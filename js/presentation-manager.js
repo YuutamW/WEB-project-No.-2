@@ -55,7 +55,7 @@
    13. Helpers
       Small utility functions.
 ========================================================== */
-
+import { createPdfViewerManager } from "./pdf-viewer.js";
 
 /* ==========================================================
    1. DOM References
@@ -76,6 +76,15 @@ const slideWrapper = document.getElementById("slideWrapper");
 const pdfCanvas = document.getElementById("pdfCanvas");
 const annotationCanvas = document.getElementById("annotationCanvas");
 const domLayer = document.getElementById("domLayer");
+
+/* PDF navigation elements */
+const pdfNavigationControls = document.getElementById("pdfNavigationControls");
+const previousPdfPageButton = document.getElementById("previousPdfPageButton");
+const nextPdfPageButton = document.getElementById("nextPdfPageButton");
+const pdfPageIndicator = document.getElementById("pdfPageIndicator");
+
+// ---
+
 
 /* Teacher toolbar */
 const teacherControls = document.getElementById("teacherControls");
@@ -132,6 +141,37 @@ let teacherControlsHideTimer = null;
 let shouldKeepToolbarHiddenUntilMouseLeavesBottom = false;
 
 /* ==========================================================
+   2.1 Presentation Data JSON
+   Purpose:
+   Store page-based annotations, objects and questions.
+   This is the layer that will later be saved/exported.
+========================================================== */
+
+const presentationData = {
+    fileName: null,
+    currentPage: 1,
+    totalPages: 0,
+
+    pages: {}
+};
+
+/* ==========================================================
+   PDF Viewer Manager
+   Purpose:
+   Handles PDF loading and rendering.
+========================================================== */
+
+const pdfViewerManager = createPdfViewerManager({
+    slideWrapper: slideWrapper,
+    pdfCanvas: pdfCanvas,
+    annotationCanvas: annotationCanvas,
+    domLayer: domLayer,
+
+    onStatus: updateStatus,
+    onPageChange: handlePdfPageChange
+});
+
+/* ==========================================================
    3. Init
    Purpose:
    Starts the page logic after the file is loaded.
@@ -158,6 +198,15 @@ initPresentationPage();
 function connectEvents() {
     /* File upload */
     presentationFileInput.addEventListener("change", handlePresentationFileUpload);
+
+    /* PDF page navigation */
+    if (previousPdfPageButton && nextPdfPageButton) {
+        previousPdfPageButton.addEventListener("click", goToPreviousPdfPage);
+        nextPdfPageButton.addEventListener("click", goToNextPdfPage);
+    }
+
+    /* Click position testing for Q / annotation points */
+    annotationCanvas.addEventListener("pointerdown", handleAnnotationCanvasPointerDown);
 
     /* Toolbar visibility + laser movement */
     document.addEventListener("mousemove", handlePageMouseMove);
@@ -193,9 +242,10 @@ function connectEvents() {
    5. File Upload Handling
    Purpose:
    Detect selected file type and update the mockup state.
+   await = async func - not to stuck the flow
 ========================================================== */
 
-function handlePresentationFileUpload(event) {
+async function handlePresentationFileUpload(event) {
     const file = event.target.files[0];
 
     if (!file) {
@@ -208,8 +258,17 @@ function handlePresentationFileUpload(event) {
     const fileName = file.name.toLowerCase();
 
     if (fileName.endsWith(".pdf")) {
-        updateStatus("PDF selected. PDF rendering will be added next.");
+        updateStatus("PDF selected. Loading...");
+
         activatePresentationMode();
+
+        try {
+            await pdfViewerManager.loadPdfFile(file);
+        } catch (error) {
+            console.error("PDF loading failed:", error);
+            updateStatus("PDF loading failed. Check console.");
+        }
+
         return;
     }
 
@@ -547,6 +606,36 @@ function stopPresentation() {
     updateStatus("Presentation stopped.");
 }
 
+/* ==========================================================
+   13. PDF Page Navigation
+   Purpose:
+   Move between PDF pages and update page indicator.
+========================================================== */
+
+function handlePdfPageChange(pageInfo) {
+    if (pdfPageIndicator) {
+        pdfPageIndicator.textContent =
+            `${pageInfo.currentPage} / ${pageInfo.totalPages}`;
+    }
+
+    presentationData.currentPage = pageInfo.currentPage;
+    presentationData.totalPages = pageInfo.totalPages;
+    presentationData.fileName = pageInfo.fileName;
+
+    ensurePageData(pageInfo.currentPage);
+
+    console.log("PDF page changed:", pageInfo);
+}
+
+
+async function goToNextPdfPage() {
+    await pdfViewerManager.goToNextPage();
+}
+
+
+async function goToPreviousPdfPage() {
+    await pdfViewerManager.goToPreviousPage();
+}
 
 /* ==========================================================
    13. Helpers
@@ -557,4 +646,102 @@ function stopPresentation() {
 /* Updates the upload/status text */
 function updateStatus(message) {
     presentationStatusText.textContent = message;
+}
+
+/* ==========================================================
+   14. Presentation Data JSON Helpers
+   Purpose:
+   Manage page-based data for annotations, objects and questions.
+========================================================== */
+
+function ensurePageData(pageNumber) {
+    if (!presentationData.pages[pageNumber]) {
+        presentationData.pages[pageNumber] = {
+            annotations: [],
+            objects: [],
+            questions: []
+        };
+    }
+
+    return presentationData.pages[pageNumber];
+}
+
+
+function createId(prefix) {
+    return `${prefix}_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+}
+
+
+function saveQuestionPoint(relativePoint) {
+    const pageNumber = presentationData.currentPage;
+    const pageData = ensurePageData(pageNumber);
+
+    const questionPoint = {
+        id: createId("q"),
+        type: "question-point",
+        x: relativePoint.x,
+        y: relativePoint.y,
+        createdAt: new Date().toISOString()
+    };
+
+    pageData.questions.push(questionPoint);
+
+    console.log("Saved question point:", questionPoint);
+    console.log("Presentation JSON:", presentationData);
+}
+
+/* ==========================================================
+   15. Relative Pointer Position
+   Purpose:
+   Convert screen click position into relative PDF page position.
+   Example:
+   x: 0.42 means 42% from the left side of the PDF page.
+========================================================== */
+
+function handleAnnotationCanvasPointerDown(event) {
+    if (!pdfViewerManager.hasPdf()) {
+        return;
+    }
+
+    const relativePoint = getRelativePointFromPointerEvent(event);
+
+    /* For now:
+       Shift + click saves a Q point.
+       Later:
+       Pen tool will save annotation strokes.
+    */
+    if (event.shiftKey) {
+        saveQuestionPoint(relativePoint);
+        updateStatus(
+            `Q point saved: x=${relativePoint.x.toFixed(3)}, y=${relativePoint.y.toFixed(3)}`
+        );
+        return;
+    }
+
+    console.log("Relative PDF click:", relativePoint);
+
+    updateStatus(
+        `Click: x=${relativePoint.x.toFixed(3)}, y=${relativePoint.y.toFixed(3)}`
+    );
+}
+
+
+function getRelativePointFromPointerEvent(event) {
+    const pageRect = pdfViewerManager.getPageLayerRect();
+
+    const localX = event.clientX - pageRect.left;
+    const localY = event.clientY - pageRect.top;
+
+    const relativeX = localX / pageRect.width;
+    const relativeY = localY / pageRect.height;
+
+    return {
+        x: clamp(relativeX, 0, 1),
+        y: clamp(relativeY, 0, 1)
+    };
+}
+
+
+function clamp(value, min, max) {
+    return Math.max(min, Math.min(max, value));
 }
