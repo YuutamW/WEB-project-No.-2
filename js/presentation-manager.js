@@ -613,6 +613,10 @@ function stopPresentation() {
 ========================================================== */
 
 function handlePdfPageChange(pageInfo) {
+    if (!pageInfo) {
+        return;
+    }
+    
     if (pdfPageIndicator) {
         pdfPageIndicator.textContent =
             `${pageInfo.currentPage} / ${pageInfo.totalPages}`;
