@@ -1,0 +1,68 @@
+/* =========================================================
+   DLS THEME TOKENS — GLASSY PURPLE ORANGE PALETTE
+    ========================================================= */
+
+   /*
+   in charge of defining the color palette,
+    typography,
+     spacing,
+      and other design tokens for the DLS auth pages.
+       This file is imported at the top of style.css 
+        to provide a consistent theme
+          across all authentication-related pages.
+   */
+
+:root {
+  /* Background Gradient Colors */
+  --color-bg-start: #120d22;
+  --color-bg-mid: #20122e;
+  --color-bg-end: #2b1626;
+
+  /* Surface Colors */
+  --color-surface: rgba(19, 20, 34, 0.58);
+  --color-surface-strong: rgba(28, 27, 44, 0.78);
+
+  /* Primary Colors */
+  --color-primary: #fff7ed;
+  --color-primary-soft: rgba(255, 247, 237, 0.08);
+
+  /* Accent Colors */
+  --color-accent: #ffb86b;
+  --color-accent-strong: #ff7a90;
+  --color-accent-dark: #ffd9a8;
+  --color-accent-soft: rgba(255, 184, 107, 0.16);
+
+  /* Purple/Soft Magenta Tones */
+  --color-purple: #a78bfa;
+  --color-purple-soft: rgba(167, 139, 250, 0.18);
+
+  /* Text Colors */
+  --color-text: #fff7ed;
+  --color-muted: #c8bdc9;
+  --color-border: rgba(255, 247, 237, 0.15);
+
+  /* Input Colors */
+  --color-input: rgba(255, 247, 237, 0.075);
+  --color-input-focus: rgba(255, 247, 237, 0.12);
+
+  /* Feedback Colors */
+  --color-error-bg: rgba(190, 18, 60, 0.18);
+  --color-error-text: #ffb4c6;
+  --color-success-bg: rgba(22, 101, 52, 0.22);
+  --color-success-text: #bbf7d0;
+
+  /* Rounded Corners*/
+  --radius-md: 18px;
+  --radius-lg: 26px;
+  --radius-xl: 34px;
+
+  /* Shadows */
+  --shadow-card: 0 24px 80px rgba(0, 0, 0, 0.34);
+  --shadow-soft: 0 14px 36px rgba(0, 0, 0, 0.22);
+
+  /* Spacing */
+  --space-page: 28px;
+  --container-width: 1160px;
+  
+  
+}

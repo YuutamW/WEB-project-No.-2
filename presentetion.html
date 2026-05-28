@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+
+<head>
+    <!-- =========================================================
+         DLS PRESENTATION PAGE
+         File: presentation.html
+
+         Purpose:
+         - Presentation upload page.
+         - PDF / PPT / PPTX mockup handling.
+         - Teacher control toolbar.
+         - Annotation layers above presentation.
+    ========================================================== -->
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>DLS Presentation Demo</title>
+
+    <!-- favicon -->
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+
+    <!-- Page CSS -->
+    <link rel="stylesheet" href="css/presentation.css">
+
+    <!-- Page JavaScript -->
+    <script src="js/presentation-manager.js" type="module" defer></script>
+</head>
+
+
+<body>
+
+    <!-- =========================================================
+         PAGE SHELL
+         Purpose:
+         Holds the full presentation page. (general wrapper)
+    ========================================================== -->
+
+    <div id="presentationPage" class="presentation-page is-waiting-upload">
+
+
+        <!-- =====================================================
+             UPLOAD PANEL
+             Purpose:
+             Initial card for uploading PDF / PowerPoint.
+             Later: this panel disappears after file selection.
+             (id is needed for JS -> uploadPanel.classList.add("is-hidden");)
+             after uploading Presentation -> cube of upload disappears
+        ====================================================== -->
+
+        <section id="uploadPanel" class="upload-panel">
+
+            <div class="upload-panel__content">
+
+                <h1 class="upload-panel__title">
+                    DLS Presentation
+                </h1>
+
+                <p class="upload-panel__subtitle">
+                    Upload a PDF or PowerPoint file to start the lecture demo.
+                </p>
+
+                <label class="upload-panel__label" for="presentationFileInput">
+                    📄 Upload PDF / PowerPoint
+                </label>
+
+                <input id="presentationFileInput" class="upload-panel__input" type="file" accept=".pdf,.ppt,.pptx">
+
+                <p id="presentationStatusText" class="upload-panel__status">
+                    Waiting for presentation upload...
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             PRESENTATION STAGE
+             Purpose:
+             Main area where the current slide will appear.
+        ====================================================== -->
+
+        <main class="presentation-stage">
+            <!-- Wrapper of slide : center of presentation [PDF,Img Layering] -->
+            <section id="slideWrapper" class="slide-wrapper">
+
+                <!-- PDF Layer -->
+                <canvas id="pdfCanvas" class="slide-layer slide-layer--pdf">
+                </canvas>
+
+                <!-- Annotation Layer -->
+                <canvas id="annotationCanvas" class="slide-layer slide-layer--annotation">
+                </canvas>
+
+                <!-- Text / Image Layer -->
+                <div id="domLayer" class="slide-layer slide-layer--dom">
+                </div>
+
+            </section>
+
+        </main>
+
+
+        <!-- =====================================================
+             LASER POINTER
+             Purpose:
+             Small visual pointer controlled by mouse movement.
+        ====================================================== -->
+
+        <div id="laserPointer" class="laser-pointer"></div>
+
+        <!-- =====================================================
+     Q&A DRAWER
+     Purpose:
+     Right side Q&A drawer.
+     The side tab is attached to the drawer and opens it on hover.
+====================================================== -->
+
+        <aside id="questionsDrawer" class="questions-drawer">
+
+            <!-- Side tab button -->
+            <button id="questionsTabButton" class="questions-drawer__tab" type="button" aria-label="Open Q&A drawer"
+                title="Open Q&A">
+            </button>
+
+            <!-- Drawer content -->
+            <section class="questions-drawer__panel">
+
+                <h2 class="questions-drawer__title">
+                    Q&amp;A
+                </h2>
+
+                <p class="questions-drawer__text">
+                    Student questions will appear here.
+                </p>
+                <p>🔴🟢🟡</p>
+                <p>🔵</p>
+
+            </section>
+
+        </aside>
+
+
+        <!-- =====================================================
+             TEACHER CONTROLS
+             Purpose:
+             Main teacher toolbar.
+        ====================================================== -->
+
+        <nav id="teacherControls" class="teacher-controls">
+
+            <!-- Settings -->
+            <button class="teacher-controls__button teacher-controls__button--tool" type="button" data-tool="settings"
+                data-tooltip="Settings" title="Settings" aria-label="Settings">
+
+                <img class="teacher-controls__icon" src="assets/icons/Settings-Icn.svg" alt="">
+
+            </button>
+
+            <!-- Switch Presentation -->
+            <button id="switchPresentationButton" class="teacher-controls__button teacher-controls__button--tool"
+                type="button" data-tool="switch" data-tooltip="Switch Presentation" title="Switch presentation"
+                aria-label="Switch presentation">
+
+                <img class="teacher-controls__icon" src="assets/icons/Switch-Presentation-Icn.svg" alt="">
+
+            </button>
+
+            <!-- Laser -->
+            <button class="teacher-controls__button teacher-controls__button--tool" type="button" data-tool="laser"
+                data-tooltip="Laser" title="Laser tool" aria-label="Laser tool">
+
+                <img class="teacher-controls__icon" src="assets/icons/Lazer-Icn.svg" alt="">
+
+            </button>
+
+            <!-- Image -->
+            <button class="teacher-controls__button teacher-controls__button--tool" type="button" data-tool="image"
+                data-tooltip="Image" title="Image tool" aria-label="Image tool">
+
+                <img class="teacher-controls__icon" src="assets/icons/Image-Icn.svg" alt="">
+
+            </button>
+
+            <!-- Text -->
+            <button class="teacher-controls__button teacher-controls__button--tool" type="button" data-tool="text"
+                data-tooltip="Text" title="Text tool" aria-label="Text tool">
+
+                <img class="teacher-controls__icon" src="assets/icons/Text-Icn.svg" alt="">
+
+            </button>
+
+            <!-- Eraser -->
+            <button class="teacher-controls__button teacher-controls__button--tool" type="button" data-tool="eraser"
+                data-tooltip="Eraser" title="Eraser tool" aria-label="Eraser tool">
+
+                <img class="teacher-controls__icon" src="assets/icons/eraser-Icn.svg" alt="">
+
+            </button>
+
+            <!-- Pen -->
+            <button class="teacher-controls__button teacher-controls__button--tool" type="button" data-tool="pen"
+                data-tooltip="Pen" title="Pen tool" aria-label="Pen tool">
+
+                <img class="teacher-controls__icon" src="assets/icons/Anottator-Icn.svg" alt="">
+
+            </button>
+
+            <!-- Stop -->
+            <button id="stopPresentationButton" class="teacher-controls__button teacher-controls__button--stop"
+                type="button" data-tooltip="Stop" title="Stop presentation" aria-label="Stop presentation">
+
+                <img class="teacher-controls__icon" src="assets/icons/Stop-Class-Icn.svg" alt="">
+
+            </button>
+
+        </nav>
+
+
+        <!-- =====================================================
+             TOOL OPTIONS PANEL
+             Purpose:
+             Small floating panel that changes according to active tool.
+             Example:
+             - Pen: color + size
+             - Laser: color
+             - Text: font size maybe later
+        ====================================================== -->
+
+        <section id="toolOptionsPanel" class="tool-options-panel">
+
+            <!-- Pen Options -->
+            <div class="tool-options-panel__group" data-options-for="pen">
+
+                <label class="tool-options-panel__label" for="penColorInput">
+                    Pen color
+                </label>
+
+                <input id="penColorInput" class="tool-options-panel__color" type="color" value="#ff7a90">
+
+                <label class="tool-options-panel__label" for="penSizeInput">
+                    Pen size
+                </label>
+
+                <input id="penSizeInput" class="tool-options-panel__range" type="range" min="1" max="30" value="4">
+
+            </div>
+
+
+            <!-- Laser Options -->
+            <div class="tool-options-panel__group" data-options-for="laser">
+
+                <label class="tool-options-panel__label" for="laserColorInput">
+                    Laser color
+                </label>
+
+                <input id="laserColorInput" class="tool-options-panel__color" type="color" value="#ff3b3b">
+
+            </div>
+
+            <!-- Eraser Optios -->
+            <div class="tool-options-panel__group" data-options-for="eraser">
+                <label class="tool-options-panel__label" for="eraserSizeInput">
+                    Eraser size
+                </label>
+                <input id="eraserSizeInput" class="tool-options-panel__range" type="range" min="1" max="30" value="4">
+            </div>
+        </section>
+
+
+        <!-- =====================================================
+             IMAGE UPLOAD INPUT
+             Purpose:
+             Hidden image picker for Image tool.
+             in js ( imageUploadInput.click(); )
+        ====================================================== -->
+
+        <input id="imageUploadInput" class="hidden-file-input" type="file" accept="image/*">
+
+
+        <!-- =====================================================
+             END SCREEN
+             Purpose:
+             Appears when teacher clicks Stop.
+        ====================================================== -->
+
+        <!--
+            in css: init as:
+                .end-screen {
+                display: none;
+                }
+            // activator:
+                .end-screen.is-visible {
+                display: flex;
+                }
+        -->
+
+        <section id="endScreen" class="end-screen">
+
+            <h1 class="end-screen__title">
+                Presentation Ended
+            </h1>
+
+            <p class="end-screen__text">
+                Thank you for watching.
+            </p>
+
+        </section>
+
+    </div>
+
+</body>
+
+</html>

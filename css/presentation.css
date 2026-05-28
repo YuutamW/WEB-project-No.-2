@@ -1,0 +1,1118 @@
+/* ==========================================================
+   DLS PRESENTATION PAGE STYLE
+   File: css/presentation.css
+
+   Purpose:
+   - Style the DLS presentation demo page.
+   - Use the shared classic purple-orange glass theme.
+   - Keep layout, layers, toolbar and tool options organized.
+========================================================== */
+
+/* ==========================================================
+   0. Theme Import
+   Purpose:
+   Load the shared DLS font, colors, radius, spacing and shadows.
+========================================================== */
+/* Heebo Font */
+@import url("https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap");
+/* Theme */
+@import url("./theme.css");
+
+
+/* ==========================================================
+   1. Global Reset
+   Purpose:
+   Remove browser default spacing and make sizing predictable.
+========================================================== */
+
+* {
+    /* All elements include padding/border inside their width/height */
+    box-sizing: border-box;
+}
+
+/* Make the root elements fill the browser window */
+html,
+body {
+    width: 100%;
+    min-height: 100%;
+}
+
+/* Main page body setup */
+body {
+    margin: 0;
+    /* Makes the page at least full screen height */
+    min-height: 100vh;
+    /* Presentation page should not scroll like a normal article page */
+    overflow: hidden;
+
+    font-family: "Heebo", Arial, Helvetica, sans-serif;
+
+    /* Main text color from theme.css */
+    color: var(--color-text);
+
+    /* Theme BG */
+    background:
+        radial-gradient(circle at 18% 16%, var(--color-purple-soft), transparent 34%),
+        radial-gradient(circle at 86% 28%, rgba(255, 122, 144, 0.16), transparent 35%),
+        linear-gradient(120deg,
+            var(--color-bg-start),
+            var(--color-bg-mid),
+            var(--color-bg-end));
+}
+
+/* ==========================================================
+   2. Presentation Page Shell
+   Purpose:
+   Full-screen wrapper for the presentation page.
+========================================================== */
+
+.presentation-page {
+    /* Allows children like toolbar / panels to be positioned inside the page */
+    position: relative;
+
+    /* Full browser width / height */
+    width: 100vw;
+    height: 100vh;
+
+    /* Prevents floating elements from creating scrollbars */
+    overflow: hidden;
+}
+
+/* ==========================================================
+   2.1 Page States
+   Purpose:
+   Control what appears before and after presentation upload.
+========================================================== */
+
+/* Waiting upload state:
+   The page is not presenting yet.
+   Hide teacher-only UI, but DO NOT hide the whole page.
+*/
+.presentation-page.is-waiting-upload .teacher-controls,
+.presentation-page.is-waiting-upload .tool-options-panel,
+.presentation-page.is-waiting-upload .questions-drawer {
+    display: none;
+}
+
+
+/* Active presentation state:
+   The upload panel is hidden after file selection.
+*/
+.presentation-page.is-presentation-active .upload-panel {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-12px);
+    pointer-events: none;
+}
+
+/* ==========================================================
+   3. Upload Panel
+   Purpose:
+   Initial glass card for uploading PDF / PowerPoint.
+   Later it disappears after upload using .is-hidden.
+========================================================== */
+
+.upload-panel {
+    /* Fixed position: card stays in the same place on screen */
+    position: fixed;
+
+    /* Top-left placement */
+    top: 34px;
+    left: 34px;
+    /* Above slide, below toolbar/end screen */
+    z-index: 30;
+
+    /* Card size */
+    width: 340px;
+    padding: 22px;
+
+    /* Changed Cursor - out of curiosity 🦐 */
+    cursor: copy;
+
+    /* Rounded glass card */
+    border-radius: var(--radius-lg);
+
+    /* Theme glass background */
+    background: var(--color-surface-strong);
+    border: 1px solid var(--color-border);
+
+    /* Soft floating shadow */
+    box-shadow: var(--shadow-soft);
+    /* Glass blur effect */
+    backdrop-filter: blur(18px);
+
+    /* Smooth hide/show animation */
+    transition:
+        opacity 0.25s ease,
+        transform 0.25s ease,
+        visibility 0.25s ease;
+
+}
+
+/* State class:
+   JS will add this after upload:
+   uploadPanel.classList.add("is-hidden");
+*/
+.upload-panel.is-hidden {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-12px);
+    pointer-events: none;
+}
+
+/* Internal layout:
+   Stack title, subtitle, label, input and status vertically.
+*/
+.upload-panel__content {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* Main card title */
+.upload-panel__title {
+    margin: 0;
+
+    font-size: 22px;
+    font-weight: 800;
+
+    color: var(--color-text);
+}
+
+/* Short explanation text under title */
+.upload-panel__subtitle {
+    margin: 0;
+
+    font-size: 14px;
+    line-height: 1.45;
+
+    color: var(--color-muted);
+}
+
+/* Upload label above file input */
+.upload-panel__label {
+    display: block;
+
+    margin-top: 4px;
+
+    font-size: 14px;
+    font-weight: 450;
+
+    color: var(--color-text);
+}
+
+/* Native file input styled to match the theme */
+.upload-panel__input {
+    width: 100%;
+    padding: 10px 12px;
+
+    border-radius: var(--radius-md);
+
+    color: var(--color-muted);
+    background: var(--color-input);
+    border: 1px solid var(--color-border);
+
+    /* Pointer Cursor for choosing Presentation 👆🏻 */
+    cursor: pointer;
+}
+
+/* File input button:
+   Styles the native "Choose File" button inside the file input.
+*/
+.upload-panel__input::file-selector-button {
+    /* Logical Property Margin for He /- instead of margin right 
+    Works for RTL and LTR */
+    margin-inline-end: 10px;
+    padding: 7px 12px;
+
+    border: none;
+    border-radius: 12px;
+
+    cursor: pointer;
+
+    font-family: inherit;
+    font-weight: 700;
+
+    color: black;
+
+    /* Custom Theme Btn */
+    background:
+        linear-gradient(90deg,
+            var(--color-purple),
+            var(--color-accent),
+            var(--color-accent-strong));
+}
+
+
+/* File input hover:
+   Gives feedback when hovering the choose-file button.
+*/
+.upload-panel__input::file-selector-button:hover {
+    filter: brightness(1.15);
+}
+
+/* Small status message after choosing file */
+.upload-panel__status {
+    margin: 0;
+
+    font-size: 13px;
+    line-height: 1.45;
+
+    color: var(--color-muted);
+}
+
+/* ==========================================================
+   4. Presentation Stage
+   Purpose:
+   Full-page presentation area.
+   After upload, the slide should feel like the whole screen.
+========================================================== */
+
+.presentation-stage {
+    /* Full browser area */
+    width: 100vw;
+    height: 100vh;
+
+    /* No spacing around the presentation */
+    padding: 0;
+
+    /* Holds the slide wrapper */
+    display: flex;
+    align-items: stretch;
+    justify-content: stretch;
+}
+
+/* ==========================================================
+   5. Slide Wrapper
+   Purpose:
+   Main presentation page area.
+   In this mockup it behaves like a full-screen slide canvas.
+========================================================== */
+
+.slide-wrapper {
+    /* Positioning parent for PDF / annotation / DOM layers */
+    position: relative;
+
+    /* Full page presentation */
+    width: 100vw;
+    height: 100vh;
+
+    /* Keep all slide layers inside */
+    overflow: hidden;
+
+    /* No rounded card in full presentation mode */
+    border-radius: 0;
+
+    /* White slide / PDF background */
+    background: #ffffff;
+
+    /* Cancel card look */
+    border: none;
+    box-shadow: none;
+}
+
+/* ==========================================================
+   6. Slide Layers
+   Purpose:
+   Stack all slide layers exactly on top of each other.
+========================================================== */
+
+.slide-layer {
+    /* Each layer is placed inside slide-wrapper */
+    position: absolute;
+
+    /* Shortcut for top:0; right:0; bottom:0; left:0; */
+    inset: 0;
+
+    /* Each layer fills the full slide wrapper */
+    width: 100%;
+    height: 100%;
+}
+
+
+/* PDF layer: (1)
+   The PDF renderer will draw the presentation page here.
+*/
+.slide-layer--pdf {
+    z-index: 1;
+    background-color: white;
+}
+
+
+/* Annotation layer: (2)
+   Pen and eraser drawing happens here.
+*/
+.slide-layer--annotation {
+    z-index: 2;
+    cursor: crosshair;
+
+}
+
+
+/* DOM layer: (3)
+   Text boxes and images will be placed here later.
+*/
+.slide-layer--dom {
+    z-index: 3;
+
+    /* By default it does not block drawing on canvas */
+    pointer-events: none;
+}
+
+/* ==========================================================
+   7. Teacher Controls
+   Purpose:
+   Bottom Figma-style teacher tools drawer.
+
+   Shape:
+   - Main gray toolbar strip.
+   - Raised tab/bump behind the Settings button.
+   - RTL page keeps the visual order:
+     Stop | Pen | Eraser | Text | Image | Laser | Switch | Settings
+========================================================== */
+
+.teacher-controls {
+    /* Fixed to screen bottom */
+    position: fixed;
+
+    /* Center toolbar horizontally */
+    left: 50%;
+    bottom: 0;
+
+    /* Above slide */
+    z-index: 40;
+
+    /* Hidden below screen by default */
+    transform: translateX(-50%) translateY(120px);
+
+    /* Toolbar row layout */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    /* Do not use direction:ltr here.
+       The HTML order is already arranged for RTL. */
+
+    /* Space between icons */
+    gap: 24px;
+
+    /* Figma-like toolbar size */
+    height: 54px;
+    padding: 0 26px;
+
+    /* Main toolbar color from Figma */
+    background: #D2D2D2;
+
+    /* Flat drawer strip */
+    border: none;
+    border-radius: 0;
+
+    /* Allow the raised Settings tab to show above toolbar */
+    overflow: visible;
+
+    /* Soft top shadow */
+    box-shadow: 0 -10px 28px rgba(0, 0, 0, 0.18);
+
+    /* Hidden state */
+    opacity: 0;
+    pointer-events: none;
+
+    /* Smooth show / hide */
+    transition:
+        transform 0.25s ease,
+        opacity 0.25s ease;
+}
+
+
+/* Raised Settings tab:
+   This is the curved top bump from the Figma toolbar.
+   It sits behind the Settings icon, which is the first button in RTL layout.
+*/
+.teacher-controls::before {
+    content: "";
+
+    position: absolute;
+
+    /* In RTL visual layout, Settings appears on the right side */
+    right: 0;
+    top: -30px;
+
+    width: 128px;
+    height: 60px;
+
+    background: #D2D2D2;
+
+    border-radius: 48px 48px 0 0;
+
+    z-index: 0;
+    
+    /* Center Bottom Tab - TRL made it upside down in directions */
+    right: 240px;
+}
+
+
+/* Visible toolbar:
+   JS adds this when presentation is active and mouse is near bottom.
+*/
+.teacher-controls.is-visible {
+    transform: translateX(-50%) translateY(0);
+
+    opacity: 1;
+    pointer-events: auto;
+}
+
+
+/* ==========================================================
+   8. Teacher Control Buttons
+   Purpose:
+   Invisible hit-zones for toolbar icons.
+   Icons provide the actual visual design.
+========================================================== */
+
+.teacher-controls__button {
+    /* Button hit area */
+    width: 42px;
+    min-width: 42px;
+    height: 42px;
+
+    /* Remove native button style */
+    padding: 0;
+    margin: 0;
+    border: none;
+    outline: none;
+
+    /* No pill background */
+    border-radius: 4px;
+
+    /* Clickable */
+    cursor: pointer;
+
+    /* Center icon */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    /* Transparent by default */
+    background: transparent;
+
+    /* Keep icons above toolbar bump */
+    position: relative;
+    z-index: 1;
+
+    /* Smooth interaction */
+    transition:
+        background 0.18s ease,
+        opacity 0.18s ease;
+}
+
+
+/* Normal toolbar icon */
+.teacher-controls__icon {
+    width: 26px;
+    height: 26px;
+
+    display: block;
+
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+
+/* Hover feedback */
+.teacher-controls__button:hover {
+    background: rgba(0, 0, 0, 0.08);
+}
+
+
+/* Active selected tool */
+.teacher-controls__button.is-active {
+    background: rgba(0, 0, 0, 0.12);
+}
+
+
+/* Settings button:
+   Sits on the raised toolbar tab.
+*/
+.teacher-controls__button[data-tool="settings"] {
+    width: 52px;
+    min-width: 52px;
+    height: 52px;
+
+    margin-top: -26px;
+}
+
+
+/* Settings icon:
+   Slightly larger like the Figma gear.
+*/
+.teacher-controls__button[data-tool="settings"] .teacher-controls__icon {
+    width: 34px;
+    height: 34px;
+}
+
+
+/* ==========================================================
+   8.1 Stop Button
+   Purpose:
+   Stop-Class-Icn.svg already includes the red rectangle.
+   Therefore the button itself stays transparent.
+========================================================== */
+
+.teacher-controls__button--stop {
+    width: 64px;
+    min-width: 64px;
+    height: 42px;
+
+    background: transparent;
+}
+
+
+/* Stop hover */
+.teacher-controls__button--stop:hover {
+    background: rgba(0, 0, 0, 0.06);
+}
+
+
+/* Stop SVG:
+   The SVG is the full red Stop button graphic.
+*/
+.teacher-controls__button--stop .teacher-controls__icon {
+    width: 58px;
+    height: auto;
+}
+
+
+/* ==========================================================
+   8.2 Teacher Button Tooltip
+   Purpose:
+   Shows a small label when hovering a toolbar button.
+========================================================== */
+
+.teacher-controls__button::after {
+    content: attr(data-tooltip);
+
+    position: absolute;
+
+    left: 50%;
+    bottom: calc(100% + 10px);
+
+    transform: translateX(-50%) translateY(6px);
+
+    padding: 5px 9px;
+
+    border-radius: 6px;
+
+    white-space: nowrap;
+
+    font-size: 12px;
+    font-weight: 700;
+
+    color: #000000;
+    background: #FFFFFF;
+
+    opacity: 0;
+    pointer-events: none;
+
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.14);
+
+    transition:
+        opacity 0.16s ease,
+        transform 0.16s ease;
+}
+
+
+/* Tooltip visible on hover */
+.teacher-controls__button:hover::after {
+    opacity: 1;
+
+    transform: translateX(-50%) translateY(0);
+}
+
+/* ==========================================================
+   9. Tool Options Panel
+   Purpose:
+   Floating advanced picker above toolbar.
+   Uses the same Figma-like light palette as the toolbar.
+========================================================== */
+
+.tool-options-panel {
+    /* Fixed like toolbar */
+    position: fixed;
+
+    /* Center above toolbar */
+    left: 50%;
+    bottom: 86px;
+
+    /* Above toolbar area */
+    z-index: 39;
+
+    /* Hidden slightly lower */
+    transform: translateX(-50%) translateY(14px);
+
+    /* Compact panel */
+    min-width: 270px;
+    padding: 10px 16px;
+
+    /* Figma-like light panel */
+    background: #D2D1D2;
+    border: none;
+
+    /* Rounded pill */
+    border-radius: 18px;
+
+    /* Soft shadow like toolbar */
+    box-shadow: 0 14px 34px rgba(0, 0, 0, 0.18);
+
+    /* Hidden by default */
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+
+    /* Smooth animation */
+    transition:
+        opacity 0.2s ease,
+        transform 0.2s ease,
+        visibility 0.2s ease;
+}
+
+.tool-options-panel__label {
+    color: #000000;
+    font-weight: 700;
+}
+
+.tool-options-panel__color {
+    width: 34px;
+    height: 30px;
+
+    padding: 2px;
+
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 4px;
+
+    background: #D2D2D2;
+}
+
+/* Visible options panel */
+.tool-options-panel.is-visible {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+
+    transform: translateX(-50%) translateY(0);
+}
+
+
+/* ==========================================================
+   10. Tool Options Groups
+   Purpose:
+   Every tool has its own options group.
+   Only the active tool group is shown.
+========================================================== */
+
+.tool-options-panel__group {
+    display: none;
+
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+
+    color: #090000;
+}
+
+
+.tool-options-panel__group.is-visible {
+    display: flex;
+}
+
+
+.tool-options-panel__label {
+    font-size: 13px;
+    font-weight: 700;
+
+    color: #3A3535;
+}
+
+
+.tool-options-panel__color {
+    width: 36px;
+    height: 32px;
+
+    padding: 2px;
+
+    border: 1px solid rgba(58, 53, 53, 0.25);
+    border-radius: 4px;
+
+    cursor: pointer;
+
+    background: #D2D1D2;
+}
+
+
+.tool-options-panel__range {
+    width: 130px;
+
+    cursor: pointer;
+}
+
+/* ==========================================================
+   11. Q&A Drawer
+   Purpose:
+   Right-side Q&A drawer.
+   The drawer and tab are designed as one connected piece.
+========================================================== */
+
+.questions-drawer {
+    /* Fixed drawer attached to the right side of the screen */
+    position: fixed;
+
+    /* Vertical center */
+    top: 50%;
+    right: -280px;
+
+    /* Drawer size */
+    width: 280px;
+    height: 380px;
+
+    /* Center by own height */
+    transform: translateY(-50%);
+
+    /* Above slide, below end screen */
+    z-index: 36;
+
+    /* Same Figma gray as toolbar / side panel */
+    background: #D9D9D9;
+
+    /* Rounded only on the visible left side */
+    border-radius: 18px 0 0 18px;
+
+    /* One shared shadow for drawer + tab */
+    box-shadow: -16px 20px 50px rgba(0, 0, 0, 0.24);
+
+    /* Smooth slide open / close */
+    transition: right 0.25s ease;
+}
+
+
+/* Drawer open state:
+   When the mouse is over the tab or drawer, the whole drawer slides in.
+*/
+.questions-drawer:hover {
+    right: 0;
+}
+
+
+/* ==========================================================
+   12. Q&A Drawer Tab
+   Purpose:
+   Small side tab attached to the drawer.
+   It uses the same color as the drawer so it feels like one piece.
+========================================================== */
+
+.questions-drawer__tab {
+    /* The tab is positioned relative to the drawer */
+    position: absolute;
+
+    /* Center vertically on the drawer */
+    top: 50%;
+    left: -32px;
+
+    /* Tab size */
+    width: 32px;
+    height: 96px;
+
+    /* Center by own height */
+    transform: translateY(-50%);
+
+    /* Remove browser button style */
+    border: none;
+    padding: 0;
+    margin: 0;
+
+    /* Click / hover cursor */
+    cursor: pointer;
+
+    /* Same color as drawer */
+    background: #D9D9D9;
+
+    /* Rounded only on the outside edge */
+    border-radius: 18px 0 0 18px;
+}
+
+
+/* Tab arrow:
+   This draws the white arrow inside the tab.
+   It replaces the old Tab.svg image.
+*/
+.questions-drawer__tab::before {
+    content: "";
+
+    position: absolute;
+
+    top: 50%;
+    left: 50%;
+
+    width: 12px;
+    height: 12px;
+
+    border-left: 4px solid #FFFFFF;
+    border-bottom: 4px solid #FFFFFF;
+
+    transform: translate(-35%, -50%) rotate(45deg);
+}
+
+
+/* ==========================================================
+   12.1 Q&A Drawer Panel
+   Purpose:
+   Inner content area of the Q&A drawer.
+========================================================== */
+
+.questions-drawer__panel {
+    /* Fill the whole drawer */
+    width: 100%;
+    height: 100%;
+
+    /* Inner spacing */
+    padding: 22px;
+
+    /* Same parent background, no extra card */
+    background: transparent;
+
+    /* Text color */
+    color: #000000;
+}
+
+
+/* Q&A title */
+.questions-drawer__title {
+    margin: 0 0 16px 0;
+
+    font-size: 24px;
+    font-weight: 700;
+
+    color: #000000;
+    text-align: center;
+}
+
+
+/* Q&A placeholder text */
+.questions-drawer__text {
+    margin: 0;
+
+    font-size: 14px;
+    line-height: 1.5;
+
+    color: #000000;
+    text-align: center;
+}
+
+/* ==========================================================
+   13. Laser Pointer
+   Purpose:
+   Small dot shown only when laser tool is active.
+========================================================== */
+
+.laser-pointer {
+    /* Follows mouse position using JS */
+    position: fixed;
+
+    /* Dot size */
+    width: 18px;
+    height: 18px;
+
+    /* Makes it circular */
+    border-radius: 50%;
+
+    /* Default laser color */
+    background-color: #ff3b3b;
+    box-shadow: 0 0 18px #ff3b3b;
+
+    /* Centers dot on mouse cursor */
+    transform: translate(-50%, -50%);
+
+    /* Above most UI, below end screen */
+    z-index: 50;
+
+    /* Hidden by default */
+    display: none;
+
+    /* Laser should not block clicks */
+    pointer-events: none;
+}
+
+
+/* Visible state:
+   JS adds this when Laser tool is active.
+*/
+.laser-pointer.is-visible {
+    display: block;
+}
+
+/* ==========================================================
+   14. Hidden File Input
+   Purpose:
+   Used by Image tool.
+   JS will call imageUploadInput.click().
+========================================================== */
+
+.hidden-file-input {
+    display: none;
+}
+
+/* ==========================================================
+   14.1 DOM Layer Objects
+   Purpose:
+   Styles objects created by JS inside the DOM layer.
+   Examples:
+   - Text notes
+   - Uploaded images
+========================================================== */
+
+/* Text box placed on the slide */
+.slide-text-note {
+    position: absolute;
+
+    min-width: 120px;
+    min-height: 36px;
+
+    padding: 8px 12px;
+
+    border-radius: 10px;
+    border: 1px solid rgba(32, 18, 46, 0.35);
+
+    color: #20122e;
+    background: rgba(255, 255, 255, 0.88);
+
+    font-family: inherit;
+    font-size: 18px;
+    font-weight: 500;
+
+    /* Good for Children Interaction in DOM */
+    pointer-events: auto;
+}
+
+
+/* Uploaded image placed on the slide */
+.slide-image-object {
+    position: absolute;
+
+    max-width: 240px;
+    max-height: 180px;
+
+    border-radius: 12px;
+
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.25);
+
+    pointer-events: auto;
+}
+
+/* ==========================================================
+   15. End Screen
+   Purpose:
+   Full-screen ending state after clicking Stop.
+========================================================== */
+
+.end-screen {
+    /* Full-screen overlay */
+    position: fixed;
+    inset: 0;
+
+    /* Above everything */
+    z-index: 100;
+
+    /* Hidden by default */
+    display: none;
+
+    /* Center content when visible */
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+
+    /* Same theme background */
+    background:
+        radial-gradient(circle at 50% 20%, var(--color-purple-soft), transparent 38%),
+        linear-gradient(120deg,
+            var(--color-bg-start),
+            var(--color-bg-mid),
+            var(--color-bg-end));
+}
+
+
+/* Visible state:
+   JS adds this after clicking Stop.
+*/
+.end-screen.is-visible {
+    display: flex;
+}
+
+
+/* Big end title */
+.end-screen__title {
+    margin: 0 0 12px 0;
+
+    font-size: 54px;
+    font-weight: 900;
+
+    color: var(--color-text);
+}
+
+
+/* Small end text */
+.end-screen__text {
+    margin: 0;
+
+    font-size: 18px;
+    color: var(--color-muted);
+}
+
+/* ==========================================================
+   CSS MAP
+
+   0. Theme Import
+      Loads Heebo + shared colors from theme.css.
+
+   1. Global Reset
+      Removes browser defaults and sets page background.
+
+   2. Presentation Page Shell
+      Full-screen wrapper.
+
+   3. Upload Panel
+      Initial upload card.
+
+   4. Presentation Stage
+      Centers the slide.
+
+   5. Slide Wrapper
+      White slide area.
+
+   6. Slide Layers
+      PDF / annotation / DOM stacking.
+
+   7. Teacher Controls
+      Bottom toolbar.
+
+   8. Teacher Control Buttons
+      Shared toolbar button styles.
+
+   9. Tool Options Panel
+      Floating options panel above toolbar.
+
+   10. Tool Options Groups
+      Pen / Eraser / Laser options.
+
+    11. Q&A Drawer
+      Right-side questions drawer.
+
+    12. Q&A Drawer Tab
+      Attached side tab with CSS arrow.
+
+   13. Laser Pointer
+      Laser dot.
+
+   14. Hidden File Input
+      Image upload helper.
+
+   15. End Screen
+      Final presentation-ended overlay.
+========================================================== */

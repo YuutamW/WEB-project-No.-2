@@ -1,0 +1,40 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="dlsBg" x1="40" y1="40" x2="472" y2="472" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#8B5CF6"></stop>
+      <stop offset="45%" stop-color="#F59EAE"></stop>
+      <stop offset="75%" stop-color="#FF9F1C"></stop>
+      <stop offset="100%" stop-color="#FF4D8D"></stop>
+    </linearGradient>
+
+    <linearGradient id="glassHighlight" x1="80" y1="80" x2="240" y2="240" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="white" stop-opacity="0.42"></stop>
+      <stop offset="100%" stop-color="white" stop-opacity="0.04"></stop>
+    </linearGradient>
+
+    <filter id="shadow" x="0" y="0" width="512" height="512" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="18" stdDeviation="24" flood-color="#000000" flood-opacity="0.22"></feDropShadow>
+    </filter>
+
+    <linearGradient id="textWhite" x1="120" y1="180" x2="380" y2="360" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FFFFFF"></stop>
+      <stop offset="100%" stop-color="#F4F4F5"></stop>
+    </linearGradient>
+  </defs>
+
+  <!-- Main rounded square -->
+  <g filter="url(#shadow)">
+    <rect x="22" y="22" width="468" height="468" rx="78" fill="url(#dlsBg)"></rect>
+  </g>
+
+  <!-- Subtle inner border -->
+  <rect x="30" y="30" width="452" height="452" rx="72" stroke="rgba(255,255,255,0.18)" stroke-width="2"></rect>
+
+  <!-- Gloss highlight -->
+  <path d="M46 46H210C142 92 87 148 46 224V46Z" fill="url(#glassHighlight)"></path>
+
+  <!-- Large DLS text -->
+  <g>
+    <text x="256" y="315" text-anchor="middle" font-size="170" font-family="Arial, Helvetica, sans-serif" font-weight="900" fill="url(#textWhite)" letter-spacing="-6">DLS</text>
+  </g>
+</svg>

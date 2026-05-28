@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+
+<head>
+  <!-- =========================================================
+       DLS REGISTER PAGE
+       ---------------------------------------------------------
+       Purpose:
+       This page is the registration form for DLS.
+
+       Assignment connection:
+       - This can count as the required Form page.
+       - It includes more than 3 input fields.
+       - It includes a submit button.
+       - JavaScript validation is connected through auth.js.
+       ========================================================= -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>DLS | הרשמה</title>
+
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800;900&display=swap"
+    rel="stylesheet" />
+
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+
+<body>
+  <main class="page-shell">
+    
+    <!-- #region Header -->
+    <header class="topbar">
+      <a class="brand" href="login.html" aria-label="Go to DLS sign in">
+        <div class="logo logo-text">DLS</div>
+        <div>
+          <div class="brand-title">DLS - Dynamic Lecture System</div>
+          <div class="brand-subtitle">מערכת הרצאות דינמית לסטודנטים ומרצים</div>
+        </div>
+      </a>
+
+      <!-- Center Top - Clock + Next Lesson + Date -->
+      <section class="top-status" aria-label="System status">
+        <span class="top-clock" id="topClock">--:--</span>
+        <span class="top-divider">•</span>
+        <span class="top-date" id="topDate">טוען תאריך...</span>
+        <span class="top-divider">•</span>
+        <span class="next-class">השיעור הבא: <strong>UNKNOWN</strong></span>
+      </section>
+
+      <!-- Navigation Link Buttons -->
+      <nav class="nav-links" aria-label="Main navigation">
+        <a class="nav-link active" href="register.html">הרשמה</a>
+        <a class="nav-link" href="login.html">התחברות</a>
+        <a class="nav-link" href="#">דשבורד</a>
+      </nav>
+    </header>
+    <!-- #endregion -->
+
+    <!-- #region Main Layout -->
+    <section class="auth-center-wrap">
+      <div class="auth-layout">
+        <!-- #region Register Form -->
+        <section class="form-card glass-panel" aria-labelledby="register-title">
+          <div class="form-header">
+            <h1 id="register-title">יצירת חשבון</h1>
+            <p>בחר תפקיד, מלא פרטים בסיסיים והיכנס למערכת DLS.</p>
+          </div>
+
+          <form id="registerForm" class="form-grid" novalidate>
+            <div class="two-columns">
+              <div class="field">
+                <label for="firstName">שם פרטי</label>
+                <input id="firstName" name="firstName" type="text" placeholder="לדוגמה: יובל" />
+              </div>
+
+              <div class="field">
+                <label for="lastName">שם משפחה</label>
+                <input id="lastName" name="lastName" type="text" placeholder="לדוגמה: עוזרי" />
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="email">אימייל</label>
+              <div class="input-wrap has-status">
+                <input id="email" name="email" type="email" placeholder="name@example.com" data-email-input />
+                <span class="input-status" data-email-status aria-hidden="true"></span>
+              </div>
+              <small class="field-hint" data-email-hint>נבדוק שהאימייל כתוב במבנה תקין.</small>
+            </div>
+
+            <div class="field">
+              <label for="role">סוג משתמש</label>
+              <select id="role" name="role">
+                <option value="">בחר תפקיד</option>
+                <option value="student">סטודנט</option>
+                <option value="lecturer">מרצה</option>
+                <option value="assistant">מתרגל</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="password">סיסמה</label>
+              <input id="password" name="password" type="password" placeholder="Aa1234" data-password-input />
+              <small id="passwordHint" class="field-hint">
+                נדרש: אות קטנה, אות גדולה, מספר ולפחות 6 תווים.
+              </small>
+            </div>
+
+            <div class="helper-row">
+              <label class="checkbox-line">
+                <input id="terms" name="terms" type="checkbox" />
+                <span>אני מאשר/ת את תנאי השימוש</span>
+              </label>
+            </div>
+
+            <button class="btn-primary" type="submit">הרשמה למערכת</button>
+
+            <div id="registerMessage" class="form-message" aria-live="polite"></div>
+          </form>
+
+          <div class="divider">או</div>
+
+          <p class="switch-note">
+            כבר יש לך חשבון?
+            <a href="login.html">מעבר להתחברות</a>
+          </p>
+        </section>
+        <!-- #endregion -->
+      </div>
+    </section>
+    <!-- #endregion -->
+  </main>
+
+  <script src="js/auth.js"></script>
+</body>
+
+</html>

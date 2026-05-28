@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+
+<head>
+  <!-- =========================================================
+       DLS LOGIN PAGE
+       ---------------------------------------------------------
+       Purpose:
+       This page is the login form for DLS.
+
+       Note:
+       This page uses the same theme and layout as register.html.
+       This keeps the project consistent and avoids duplicated design.
+       ========================================================= -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>DLS | התחברות</title>
+
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800;900&display=swap"
+    rel="stylesheet" />
+
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+
+<body>
+  <main class="page-shell">
+    <!-- #region Header -->
+    <header class="topbar">
+      <a class="brand" href="login.html" aria-label="Go to DLS sign in">
+        <div class="logo logo-text">DLS</div>
+        <div>
+          <div class="brand-title">DLS - Dynamic Lecture System</div>
+          <div class="brand-subtitle">מערכת הרצאות דינמית לסטודנטים ומרצים</div>
+        </div>
+      </a>
+
+      <section class="top-status" aria-label="System status">
+        <span class="top-clock" id="topClock">--:--</span>
+        <span class="top-divider">•</span>
+        <span class="top-date" id="topDate">טוען תאריך...</span>
+        <span class="top-divider">•</span>
+        <span class="next-class">השיעור הבא: <strong>UNKNOWN</strong></span>
+      </section>
+
+      <nav class="nav-links" aria-label="Main navigation">
+        <a class="nav-link" href="register.html">הרשמה</a>
+        <a class="nav-link active" href="login.html">התחברות</a>
+        <a class="nav-link" href="#">דשבורד</a>
+      </nav>
+    </header>
+    <!-- #endregion -->
+
+    <!-- #region Main Layout -->
+    <section class="auth-center-wrap">
+      <div class="auth-layout">
+        <!-- #region Login Form -->
+        <section class="form-card glass-panel" aria-labelledby="login-title">
+          <div class="form-header">
+            <h1 id="login-title">התחברות</h1>
+            <p>הזן פרטים כדי להיכנס למערכת.</p>
+          </div>
+
+          <form id="loginForm" class="form-grid" novalidate>
+            <div class="field">
+              <label for="loginEmail">אימייל</label>
+              <div class="input-wrap has-status">
+                <input id="loginEmail" name="email" type="email" placeholder="name@example.com" data-email-input />
+                <span class="input-status" data-email-status aria-hidden="true"></span>
+              </div>
+              <small class="field-hint" data-email-hint>נבדוק שהאימייל כתוב במבנה תקין.</small>
+            </div>
+
+            <div class="field">
+              <label for="loginPassword">סיסמה</label>
+              <input id="loginPassword" name="password" type="password" placeholder="הכנס סיסמה" />
+            </div>
+
+            <div class="helper-row">
+              <label class="checkbox-line">
+                <input id="rememberMe" name="rememberMe" type="checkbox" />
+                <span>זכור אותי</span>
+              </label>
+
+              <a class="form-link" href="#">שכחת סיסמה?</a>
+            </div>
+
+            <button class="btn-primary" type="submit">כניסה למערכת</button>
+
+            <div id="loginMessage" class="form-message" aria-live="polite"></div>
+          </form>
+
+          <div class="divider">או</div>
+
+          <p class="switch-note">
+            עדיין אין לך חשבון?
+            <a href="register.html">מעבר להרשמה</a>
+          </p>
+        </section>
+        <!-- #endregion -->
+      </div>
+    </section>
+    <!-- #endregion -->
+  </main>
+
+  <script src="js/auth.js"></script>
+</body>
+
+</html>
