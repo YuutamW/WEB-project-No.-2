@@ -616,7 +616,7 @@ function handlePdfPageChange(pageInfo) {
     if (!pageInfo) {
         return;
     }
-    
+
     if (pdfPageIndicator) {
         pdfPageIndicator.textContent =
             `${pageInfo.currentPage} / ${pageInfo.totalPages}`;
@@ -629,6 +629,7 @@ function handlePdfPageChange(pageInfo) {
     ensurePageData(pageInfo.currentPage);
 
     console.log("PDF page changed:", pageInfo);
+    console.log("Current presentation JSON:", presentationData);
 }
 
 
@@ -680,18 +681,42 @@ function saveQuestionPoint(relativePoint) {
     const pageNumber = presentationData.currentPage;
     const pageData = ensurePageData(pageNumber);
 
-    const questionPoint = {
-        id: createId("q"),
-        type: "question-point",
-        x: relativePoint.x,
-        y: relativePoint.y,
-        createdAt: new Date().toISOString()
-    };
+    const questionPoint = createQuestionPoint(relativePoint);
 
     pageData.questions.push(questionPoint);
 
     console.log("Saved question point:", questionPoint);
     console.log("Presentation JSON:", presentationData);
+}
+
+/* Shift + Click = Save Q Point - create dot obj */
+/* JSON Q :
+{
+    id: "q_...",
+    type: "question-point",
+    page: 3,
+    x: 0.42,
+    y: 0.31,
+    text: "",
+    status: "open",
+    createdAt: "..."
+}
+*/
+function createQuestionPoint(relativePoint) {
+    return {
+        id: createId("q"),
+        type: "question-point",
+
+        page: presentationData.currentPage,
+
+        x: relativePoint.x,
+        y: relativePoint.y,
+
+        text: "",
+        status: "open",
+
+        createdAt: new Date().toISOString()
+    };
 }
 
 /* ==========================================================
@@ -729,7 +754,7 @@ function handleAnnotationCanvasPointerDown(event) {
     );
 }
 
-
+/* JSON will save x/y + raw = debugging console data */
 function getRelativePointFromPointerEvent(event) {
     const pageRect = pdfViewerManager.getPageLayerRect();
 
@@ -741,7 +766,16 @@ function getRelativePointFromPointerEvent(event) {
 
     return {
         x: clamp(relativeX, 0, 1),
-        y: clamp(relativeY, 0, 1)
+        y: clamp(relativeY, 0, 1),
+
+        raw: {
+            clientX: event.clientX,
+            clientY: event.clientY,
+            localX: localX,
+            localY: localY,
+            width: pageRect.width,
+            height: pageRect.height
+        }
     };
 }
 
