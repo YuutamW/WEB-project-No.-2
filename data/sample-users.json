@@ -1,14 +1,50 @@
-[
-  {
-    "id": 1,
-    "name": "Dor Cohen",
-    "role": "student",
-    "email": "dor@example.com"
-  },
-  {
-    "id": 2,
-    "name": "Vova Lecturer",
-    "role": "lecturer",
-    "email": "vova@example.com"
-  }
-]
+{
+  "users": [
+    {
+      "username": "lecturer",
+      "email": "Lecturer@shenkar.com",
+      "password": "Lecturer1",
+      "role": "lecturer",
+      "redirect": "dashboard.html"
+    },
+    {
+      "username": "student",
+      "email": "Student@shenkar.com",
+      "password": "Student1",
+      "role": "student",
+      "redirect": "student.html"
+    },
+        {
+      "username": "Yuval Uzeri",
+      "email": "YuvalOzeri@shenkar.com",
+      "password": "Yuval1",
+      "role": "lecturer",
+      "redirect": "dashboard.html"
+    },
+
+    {
+      "username": "Gamoor1",
+      "email": "Gamoor@gamoor.com",
+      "password": "Gamoor1",
+      "role": "easter-egg",
+      "redirect": "dashboard.html",
+      "effect": "confetti"
+    },
+    {
+      "username": "Yotam",
+      "email": "Wntrb1st@gmail.com",
+      "password": "Yotam1",
+      "role": "easter-egg",
+      "redirect": "https://www.youtube.com/watch?v=5SZYz7lZRRI&list=RD5SZYz7lZRRI&start_radio=1",
+      "effect": "confetti"
+    },
+    {
+      "username": "Dor",
+      "email": "Dordavidmandel@gmail.com",
+      "password": "Mandel1",
+      "role": "easter-egg",
+      "redirect": "easteregg.html",
+      "effect": "confetti"
+    }
+  ]
+}
