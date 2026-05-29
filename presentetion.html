@@ -39,6 +39,12 @@
 
     <div id="presentationPage" class="presentation-page is-waiting-upload">
 
+        <!-- upload panel -->
+        <!-- presentation stage -->
+        <!-- laser pointer -->
+        <!-- Q drawer -->
+        <!-- teacher controls -->
+        <!-- end screen -->
 
         <!-- =====================================================
              UPLOAD PANEL
@@ -85,6 +91,27 @@
         <main class="presentation-stage">
             <!-- Wrapper of slide : center of presentation [PDF,Img Layering] -->
             <section id="slideWrapper" class="slide-wrapper">
+                <!-- =====================================================
+                 PDF NAVIGATION CONTROLS
+                 Purpose:
+                 Temporary controls for testing PDF page navigation.
+                ====================================================== -->
+
+                <nav id="pdfNavigationControls" class="pdf-navigation-controls">
+
+                    <button id="previousPdfPageButton" class="pdf-navigation-controls__button" type="button">
+                        ‹
+                    </button>
+
+                    <span id="pdfPageIndicator" class="pdf-navigation-controls__indicator">
+                        0 / 0
+                    </span>
+
+                    <button id="nextPdfPageButton" class="pdf-navigation-controls__button" type="button">
+                        ›
+                    </button>
+
+                </nav>
 
                 <!-- PDF Layer -->
                 <canvas id="pdfCanvas" class="slide-layer slide-layer--pdf">

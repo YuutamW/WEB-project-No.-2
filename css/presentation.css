@@ -324,9 +324,10 @@ body {
     /* Shortcut for top:0; right:0; bottom:0; left:0; */
     inset: 0;
 
-    /* Each layer fills the full slide wrapper */
-    width: 100%;
-    height: 100%;
+    /* Do NOT use inset: 0 here.
+       PDF viewer JS needs to control left/top manually. */
+    left: 0;
+    top: 0;
 }
 
 
@@ -357,6 +358,68 @@ body {
 
     /* By default it does not block drawing on canvas */
     pointer-events: none;
+}
+
+/* ==========================================================
+   6.1 PDF Navigation Controls
+   Purpose:
+   Temporary page controls for PDF navigation.
+========================================================== */
+
+.pdf-navigation-controls {
+    position: fixed;
+
+    top: 18px;
+    left: 50%;
+
+    transform: translateX(-50%);
+
+    z-index: 45;
+
+    display: none;
+    align-items: center;
+    gap: 12px;
+
+    padding: 8px 14px;
+
+    border-radius: 18px;
+
+    background: rgba(210, 210, 210, 0.94);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16);
+}
+
+.presentation-page.is-presentation-active .pdf-navigation-controls {
+    display: flex;
+}
+
+.pdf-navigation-controls__button {
+    width: 34px;
+    height: 30px;
+
+    border: none;
+    border-radius: 10px;
+
+    cursor: pointer;
+
+    font-size: 22px;
+    font-weight: 800;
+
+    color: #000000;
+    background: #ffffff;
+}
+
+.pdf-navigation-controls__button:hover {
+    background: #d9d9d9;
+}
+
+.pdf-navigation-controls__indicator {
+    min-width: 70px;
+
+    font-size: 14px;
+    font-weight: 700;
+
+    color: #000000;
+    text-align: center;
 }
 
 /* ==========================================================
@@ -445,7 +508,7 @@ body {
     border-radius: 48px 48px 0 0;
 
     z-index: 0;
-    
+
     /* Center Bottom Tab - TRL made it upside down in directions */
     right: 240px;
 }
@@ -531,14 +594,15 @@ body {
 
 
 /* Settings button:
-   Sits on the raised toolbar tab.
+   Keep the icon aligned with the rest of the toolbar icons.
+   The raised tab is only a background shape.
 */
 .teacher-controls__button[data-tool="settings"] {
-    width: 52px;
-    min-width: 52px;
-    height: 52px;
+    width: 42px;
+    min-width: 42px;
+    height: 42px;
 
-    margin-top: -26px;
+    margin-top: 0;
 }
 
 
@@ -546,8 +610,8 @@ body {
    Slightly larger like the Figma gear.
 */
 .teacher-controls__button[data-tool="settings"] .teacher-controls__icon {
-    width: 34px;
-    height: 34px;
+    width: 26px;
+    height: 26px;
 }
 
 
@@ -1116,3 +1180,23 @@ body {
    15. End Screen
       Final presentation-ended overlay.
 ========================================================== */
+
+/* PDF Encoding Font Patch tryout */
+html,
+body {
+    font-family: "Arial", sans-serif;
+    direction: rtl;
+    unicode-bidi: plaintext;
+    letter-spacing: normal;
+    word-spacing: normal;
+}
+
+/* Page Indicator Flip */
+.pdf-navigation-controls {
+    direction: ltr;
+}
+
+.pdf-navigation-controls__indicator {
+    direction: ltr;
+    unicode-bidi: isolate;
+}

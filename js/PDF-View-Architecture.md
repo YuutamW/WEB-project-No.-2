@@ -181,3 +181,103 @@ LibreOffice installed
 if PDF -> Render
 if PPT/PPTX -> show message : "needs server conversion"
 ```
+
+---
+
+## Slider Wrapper :
+- PDF Canvas         -- Paint PDF Page
+- Annotations Canvas -- Paint/Click/Annotations in Transparent Layer
+- DOM Layer          -- Markers, Text in future, Images ...
+
+---
+
+### Shift + Click Pos Q :
+event -> annotationCanvas:
+
+```js
+annotationCanvas.addEventListener(
+    "pointerdown",
+    handleAnnotationCanvasPointerDown
+);
+```
+```pointerdown``` = more generic : Mouse, Touch, Tablet, Stylus
+
+```js
+if (event.shiftKey) {
+    saveQuestionPoint(relativePoint, pageNumber);
+}
+```
+### Relative Pos:
+
+saved relative position for adaptive use between various resolutions 
+and devices .
+
+```js
+localX = event.clientX - pageRect.left;
+localY = event.clientY - pageRect.top;
+
+relativeX = localX / pageRect.width;
+relativeY = localY / pageRect.height;
+```
+```x``` : How far Left in Page - in % 
+```y``` : How far Up in Page   - in %
+
+PDF Viewer Holds Page number when pressed .
+
+---
+
+## Laser -
+
+little HTML element:
+
+```html
+<div id="laserPointer" class="laser-pointer"></div>
+```
+
+### in Js - We move it by Mouse Pos in px :
+
+```js
+laserPointer.style.left = `${event.clientX}px`;
+laserPointer.style.top = `${event.clientY}px`;
+```
+
+---
+
+## Annotations - 
+
+save the annotations as relative to screen by precentage, not actual size.
+
+### each stroke save like this:
+
+```js
+{
+    id: "ann_123",
+    type: "pen",
+    page: 2,
+    color: "#ff0000",
+    size: 4,
+    points: [
+        { x: 0.31, y: 0.42 },
+        { x: 0.32, y: 0.43 },
+        { x: 0.33, y: 0.44 }
+    ],
+    createdAt: "2026-05-29T..."
+}
+```
+
+### When paint to Screen :
+
+```js
+screenX = point.x * canvas.width;
+screenY = point.y * canvas.height;
+```
+- Works for various resolutions and screens
+- easy to save in JSON
+- easy to make undo redo ( in future )
+- better base for Export / Reload
+
+---
+
+
+
+

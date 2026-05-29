@@ -654,6 +654,21 @@ function updateStatus(message) {
 }
 
 /* ==========================================================
+   Active Page Helper
+   Purpose:
+   Get the current PDF page from the PDF viewer.
+   This prevents stale page state when saving annotations/questions.
+========================================================== */
+
+function getActivePageNumber() {
+    if (pdfViewerManager && pdfViewerManager.hasPdf()) {
+        return pdfViewerManager.getCurrentPage();
+    }
+
+    return presentationData.currentPage || 1;
+}
+
+/* ==========================================================
    14. Presentation Data JSON Helpers
    Purpose:
    Manage page-based data for annotations, objects and questions.
@@ -677,14 +692,14 @@ function createId(prefix) {
 }
 
 
-function saveQuestionPoint(relativePoint) {
-    const pageNumber = presentationData.currentPage;
+function saveQuestionPoint(relativePoint, pageNumber) {
     const pageData = ensurePageData(pageNumber);
 
-    const questionPoint = createQuestionPoint(relativePoint);
+    const questionPoint = createQuestionPoint(relativePoint, pageNumber);
 
     pageData.questions.push(questionPoint);
 
+    console.log("Saved question point on page:", pageNumber);
     console.log("Saved question point:", questionPoint);
     console.log("Presentation JSON:", presentationData);
 }
@@ -702,12 +717,12 @@ function saveQuestionPoint(relativePoint) {
     createdAt: "..."
 }
 */
-function createQuestionPoint(relativePoint) {
+function createQuestionPoint(relativePoint, pageNumber) {
     return {
         id: createId("q"),
         type: "question-point",
 
-        page: presentationData.currentPage,
+        page: pageNumber,
 
         x: relativePoint.x,
         y: relativePoint.y,
@@ -720,11 +735,10 @@ function createQuestionPoint(relativePoint) {
 }
 
 /* ==========================================================
-   15. Relative Pointer Position
+   Relative Pointer Position Handler
    Purpose:
-   Convert screen click position into relative PDF page position.
-   Example:
-   x: 0.42 means 42% from the left side of the PDF page.
+   Convert click position into relative PDF page position.
+   Shift + Click saves a Q point on the current PDF page.
 ========================================================== */
 
 function handleAnnotationCanvasPointerDown(event) {
@@ -732,25 +746,28 @@ function handleAnnotationCanvasPointerDown(event) {
         return;
     }
 
+    const pageNumber = getActivePageNumber();
     const relativePoint = getRelativePointFromPointerEvent(event);
 
-    /* For now:
-       Shift + click saves a Q point.
-       Later:
-       Pen tool will save annotation strokes.
-    */
+    console.log("Relative PDF click:", {
+        page: pageNumber,
+        x: relativePoint.x,
+        y: relativePoint.y,
+        raw: relativePoint.raw
+    });
+
     if (event.shiftKey) {
-        saveQuestionPoint(relativePoint);
+        saveQuestionPoint(relativePoint, pageNumber);
+
         updateStatus(
-            `Q point saved: x=${relativePoint.x.toFixed(3)}, y=${relativePoint.y.toFixed(3)}`
+            `Q point saved on page ${pageNumber}: x=${relativePoint.x.toFixed(3)}, y=${relativePoint.y.toFixed(3)}`
         );
+
         return;
     }
 
-    console.log("Relative PDF click:", relativePoint);
-
     updateStatus(
-        `Click: x=${relativePoint.x.toFixed(3)}, y=${relativePoint.y.toFixed(3)}`
+        `Click on page ${pageNumber}: x=${relativePoint.x.toFixed(3)}, y=${relativePoint.y.toFixed(3)}`
     );
 }
 

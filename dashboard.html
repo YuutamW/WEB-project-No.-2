@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> DLS Dashboard </title>
+
+    <link rel="stylesheet" href="css/dashboard.css">
+    <script src="js/dashboard.js" defer></script>
+    <!-- favicon -->
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+</head>
+
+<body>
+
+    <div class="dashboard-page">
+
+        <!-- ===============================
+             SIDEBAR
+        ================================ -->
+        <aside class="dashboard-sidebar">
+
+            <div class="dashboard-sidebar__brand">
+                <div class="dashboard-sidebar__logo">
+                    DLS
+                </div>
+
+                <div>
+                    <h1 class="dashboard-sidebar__title">
+                        Dynamic Lecture System
+                    </h1>
+                    <p class="dashboard-sidebar__subtitle">
+                        Teacher workspace
+                    </p>
+                </div>
+            </div>
+
+            <nav class="dashboard-sidebar__nav">
+                <a class="dashboard-sidebar__link is-active" href="dashboard.html">
+                    🏠 דף הבית
+                </a>
+
+                <a class="dashboard-sidebar__link" href="presentetion.html">
+                    🎞️ מצגות
+                </a>
+
+                <a class="dashboard-sidebar__link" href="#">
+                    ❓ שאלות סטודנטים
+                </a>
+
+                <a class="dashboard-sidebar__link" href="#">
+                    📊 Heatmap
+                </a>
+
+                <a class="dashboard-sidebar__link" href="#">
+                    ⚙️ הגדרות
+                </a>
+            </nav>
+
+        </aside>
+
+
+        <!-- ===============================
+             MAIN CONTENT
+        ================================ -->
+        <main class="dashboard-main">
+
+            <!-- Header -->
+            <header class="dashboard-header">
+
+                <section>
+                    <p class="dashboard-header__eyebrow">
+                        ברוך הבא
+                    </p>
+
+                    <h2 class="dashboard-header__title">
+                        שלום, מרצה 👋
+                    </h2>
+
+                    <p class="dashboard-header__text">
+                        נהל מצגות, שאלות, ושיעורים חיים ממקום אחד.
+                    </p>
+                </section>
+
+                <section class="dashboard-clock-card">
+                    <span id="dashboardClock" class="dashboard-clock-card__time">
+                        00:00
+                    </span>
+
+                    <span id="dashboardDate" class="dashboard-clock-card__date">
+                        Loading date...
+                    </span>
+                </section>
+
+            </header>
+
+
+            <!-- Quick Actions -->
+            <section class="dashboard-actions">
+
+                <a class="dashboard-action-card dashboard-action-card--primary" href="presentetion.html">
+                    <span class="dashboard-action-card__icon">
+                        ▶
+                    </span>
+
+                    <h3 class="dashboard-action-card__title">
+                        התחל מצגת
+                    </h3>
+
+                    <p class="dashboard-action-card__text">
+                        עבור למסך ההצגה והעלה PDF.
+                    </p>
+                </a>
+
+                <button class="dashboard-action-card" type="button">
+                    <span class="dashboard-action-card__icon">
+                        📄
+                    </span>
+
+                    <h3 class="dashboard-action-card__title">
+                        העלאת חומר
+                    </h3>
+
+                    <p class="dashboard-action-card__text">
+                        העלה קובץ חדש לשיעור.
+                    </p>
+                </button>
+
+                <button class="dashboard-action-card" type="button">
+                    <span class="dashboard-action-card__icon">
+                        ❓
+                    </span>
+
+                    <h3 class="dashboard-action-card__title">
+                        שאלות
+                    </h3>
+
+                    <p class="dashboard-action-card__text">
+                        צפה בשאלות שנשאלו.
+                    </p>
+                </button>
+
+            </section>
+
+
+            <!-- Dashboard Grid -->
+            <section class="dashboard-grid">
+
+                <!-- Recent lectures -->
+                <article class="dashboard-panel dashboard-panel--large">
+
+                    <div class="dashboard-panel__header">
+                        <h3 class="dashboard-panel__title">
+                            שיעורים אחרונים
+                        </h3>
+
+                        <a class="dashboard-panel__link" href="#">
+                            הצג הכל
+                        </a>
+                    </div>
+
+                    <div class="lecture-list">
+
+                        <div class="lecture-list__item">
+                            <span class="lecture-list__dot"></span>
+
+                            <div>
+                                <h4 class="lecture-list__title">
+                                    🕸️ Web & Cloud ☁️
+                                </h4>
+                                <p class="lecture-list__meta">
+                                    9 עמודים · 3 שאלות · עודכן היום
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="lecture-list__item">
+                            <span class="lecture-list__dot"></span>
+
+                            <div>
+                                <h4 class="lecture-list__title">
+                                    🦐 Dynamic Lecture Demo
+                                </h4>
+                                <p class="lecture-list__meta">
+                                    6 עמודים · PDF
+                                </p>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </article>
+
+
+                <!-- Calendar -->
+                <article class="dashboard-panel">
+
+                    <div class="dashboard-panel__header">
+                        <h3 class="dashboard-panel__title">
+                            לוח שנה
+                        </h3>
+                    </div>
+
+                    <div class="mini-calendar">
+
+                        <div class="mini-calendar__day">א</div>
+                        <div class="mini-calendar__day">ב</div>
+                        <div class="mini-calendar__day">ג</div>
+                        <div class="mini-calendar__day">ד</div>
+                        <div class="mini-calendar__day">ה</div>
+                        <div class="mini-calendar__day">ו</div>
+                        <div class="mini-calendar__day">ש</div>
+
+                        <div class="mini-calendar__cell"></div>
+                        <div class="mini-calendar__cell">1</div>
+                        <div class="mini-calendar__cell">2</div>
+                        <div class="mini-calendar__cell">3</div>
+                        <div class="mini-calendar__cell is-today">4</div>
+                        <div class="mini-calendar__cell">5</div>
+                        <div class="mini-calendar__cell">6</div>
+
+                    </div>
+
+                </article>
+
+
+                <!-- Stats -->
+                <article class="dashboard-panel">
+
+                    <div class="dashboard-panel__header">
+                        <h3 class="dashboard-panel__title">
+                            סטטיסטיקה מהירה
+                        </h3>
+                    </div>
+
+                    <div class="dashboard-stats">
+
+                        <div class="dashboard-stat">
+                            <span class="dashboard-stat__value">
+                                12
+                            </span>
+                            <span class="dashboard-stat__label">
+                                מצגות
+                            </span>
+                        </div>
+
+                        <div class="dashboard-stat">
+                            <span class="dashboard-stat__value">
+                                34
+                            </span>
+                            <span class="dashboard-stat__label">
+                                שאלות
+                            </span>
+                        </div>
+
+                    </div>
+
+                </article>
+
+            </section>
+
+        </main>
+
+    </div>
+
+</body>
+
+</html>
