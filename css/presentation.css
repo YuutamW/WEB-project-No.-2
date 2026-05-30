@@ -1210,10 +1210,10 @@ body {
 .question-marker {
     position: absolute;
 
-    width:  26px;
+    width: 26px;
     height: 26px;
 
-    transform: translate(-50%,-50%);
+    transform: translate(-50%, -50%);
 
     border: 2px solid #ffffff;
     border-radius: 50%;
@@ -1227,5 +1227,93 @@ body {
 }
 
 .question-marker:hover {
-    transform: translate(-50%,-50%) scale(1.12);
+    transform: translate(-50%, -50%) scale(1.12);
+}
+
+/* ==========================================================
+   QUESTION COMPOSE POPUP
+   Purpose:
+   Floating popup that lets the user type a question before
+   creating a question marker.
+========================================================== */
+
+.question-compose-popup {
+    /* For show on Mouse Press Pos - accordingly */
+    position: fixed;
+
+    width: 280px;
+    min-height: 180px;
+
+    padding: 14px;
+    border-radius: 18px;
+
+    background: rgba(245, 245, 245, 0.96);
+    box-shadow:
+        0 18px 50px rgba(0, 0, 0, 0.12),
+        0 0 0 1px rgba(0, 0, 0, 0.06);
+    
+    /* so Qs will be on top */
+    z-index: 80;
+
+    display:  none;
+}
+
+.question-compose-popup.is-visible {
+    display: block;
+
+}
+
+.question-compose-popup__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.question-compose-popup__title {
+    margin: 0;
+
+    font-size: 16px;
+    font-weight: 600;
+
+    color: #241631;
+}
+
+.question-compose-popup__close {
+    width: 28px;
+    min-height: 28px;
+
+    padding: 10px;
+
+    resize: none;
+
+    border: none;
+    border-radius: 12px;
+
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 300;
+
+    color: #241631;
+    background: #ffffff;
+
+    cursor: pointer;
+
+}
+
+.question-compose-popup__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 6px;
+    margin-top: 10px;
+}
+
+.question-compose-popup__button--secondary {
+    background: rgba(0, 0, 0, 0.08);
+    color: #241631;
+}
+
+.question-compose-popup__button--primary {
+    background: #ff3b6b;
+    color: #FFFFFF;
 }

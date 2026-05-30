@@ -125,6 +125,14 @@ const endScreen = document.getElementById("endScreen");
 /* Show / Hide Question MArkers */
 const questionMarkerToggleButton = document.getElementById("questionMarkersToggleButton");
 
+/* Question Compose Popup - for JS control  QuestionAddInput Popup */
+const questionComposePopup = document.getElementById("questionComposePopup");
+const questionComposeInput = document.getElementById("questionComposeInput");
+const questionComposeSaveButton = document.getElementById("questionComposeSaveButton");
+const questionComposeCancelButton = document.getElementById("questionComposeCancelButton");
+const questionComposeCloseButton = document.getElementById("questionComposeCloseButton");
+
+
 
 /* ==========================================================
    2. App State
@@ -147,11 +155,15 @@ const presentationState = {
     questionMarkerColor: "#ff3b6b"
 };
 
+/* --Added Helper Vars-- */
+
 let toolOptionsHideTimer = null;
 
 let teacherControlsHideTimer = null;
 
 let shouldKeepToolbarHiddenUntilMouseLeavesBottom = false;
+
+let pendingQuestionDraft = null;
 
 /* ==========================================================
    2.1 Presentation Data JSON
@@ -250,8 +262,31 @@ function connectEvents() {
     stopPresentationButton.addEventListener("click", stopPresentation);
 
     /* Show / Hide Questions Markers */
-    if(questionMarkerToggleButton) {
-        questionMarkerToggleButton.addEventListener("click",toggleQuestionMarkerVisibility);
+    if (questionMarkerToggleButton) {
+        questionMarkerToggleButton.addEventListener("click", toggleQuestionMarkerVisibility);
+    }
+
+    /* Add PopUp for add Text when adding Dot of Question on PDF */
+    if (questionComposeSaveButton) {
+        questionComposeSaveButton.addEventListener("click", savePendingQuestionFromPopup);
+    }
+    if (questionComposeCancelButton) {
+        questionComposeCancelButton.addEventListener("click", closeQuestionComposePopup);
+    }
+        if(questionComposeCloseButton) {
+        questionComposeCloseButton.addEventListener("click",closeQuestionComposePopup);
+    }
+
+    /* Added Save with Enter Press */
+    if(questionComposeInput) {
+        questionComposeInput.addEventListener("keydown", function (event) {
+            if(event.key === "Enter" && event.ctrlKey) {
+                savePendingQuestionFromPopup();
+            }
+            if(event.key === "Escape") {
+                closeQuestionComposePopup();
+            }
+        });
     }
 }
 
@@ -712,7 +747,7 @@ function createId(prefix) {
 }
 
 
-function saveQuestionPoint(relativePoint, pageNumber) {
+function saveQuestionPoint(relativePoint, pageNumber, questionText) {
     const pageData = ensurePageData(pageNumber);
 
     const presentationId = createPresentationId(presentationData.fileName);
@@ -726,10 +761,10 @@ function saveQuestionPoint(relativePoint, pageNumber) {
         x: relativePoint.x,
         y: relativePoint.y,
 
-        text: "",
+        text: questionText,
         status: "open",
 
-        color : presentationState.questionMarkerColor,
+        color: presentationState.questionMarkerColor,
 
         studentName: "Anonymous",
         isAnonymous: true
@@ -854,6 +889,83 @@ function toggleQuestionMarkerVisibility() {
     }
 }
 
+/* ==========================================================
+   QUESTION COMPOSE POPUP
+   Purpose:
+   Open a small input popup before saving a question.
+========================================================== */
+
+/*
+   Opens the question popup near the mouse click.
+
+   relativePoint:
+   - x/y inside the PDF page, saved as 0..1
+
+   pageNumber:
+   - current PDF page number
+
+   event:
+   - browser pointer event, used for screen position
+*/
+function openQuestionComposePopup(relativePoint, pageNumber, event) {
+    pendingQuestionDraft = {
+        page: pageNumber,
+        x: relativePoint.x,
+        y: relativePoint.y,
+        screenX: event.clientX,
+        screenY: event.clientY
+
+    };
+
+    questionComposeInput.value = "";
+    questionComposePopup.style.left = `${event.clientX + 14}px`;
+    questionComposePopup.style.top = `${event.clientY + 14}px`;
+
+    questionComposePopup.classList.add("is-visible");
+    questionComposePopup.setAttribute("aria-hidden", "false");
+
+    questionComposeInput.focus();
+}
+
+/*
+   Closes the question popup and clears the draft.
+*/
+function closeQuestionComposePopup() {
+    pendingQuestionDraft = null;
+
+    questionComposePopup.classList.remove("is-visible");
+    questionComposePopup.setAttribute("aria-hidden", "true");
+
+    questionComposeInput.value = "";
+}
+
+/*
+Saves padding Question after User typed Text
+*/
+function savePendingQuestionFromPopup() {
+    if (!pendingQuestionDraft) {
+        return;
+    }
+
+    const questionText = questionComposeInput.value.trim();
+
+    if (questionText === "") {
+        updateStatus(" Question text cannot be EMPTY! ");
+        console.log(" invalid input -Empty Question String! ");
+        questionComposeInput.focus();
+        return;
+    }
+
+    const relativePoint = {
+        x: pendingQuestionDraft.x,
+        y: pendingQuestionDraft.y
+    };
+
+    const pageNumber = pendingQuestionDraft.page;
+    saveQuestionPoint(relativePoint, pageNumber, questionText);
+    closeQuestionComposePopup();
+    updateStatus(" Question Saved 💾 ");
+}
 
 /* ==========================================================
    Relative Pointer Position Handler
@@ -877,7 +989,7 @@ function handleAnnotationCanvasPointerDown(event) {
     });
 
     if (event.shiftKey) {
-        saveQuestionPoint(relativePoint, pageNumber);
+        openQuestionComposePopup(relativePoint, pageNumber, event);
 
         updateStatus(
             `Q point saved on page ${pageNumber}: x=${relativePoint.x.toFixed(3)}, y=${relativePoint.y.toFixed(3)}`

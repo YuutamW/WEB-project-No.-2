@@ -127,6 +127,39 @@
 
             </section>
 
+            <!-- =========================================================
+             QUESTION COMPOSE POPUP
+             Purpose:
+             Small popup that lets the user write a question before
+             saving a Q marker on the current PDF page.
+            ========================================================== -->
+            <section id="questionComposePopup" class="question-compose-popup" aria-hidden="true">
+                <header class="question-compose-popup__header">
+                    <h3 class="question-compose-popup__title">
+                        ➕ Add Question ❓
+                    </h3>
+                    <button id="questionComposeCloseButton" class="question-compose-popup__close" type="button"
+                        aria-label="Close question popup">
+                        ❌
+                    </button>
+                </header>
+
+                <textarea id="questionComposeInput" class="question-compose-popup__input"
+                    placeholder="Write your Question here..."></textarea>
+
+                <footer class="question-compose-popup__actions">
+                    <button id="questionComposeCancelButton"
+                        class="question-compose-popup__button question-compose-popup__button--secondary" type="button">
+                        Cancel ✖️
+                    </button>
+
+                    <button id="questionComposeSaveButton"
+                        class="question-compose-popup__button question-compose-popup__button--primary" type="button">
+                        Save 💾
+                    </button>
+                </footer>
+            </section>
+
         </main>
 
 
@@ -178,7 +211,8 @@
 
         <nav id="teacherControls" class="teacher-controls">
             <!-- Hide/Reveal Q Markers -->
-             <button id="questionMarkersToggleButton" class="teacher-controls__button" type="button" aria-label="Show/Hide Questions">❓</button>
+            <button id="questionMarkersToggleButton" class="teacher-controls__button" type="button"
+                aria-label="Show/Hide Questions">❓</button>
 
             <!-- Settings -->
             <button class="teacher-controls__button teacher-controls__button--tool" type="button" data-tool="settings"
