@@ -339,6 +339,8 @@ export function createQuestion(questionData) {
         text: questionData.text || "",
         status: questionData.status || "open",
 
+        color: questionData.color || "#ff3b6b",
+
         studentName: questionData.studentName || "Anonymous",
         isAnonymous: questionData.isAnonymous !== false,
 

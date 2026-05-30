@@ -184,6 +184,30 @@ PPT/PPTX → Show “server conversion required” message
 ```
 
 ---
+### 🙋🏻‍♂️ Question Injection ❔
+
+### current Flow:
+```cs
+1. [Shift + Click] on annotrationCanvas
+-----------------------------------------------------
+2. `presentation-manager.js` Identifies the Click
+-----------------------------------------------------
+3. Asks "pdfViewerManager" what "currentPage"
+-----------------------------------------------------
+4. Calculates relativ X/Y on current Page
+-----------------------------------------------------
+5. Creates `QuestionObject`
+-----------------------------------------------------
+6. Saves the obj to `presentationData` && `localStorage`
+-----------------------------------------------------
+7. Later can reaad Data from Dashboard
+-----------------------------------------------------
+```
+#### Question saved as Info Object : 
+#### helps us in presenting the info as a ```"Dot"``` ```🔵``` or open as ```popup```
+#### , set as ```answered``` , count on ```dashboard``` and use in ```heatmap```.
+
+---
 
 ## 🚧 Next Steps
 

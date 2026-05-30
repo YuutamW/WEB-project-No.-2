@@ -122,6 +122,9 @@ const switchPresentationButton = document.getElementById("switchPresentationButt
 const stopPresentationButton = document.getElementById("stopPresentationButton");
 const endScreen = document.getElementById("endScreen");
 
+/* Show / Hide Question MArkers */
+const questionMarkerToggleButton = document.getElementById("questionMarkersToggleButton");
+
 
 /* ==========================================================
    2. App State
@@ -138,7 +141,10 @@ const presentationState = {
 
     eraserSize: 4,
 
-    laserColor: "#ff3b3b"
+    laserColor: "#ff3b3b",
+
+    questionMarkersVisible: false,
+    questionMarkerColor: "#ff3b6b"
 };
 
 let toolOptionsHideTimer = null;
@@ -242,6 +248,11 @@ function connectEvents() {
 
     /* Stop presentation */
     stopPresentationButton.addEventListener("click", stopPresentation);
+
+    /* Show / Hide Questions Markers */
+    if(questionMarkerToggleButton) {
+        questionMarkerToggleButton.addEventListener("click",toggleQuestionMarkerVisibility);
+    }
 }
 
 
@@ -635,6 +646,8 @@ function handlePdfPageChange(pageInfo) {
 
     ensurePageData(pageInfo.currentPage);
 
+    renderQuestionsForCurrentPage();
+
     console.log("PDF page changed:", pageInfo);
     console.log("Current presentation JSON:", presentationData);
 }
@@ -716,11 +729,18 @@ function saveQuestionPoint(relativePoint, pageNumber) {
         text: "",
         status: "open",
 
+        color : presentationState.questionMarkerColor,
+
         studentName: "Anonymous",
         isAnonymous: true
     });
 
     pageData.questions.push(savedQuestion);
+
+    // renderQuestionMarker(savedQuestion);
+    if (presentationState.questionMarkersVisible) {
+        renderQuestionMarker(savedQuestion);
+    }
 
     console.log("Saved question on page:", pageNumber);
     console.log("Saved question:", savedQuestion);
@@ -762,12 +782,85 @@ function createQuestionPoint(relativePoint, pageNumber) {
 }
 
 /* ==========================================================
+   15. Question Markers
+   Purpose:
+   Render saved question markers on the DOM layer.
+========================================================== */
+/* Clear Question Markers */
+function clearQuestionMarkers() {
+    const markers = domLayer.querySelectorAll(".question-marker");
+
+    markers.forEach(function (marker) {
+        marker.remove();
+    });
+}
+
+/* Display Question Marker (button) */
+function renderQuestionMarker(question) {
+    const marker = document.createElement("button");
+
+    marker.className = "question-marker";
+    marker.type = "button";
+
+    marker.dataset.questionId = question.Id;
+    marker.title = question.text || "Student question";
+
+    /* Actual Marker */
+    marker.textContent = "?";
+
+    marker.style.left = `${question.x * 100}%`;
+    marker.style.top = `${question.y * 100}%`;
+    marker.style.backgroundColor = question.color || "#ff3b6b";
+
+    marker.addEventListener("click", function () {
+        console.log("Question marker clicked:", question);
+        updateStatus(`Question: ${question.text || "No text yet"}`);
+    });
+
+    domLayer.appendChild(marker);
+}
+
+function renderQuestionsForCurrentPage() {
+    clearQuestionMarkers();
+
+    if (!presentationState.questionMarkersVisible) {
+        return;
+    }
+
+    const presentationId = createPresentationId(presentationData.fileName);
+    const pageNumber = getActivePageNumber();
+
+    const questions = getQuestionsForPage(presentationId, pageNumber);
+
+    clearQuestionMarkers();
+
+    questions.forEach(function (question) {
+        renderQuestionMarker(question);
+    });
+
+}
+
+/* Helper - Toggle Func for Visibility of Markers on PDF current page */
+function toggleQuestionMarkerVisibility() {
+    presentationState.questionMarkersVisible = !presentationState.questionMarkersVisible;
+
+    renderQuestionsForCurrentPage();
+
+    if (presentationState.questionMarkersVisible) {
+        updateStatus("Question Markers Are Visible 👁️ ");
+    }
+    else {
+        updateStatus("Question Markers Are Hidden 🥷🏻 ");
+    }
+}
+
+
+/* ==========================================================
    Relative Pointer Position Handler
    Purpose:
    Convert click position into relative PDF page position.
    Shift + Click saves a Q point on the current PDF page.
 ========================================================== */
-
 function handleAnnotationCanvasPointerDown(event) {
     if (!pdfViewerManager.hasPdf()) {
         return;

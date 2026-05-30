@@ -1200,3 +1200,32 @@ body {
     direction: ltr;
     unicode-bidi: isolate;
 }
+
+/* ==========================================================
+   Question Marker
+   Purpose:
+   Small dot that points to a saved student question.
+========================================================== */
+
+.question-marker {
+    position: absolute;
+
+    width:  26px;
+    height: 26px;
+
+    transform: translate(-50%,-50%);
+
+    border: 2px solid #ffffff;
+    border-radius: 50%;
+
+    color: #FFFFFF;
+    font-size: 14px;
+    font-weight: 600;
+
+    cursor: pointer;
+    z-index: 5;
+}
+
+.question-marker:hover {
+    transform: translate(-50%,-50%) scale(1.12);
+}
