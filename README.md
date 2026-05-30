@@ -1,74 +1,204 @@
-# DLS Final Project - Part A Starter
+<p align="center">
+  <img src="/assets/dls-logo.svg" alt="DLS Logo" width="120" />
+</p>
 
-## Pages included
+<h1 align="center">🖊️ DLS – Dynamic Lecture System 👨🏻‍🏫</h1>
 
-1. `register.html` - Registration form page.
-2. `login.html` - Login form page.
+<p align="center">
+  Frontend prototype for a Dynamic Lecture System built with
+  <b>Vanilla HTML</b>, <b>CSS</b>, <b>JavaScript</b> and <b>JSON</b>.
+</p>
 
-## Current purpose
+<p align="center">
+  <img src="https://img.shields.io/badge/HTML-Vanilla-orange" alt="HTML Vanilla" />
+  <img src="https://img.shields.io/badge/CSS-Custom-purple" alt="Custom CSS" />
+  <img src="https://img.shields.io/badge/JavaScript-Vanilla-yellow" alt="Vanilla JavaScript" />
+  <img src="https://img.shields.io/badge/Status-Prototype-blue" alt="Prototype Status" />
+</p>
 
-This starter focuses on the required Form direction for the final project.
-Both pages are frontend-only and do not connect to a server.
+---
 
-## Files
+## 📌 Overview
 
-```text
-dls-auth-starter/
-│
-├── register.html
-├── login.html
-│
-├── css/
-│   ├── theme.css
-│   └── style.css
-│
-├── js/
-│   └── auth.js
-│
-├── data/
-│   └── sample-users.json
-│
-└── docs/
-    └── THEME.md
+DLS is a frontend-only prototype for a Dynamic Lecture System.
+
+The current prototype lets a lecturer log in, open a dashboard, upload a PDF presentation, navigate between pages, and use a teacher control toolbar mockup for future presentation tools.
+
+The project is built with client-side technologies only.
+
+---
+
+## 🧭 Current Pages
+
+| Page | Purpose |
+|---|---|
+| `login.html` | Email/password login page |
+| `register.html` | Registration form with validation |
+| `dashboard.html` | Lecturer dashboard prototype |
+| `presentetion.html` | PDF presentation viewer with teacher controls |
+| `easteregg.html` | Hidden demo page for future easter eggs |
+
+> Note: the presentation page file is currently named `presentetion.html` in the project.
+
+---
+
+## ✨ Current Features
+
+- Purple/orange DLS visual theme
+- Login and registration validation
+- Demo users loaded from `data/sample-users.json`
+- Registered users saved locally with `localStorage`
+- Lecturer login redirects to the dashboard
+- Dashboard prototype with clock, calendar, quick actions and recent lectures
+- PDF upload and rendering with PDF.js
+- PDF page navigation
+- Relative click positions for future Q&A / annotation layer
+- Teacher toolbar mockup:
+  - Stop
+  - Pen
+  - Eraser
+  - Text
+  - Image
+  - Laser
+  - Switch Presentation
+  - Settings
+
+---
+
+## 🔐 Demo Login
+
+Use this demo lecturer account:
+
+```txt
+Email: Lecturer@shenkar.com
+Password: Lecturer1
 ```
 
-## Validation
+---
 
-The file `js/auth.js` validates:
+## 🗂️ User Storage
 
-- Required fields
-- Email format
-- Password length
-- Role selection
-- Terms checkbox on registration
+This project is frontend-only.
 
-## Next steps
+Fixed demo users are stored in:
 
-- Match colors/fonts exactly to the Figma.
-- Add the two central DLS pages.
-- Add JSON-based dynamic content.
-- Add meaningful Git commits.
+```txt
+data/sample-users.json
+```
 
-## V2 changes
+Users registered through `register.html` are saved locally in the browser:
 
-- Added Heebo font.
-- Fixed browser autofill white input background.
-- Added live email structure indicator.
-- Improved login page with a clock/date glass window.
-- Kept registration page as the more explanatory page.
+```txt
+localStorage.dlsRegisteredUsers
+```
 
-## V2.1 changes
+The current logged-in user is saved as:
 
-- Clicking the DLS logo now opens `login.html`.
-- Added custom SVG logo in `assets/dls-icon.svg`.
-- Added SVG favicon in `assets/favicon.svg`.
+```txt
+localStorage.dlsCurrentUser
+```
+
+> ⚠️ This is only for proof of concept.  
+> A real production system must use a backend and secure password hashing.
+
+---
+
+## ▶️ Run Locally
+
+Use **Live Server** in VS Code.
+
+Do not open the files directly from the file system because `fetch()` and PDF.js need a local server.
+
+Recommended flow:
+
+```txt
+Right click login.html
+→ Open with Live Server
+```
+
+---
 
 
-## V3 changes
+## 🖼️ Presentation Viewer Architecture
 
-- Purple/orange glass theme.
-- PNG logo/favicon.
-- Centered auth wrapper.
-- Topbar clock and next-class status.
-- Removed side panels from auth pages.
-- Fixed white text/background problems in login/register inputs.
+The presentation page uses a layered structure:
+
+```txt
+slideWrapper
+│
+├── PDF Canvas Layer
+├── Annotation Canvas Layer
+├── DOM Layer
+└── Laser Pointer Layer
+```
+
+This keeps the original PDF separate from annotations, question points, images and text objects.
+
+---
+
+## 🧠 Annotation Data Idea
+
+Annotations and question positions should be saved as relative positions, not fixed pixels.
+
+Example:
+
+```js
+{
+  page: 2,
+  x: 0.42,
+  y: 0.31
+}
+```
+
+This keeps the annotation in the correct place even when the PDF changes size.
+
+---
+
+## 📄 PDF Support
+
+Current browser-only support:
+
+```txt
+[⬆️🔃] PDF upload              
+[🎦⚙️] PDF render in browser   
+[🧭↔️] PDF page navigation     
+```
+
+PowerPoint conversion is not supported in the browser-only prototype.
+
+PPT/PPTX conversion would require:
+
+```txt
+Backend server        [🔙🤚🏻🤵🏻🆚]
++
+LibreOffice installed [🪁]
++
+PPT/PPTX → PDF conversion service 
+```
+
+For this prototype:
+
+```txt
+PDF → Render in browser
+PPT/PPTX → Show “server conversion required” message
+```
+
+---
+
+## 🚧 Next Steps
+
+- Add real pen annotation saving
+- Redraw annotations per PDF page
+- Add Q&A markers on the slide
+- Improve and simplify the dashboard UI
+- Add easter egg effects
+- Prepare final submission screenshots
+- Improve project documentation before final delivery
+
+---
+
+## 📝 Notes
+
+This project is a proof-of-concept frontend prototype.
+
+It is not a production authentication system and should not be used with real passwords or sensitive data.

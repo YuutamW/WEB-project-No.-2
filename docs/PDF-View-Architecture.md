@@ -73,8 +73,80 @@ normalizedY = mouseY / canvasHeight
 screenX = normalizedX * canvasWidth
 screenY = normalizedY * canvasHeight
 ```
-### saves Annotation at the right place even when rescale page
+### saves Annotation at the right position even when rescale page
 
+### Users DataBase -
+we dont have server (yet) so we cannot change the JSON directly,
+the trick will be split it to two parts to Support Local Prefs save:
+- Fixed User for Demo - will be saved on : *```data/sample-users.json```*
+- Registered through ```register.html``` ***HTML*** - will be saved **Locally**; 
+- -   saved in ```localStorage.dlsRegisteredUsers```
+
++   LOgin check (generic wait callback):
+    ```js
+    const users = await loadAllUsers();
+    ---
+    sample-users.json
+    +
+    localStorage.dlsRegisteredUsers
+    ```
+
++ in ```Register``` we create an object:
+
+    ```js
+    const newUser = {
+      firstName,
+      lastName,
+      email,
+      password,
+      role,
+      redirect: "dashboard.html"
+    };
+    ```
+    - - we take local list  
+    ```js
+    const registeredUsers = loadRegisteredUsersFromStorage();```
+
+    - - we add :
+    ```js
+    registeredUsers.push(newUser);```
+
+    - - resave:
+    ```js
+    saveRegisteredUsersToStorage(registeredUsers);
+    ```
+
+    - - turns JSON array -> ```string```:
+    ```js
+    JSON.stringify(users, null, 2)```
+    and save iin local storage
+
+### How Login Finds Local Users (Too)?
+
+in ```login.js``` we do: 
+```js
+const matchedUser = await findMatchingUserByEmail(email, password);
+```
+this func checks : 
+
+```txt
+users from sample-users.json
++
+users from localStorage
+```
+and look for : 
+```js
+user.email === email && user.password === password
+```
+if user found : save as current user without password:
+
+```js
+localStorage.setItem("dlsCurrentUser", ...)
+//-----------------------------------------
+window.location.href = redirectUrl;
+```
+
+    
 
 
 ---

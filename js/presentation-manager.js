@@ -55,7 +55,14 @@
    13. Helpers
       Small utility functions.
 ========================================================== */
+/* impord PDF API Viewer */
 import { createPdfViewerManager } from "./pdf-viewer.js";
+/* Question manager on DOM layer */
+import {
+    createAndSaveQuestion,
+    createPresentationId,
+    getQuestionsForPage
+} from "./question-manager.js";
 
 /* ==========================================================
    1. DOM References
@@ -695,13 +702,33 @@ function createId(prefix) {
 function saveQuestionPoint(relativePoint, pageNumber) {
     const pageData = ensurePageData(pageNumber);
 
-    const questionPoint = createQuestionPoint(relativePoint, pageNumber);
+    const presentationId = createPresentationId(presentationData.fileName);
 
-    pageData.questions.push(questionPoint);
+    const savedQuestion = createAndSaveQuestion({
+        presentationId: presentationId,
+        fileName: presentationData.fileName,
 
-    console.log("Saved question point on page:", pageNumber);
-    console.log("Saved question point:", questionPoint);
-    console.log("Presentation JSON:", presentationData);
+        page: pageNumber,
+
+        x: relativePoint.x,
+        y: relativePoint.y,
+
+        text: "",
+        status: "open",
+
+        studentName: "Anonymous",
+        isAnonymous: true
+    });
+
+    pageData.questions.push(savedQuestion);
+
+    console.log("Saved question on page:", pageNumber);
+    console.log("Saved question:", savedQuestion);
+    console.log("Presentation runtime JSON:", presentationData);
+    console.log(
+        "Question localStorage JSON:",
+        dlsQuestionDebug.loadQuestionStore()
+    );
 }
 
 /* Shift + Click = Save Q Point - create dot obj */
