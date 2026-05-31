@@ -1,3 +1,5 @@
+// Dor Mandel :       ID: 315313825
+// Yotam Weintraub:   ID: 321610859
 // Load PDF.js
 /* ==========================================================
    DLS PRESENTATION MANAGER
