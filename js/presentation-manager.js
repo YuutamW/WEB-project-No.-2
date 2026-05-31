@@ -139,6 +139,15 @@ const qaDrawerList = document.getElementById("qaDrawerList");
 const qaShowAllButton = document.getElementById("qaShowAllButton");
 const qaShowCurrentPageButton = document.getElementById("qaShowCurrentPageButton");
 
+/* Summary Overlay */
+const summaryOverlay = document.getElementById("summaryOverlay");
+const closeSummaryOverlayButton = document.getElementById("closeSummaryOverlayButton");
+const summaryOverlayBackButton = document.getElementById("summaryOverlayBackButton");
+const summaryOverlayRefreshButton = document.getElementById("summaryOverlayRefreshButton");
+const overlayTotalQuestions = document.getElementById("overlayTotalQuestions");
+const overlayHottestPage = document.getElementById("overlayHottestPage");
+const overlayQuestionsList = document.getElementById("overlayQuestionsList");
+
 
 /* ==========================================================
    2. App State
@@ -308,6 +317,19 @@ function connectEvents() {
         qaShowCurrentPageButton.addEventListener("click", function () {
             setQaDrawerFilter("currentPage");
         });
+    }
+
+    /* Summary Events */
+    if (closeSummaryOverlayButton) {
+        closeSummaryOverlayButton.addEventListener("click", closeSummaryOverlay);
+    }
+
+    if (summaryOverlayBackButton) {
+        summaryOverlayBackButton.addEventListener("click", closeSummaryOverlay);
+    }
+
+    if (summaryOverlayRefreshButton) {
+        summaryOverlayRefreshButton.addEventListener("click", renderSummaryOverlay);
     }
 }
 
@@ -675,7 +697,8 @@ function updateLaserPointerPosition(event) {
 ========================================================== */
 
 function stopPresentation() {
-    openSummaryPage();
+    //openSummaryPage();
+    openSummaryOverlay();
 }
 
 /* ==========================================================
@@ -897,6 +920,22 @@ function renderQuestionsForCurrentPage() {
 
 }
 
+/* ==========================================================
+   Render Summary Overlay
+   Purpose:
+   Build summary stats and question list from presentationData.
+========================================================== */
+
+function renderSummaryOverlay() {
+    const questions = getAllPresentationQuestions();
+    const hottestPage = getHottestQuestionPage(questions);
+
+    overlayTotalQuestions.textContent = questions.length;
+    overlayHottestPage.textContent = hottestPage || "-";
+
+    renderSummaryOverlayQuestions(questions);
+}
+
 /* Helper - Toggle Func for Visibility of Markers on PDF current page */
 function toggleQuestionMarkerVisibility() {
     presentationState.questionMarkersVisible = !presentationState.questionMarkersVisible;
@@ -987,6 +1026,27 @@ function savePendingQuestionFromPopup() {
     saveQuestionPoint(relativePoint, pageNumber, questionText);
     closeQuestionComposePopup();
     updateStatus(" Question Saved 💾 ");
+}
+
+/* ==========================================================
+   Get All Presentation Questions
+   Purpose:
+   Flatten all questions from all pages into one array.
+========================================================== */
+
+function getAllPresentationQuestions() {
+    const allQuestions = [];
+
+    Object.keys(presentationData.pages).forEach(function (pageNumber) {
+        const pageData = presentationData.pages[pageNumber];
+        const pageQuestions = pageData.questions || [];
+
+        pageQuestions.forEach(function (question) {
+            allQuestions.push(question);
+        });
+    });
+
+    return allQuestions;
 }
 
 /* ==========================================================
@@ -1179,6 +1239,203 @@ function openSummaryPage() {
 
     window.location.href =
         `summary.html?presentation=${encodeURIComponent(presentationId)}`;
+}
+
+/* ==========================================================
+   Open Summary Overlay
+   Purpose:
+   Render and show the summary above the active presentation.
+========================================================== */
+
+function openSummaryOverlay() {
+    renderSummaryOverlay();
+
+    summaryOverlay.classList.add("is-visible");
+    summaryOverlay.setAttribute("aria-hidden", "false");
+
+    hideToolOptionsPanel();
+    teacherControls.classList.remove("is-visible");
+}
+
+
+/* ==========================================================
+   Close Summary Overlay
+   Purpose:
+   Hide the summary and return to the presentation.
+========================================================== */
+
+function closeSummaryOverlay() {
+    summaryOverlay.classList.remove("is-visible");
+    summaryOverlay.setAttribute("aria-hidden", "true");
+}
+
+/* ==========================================================
+   Get Hottest Question Page
+   Purpose:
+   Finds the page with the highest number of questions.
+========================================================== */
+
+function getHottestQuestionPage(questions) {
+    const questionsByPage = {};
+
+    questions.forEach(function (question) {
+        const page = question.page || 1;
+
+        questionsByPage[page] = (questionsByPage[page] || 0) + 1;
+    });
+
+    let hottestPage = null;
+    let highestCount = 0;
+
+    Object.keys(questionsByPage).forEach(function (page) {
+        if (questionsByPage[page] > highestCount) {
+            hottestPage = page;
+            highestCount = questionsByPage[page];
+        }
+    });
+
+    return hottestPage;
+}
+
+/* ==========================================================
+   Render Summary Overlay Questions
+   Purpose:
+   Group questions by page and render clickable cards.
+========================================================== */
+
+function renderSummaryOverlayQuestions(questions) {
+    overlayQuestionsList.innerHTML = "";
+
+    if (questions.length === 0) {
+        overlayQuestionsList.innerHTML = `
+            <article class="summary-overlay__page-group">
+                <h3 class="summary-overlay__page-title">
+                    No Questions Yet
+                </h3>
+                <p class="summary-overlay__question-meta">
+                    Questions added during the lecture will appear here.
+                </p>
+            </article>
+        `;
+
+        return;
+    }
+
+    const groupedQuestions = groupQuestionsByPage(questions);
+
+    Object.keys(groupedQuestions)
+        .map(Number)
+        .sort(function (a, b) {
+            return a - b;
+        })
+        .forEach(function (pageNumber) {
+            const pageGroup = createSummaryPageGroup(
+                pageNumber,
+                groupedQuestions[pageNumber]
+            );
+
+            overlayQuestionsList.appendChild(pageGroup);
+        });
+}
+
+/* ==========================================================
+   Group Questions By Page
+   Purpose:
+   Creates an object where every key is a page number.
+========================================================== */
+
+function groupQuestionsByPage(questions) {
+    const groups = {};
+
+    questions.forEach(function (question) {
+        const page = question.page || 1;
+
+        if (!groups[page]) {
+            groups[page] = [];
+        }
+
+        groups[page].push(question);
+    });
+
+    return groups;
+}
+
+/* ==========================================================
+   Create Summary Page Group
+   Purpose:
+   Creates one visual group for all questions on a page.
+========================================================== */
+
+function createSummaryPageGroup(pageNumber, questions) {
+    const group = document.createElement("article");
+
+    group.className = "summary-overlay__page-group";
+
+    const title = document.createElement("h3");
+
+    title.className = "summary-overlay__page-title";
+    title.textContent = `Page ${pageNumber}`;
+
+    group.appendChild(title);
+
+    questions.forEach(function (question) {
+        const questionItem = createSummaryQuestionItem(question);
+
+        group.appendChild(questionItem);
+    });
+
+    return group;
+}
+
+/* ==========================================================
+   Create Summary Question Item
+   Purpose:
+   Creates a clickable question card.
+   On click, closes summary and jumps to the question page.
+========================================================== */
+
+function createSummaryQuestionItem(question) {
+    const item = document.createElement("button");
+
+    item.className = "summary-overlay__question-item";
+    item.type = "button";
+
+    item.innerHTML = `
+        <p class="summary-overlay__question-meta">
+            Page ${question.page || 1} · ${question.status || "open"}
+        </p>
+
+        <p class="summary-overlay__question-text">
+            ${question.text || "No question text"}
+        </p>
+
+        <p class="summary-overlay__question-meta">
+            ${question.isAnonymous ? "Anonymous" : question.studentName || "Student"}
+            · Click to return to question
+        </p>
+    `;
+
+    item.addEventListener("click", function () {
+        goToQuestionFromSummary(question);
+    });
+
+    return item;
+}
+
+/* ==========================================================
+   Go To Question From Summary
+   Purpose:
+   Return from summary overlay to the exact question location.
+========================================================== */
+
+async function goToQuestionFromSummary(question) {
+    closeSummaryOverlay();
+
+    await pdfViewerManager.goToPage(question.page);
+
+    renderQuestionsForCurrentPage();
+
+    highlightQuestionMarker(question.id);
 }
 
 /* ==========================================================

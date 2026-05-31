@@ -1808,3 +1808,271 @@ body {
     font-weight: 700;
     text-align: center;
 }
+
+/* ==========================================================
+   16. Summary Overlay
+   Purpose:
+   Full-screen summary layer inside presentation page.
+   This keeps the PDF loaded because we do not leave the page.
+========================================================== */
+
+.summary-overlay {
+    position: fixed;
+    inset: 0;
+
+    z-index: 90;
+
+    display: none;
+
+    padding: 48px;
+
+    background:
+        radial-gradient(circle at top left, rgba(255, 176, 133, 0.22), transparent 34%),
+        linear-gradient(135deg, rgba(18, 9, 31, 0.98), rgba(49, 18, 55, 0.98));
+
+    overflow-y: auto;
+}
+
+.summary-overlay.is-visible {
+    display: block;
+}
+
+
+/* ==========================================================
+   Summary Overlay Panel
+   Purpose:
+   Centers and limits the readable content width.
+========================================================== */
+
+.summary-overlay__panel {
+    width: min(980px, 100%);
+    margin: 0 auto;
+}
+
+
+/* ==========================================================
+   Summary Overlay Header
+   Purpose:
+   Title area + close button.
+========================================================== */
+
+.summary-overlay__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 24px;
+
+    margin-bottom: 24px;
+}
+
+.summary-overlay__eyebrow {
+    margin: 0 0 8px;
+
+    color: #ffb085;
+
+    font-size: 13px;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.summary-overlay__title {
+    margin: 0;
+
+    color: #ffffff;
+
+    font-size: 48px;
+    font-weight: 900;
+}
+
+.summary-overlay__subtitle {
+    margin: 10px 0 0;
+
+    color: rgba(255, 255, 255, 0.74);
+
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.summary-overlay__close-button {
+    width: 44px;
+    height: 44px;
+
+    border: none;
+    border-radius: 14px;
+
+    background: rgba(255, 255, 255, 0.14);
+    color: #ffffff;
+
+    font-size: 20px;
+    font-weight: 900;
+
+    cursor: pointer;
+}
+
+
+/* ==========================================================
+   Summary Overlay Stats
+   Purpose:
+   Small cards for summary numbers.
+========================================================== */
+
+.summary-overlay__stats {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(180px, 1fr));
+    gap: 14px;
+
+    max-width: 600px;
+
+    margin-bottom: 18px;
+}
+
+.summary-overlay__stat-card {
+    padding: 18px;
+
+    border-radius: 22px;
+
+    background: rgba(255, 255, 255, 0.12);
+    color: #ffffff;
+}
+
+.summary-overlay__stat-card span {
+    display: block;
+
+    color: #ffb085;
+
+    font-size: 34px;
+    font-weight: 900;
+}
+
+.summary-overlay__stat-card small {
+    display: block;
+
+    margin-top: 6px;
+
+    color: rgba(255, 255, 255, 0.78);
+
+    font-size: 13px;
+    font-weight: 800;
+}
+
+
+/* ==========================================================
+   Summary Overlay Actions
+   Purpose:
+   Buttons under the stats.
+========================================================== */
+
+.summary-overlay__actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+
+    margin-bottom: 22px;
+}
+
+.summary-overlay__action-button {
+    padding: 10px 18px;
+
+    border: none;
+    border-radius: 999px;
+
+    background: rgba(255, 255, 255, 0.14);
+    color: #ffffff;
+
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 900;
+
+    cursor: pointer;
+}
+
+.summary-overlay__action-button--primary {
+    background: linear-gradient(90deg, #c7a5ff, #ff9b7d);
+    color: #160d24;
+}
+
+
+/* ==========================================================
+   Summary Overlay Questions List
+   Purpose:
+   Contains page groups and question cards.
+========================================================== */
+
+.summary-overlay__questions-list {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+
+    padding-bottom: 40px;
+}
+
+.summary-overlay__page-group {
+    padding: 20px;
+
+    border-radius: 26px;
+
+    background: rgba(255, 255, 255, 0.94);
+    color: #1d102b;
+
+    box-shadow: 0 18px 42px rgba(0, 0, 0, 0.18);
+}
+
+.summary-overlay__page-title {
+    margin: 0 0 14px;
+
+    font-size: 22px;
+    font-weight: 900;
+}
+
+.summary-overlay__question-item {
+    width: 100%;
+
+    display: block;
+
+    padding: 14px 16px;
+    margin-bottom: 10px;
+
+    border: none;
+    border-radius: 16px;
+
+    background: rgba(244, 240, 250, 0.96);
+    color: #1d102b;
+
+    font-family: inherit;
+    text-align: start;
+
+    cursor: pointer;
+
+    transition:
+        transform 0.16s ease,
+        background 0.16s ease,
+        box-shadow 0.16s ease;
+}
+
+.summary-overlay__question-item:hover {
+    transform: translateY(-2px);
+
+    background: #ffffff;
+
+    box-shadow: 0 12px 26px rgba(0, 0, 0, 0.14);
+}
+
+.summary-overlay__question-text {
+    margin: 5px 0;
+
+    font-size: 15px;
+    font-weight: 900;
+    line-height: 1.45;
+
+    overflow-wrap: anywhere;
+}
+
+.summary-overlay__question-meta {
+    margin: 0;
+
+    color: rgba(0, 0, 0, 0.58);
+
+    font-size: 12px;
+    font-weight: 700;
+}

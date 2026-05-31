@@ -398,6 +398,89 @@
 
     </div>
 
+    <!-- =====================================================
+     SUMMARY OVERLAY
+     Purpose:
+     Shows the lecture question summary inside the same
+     presentation page, so the uploaded PDF stays in memory.
+====================================================== -->
+
+    <section id="summaryOverlay" class="summary-overlay" aria-hidden="true">
+
+        <div class="summary-overlay__panel">
+
+            <!-- Summary header -->
+            <header class="summary-overlay__header">
+
+                <div>
+                    <p class="summary-overlay__eyebrow">
+                        DLS Summary
+                    </p>
+
+                    <h2 class="summary-overlay__title">
+                        Question Summary
+                    </h2>
+
+                    <p class="summary-overlay__subtitle">
+                        All lecture questions grouped by presentation page.
+                    </p>
+                </div>
+
+                <button id="closeSummaryOverlayButton" class="summary-overlay__close-button" type="button"
+                    aria-label="Close summary">
+                    ✕
+                </button>
+
+            </header>
+
+            <!-- Summary stats -->
+            <section class="summary-overlay__stats" aria-label="Question statistics">
+
+                <article class="summary-overlay__stat-card">
+                    <span id="overlayTotalQuestions">
+                        0
+                    </span>
+
+                    <small>
+                        Questions Asked
+                    </small>
+                </article>
+
+                <article class="summary-overlay__stat-card">
+                    <span id="overlayHottestPage">
+                        -
+                    </span>
+
+                    <small>
+                        🌶️ Hottest Page 🔥
+                    </small>
+                </article>
+
+            </section>
+
+            <!-- Summary actions -->
+            <section class="summary-overlay__actions">
+
+                <button id="summaryOverlayBackButton"
+                    class="summary-overlay__action-button summary-overlay__action-button--primary" type="button">
+                    Back To Presentation 🔙
+                </button>
+
+                <button id="summaryOverlayRefreshButton" class="summary-overlay__action-button" type="button">
+                    Refresh Summary 🔃
+                </button>
+
+            </section>
+
+            <!-- Questions list -->
+            <section id="overlayQuestionsList" class="summary-overlay__questions-list"
+                aria-label="Questions grouped by page">
+            </section>
+
+        </div>
+
+    </section>
+
 </body>
 
 </html>
