@@ -1251,11 +1251,11 @@ body {
     box-shadow:
         0 18px 50px rgba(0, 0, 0, 0.12),
         0 0 0 1px rgba(0, 0, 0, 0.06);
-    
+
     /* so Qs will be on top */
     z-index: 80;
 
-    display:  none;
+    display: none;
 }
 
 .question-compose-popup.is-visible {
@@ -1316,4 +1316,495 @@ body {
 .question-compose-popup__button--primary {
     background: #ff3b6b;
     color: #FFFFFF;
+}
+
+/* Highlight a question marker after jumping to it */
+.question-marker--highlighted {
+    animation: questionMarkerPulse 0.7s ease-in-out infinite;
+}
+
+@keyframes questionMarkerPulse {
+    0% {
+        transform: translate(-50%, -50%) scale(1);
+        box-shadow:
+            0 8px 20px rgba(0, 0, 0, 0.24),
+            0 0 0 5px rgba(255, 59, 107, 0.18);
+    }
+
+    50% {
+        transform: translate(-50%, -50%) scale(1.35);
+        box-shadow:
+            0 10px 26px rgba(0, 0, 0, 0.30),
+            0 0 0 12px rgba(255, 59, 107, 0.24);
+    }
+
+    100% {
+        transform: translate(-50%, -50%) scale(1);
+        box-shadow:
+            0 8px 20px rgba(0, 0, 0, 0.24),
+            0 0 0 5px rgba(255, 59, 107, 0.18);
+    }
+}
+
+/* ==========================================================
+   Q&A DRAWER CONTENT
+   Purpose:
+   Styles the list of saved student questions in the side drawer.
+========================================================== */
+
+.qa-drawer__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    margin-bottom: 18px;
+}
+
+.qa-drawer__title {
+    margin: 0;
+
+    font-size: 24px;
+    font-weight: 900;
+
+    color: #090000;
+}
+
+.qa-drawer__count {
+    min-width: 28px;
+    height: 28px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 999px;
+
+    background: #ff3b6b;
+    color: #ffffff;
+
+    font-size: 13px;
+    font-weight: 900;
+}
+
+.qa-drawer__filters {
+    display: flex;
+    gap: 8px;
+
+    margin-bottom: 16px;
+}
+
+.qa-drawer__filter-button {
+    padding: 7px 12px;
+
+    border: none;
+    border-radius: 999px;
+
+    background: rgba(0, 0, 0, 0.08);
+    color: #090000;
+
+    font-size: 12px;
+    font-weight: 800;
+
+    cursor: pointer;
+}
+
+.qa-drawer__filter-button.is-active {
+    background: #090000;
+    color: #ffffff;
+}
+
+.qa-drawer__list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    max-height: 72vh;
+    overflow-y: auto;
+}
+
+.qa-question-card {
+    width: 100%;
+
+    padding: 12px;
+
+    border: none;
+    border-radius: 14px;
+
+    background: rgba(255, 255, 255, 0.72);
+    color: #090000;
+
+    text-align: start;
+    cursor: pointer;
+
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+.qa-question-card:hover {
+    transform: translateY(-5px);
+    background: #ffffff;
+}
+
+.qa-question-card__meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    margin-bottom: 6px;
+
+    font-size: 11px;
+    font-weight: 800;
+
+    opacity: 0.72;
+}
+
+.qa-question-card__text {
+    margin: 0;
+
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.35;
+}
+
+.qa-question-card__status {
+    margin-top: 8px;
+
+    font-size: 11px;
+    font-weight: 800;
+
+    color: #ff3b6b;
+}
+
+.qa-drawer__empty {
+    padding: 18px;
+
+    border-radius: 14px;
+
+    background: rgba(255, 255, 255, 0.56);
+    color: rgba(0, 0, 0, 0.62);
+
+    font-size: 14px;
+    font-weight: 700;
+    text-align: center;
+}
+
+/* ==========================================================
+   11. Q&A Drawer
+   Purpose:
+   Full-height right-side Q&A drawer.
+   The tab position stays attached to the drawer.
+========================================================== */
+
+.questions-drawer {
+    /* Fixed drawer attached to screen */
+    position: fixed;
+
+    /* Full-page drawer like Figma */
+    top: 0;
+    right: -370px;
+
+    width: 370px;
+    height: 100vh;
+
+    /* Important:
+       No translate here.
+       The drawer itself is full height now.
+       The tab still uses top: 50%.
+    */
+    transform: none;
+
+    z-index: 36;
+
+    /* Same gray as Figma drawer/tab */
+    background: #D9D9D9;
+    color: #090000;
+
+    /* Keep it as one clean side panel */
+    border-radius: 0;
+
+    box-shadow: -16px 0 50px rgba(0, 0, 0, 0.22);
+
+    transition: right 0.25s ease;
+}
+
+/* Open drawer on hover */
+.questions-drawer:hover {
+    right: 0;
+}
+
+
+/* ==========================================================
+   12. Q&A Drawer Tab
+   Purpose:
+   Same tab position, attached to the drawer.
+   Do not move this block unless you want to change tab position.
+========================================================== */
+
+.questions-drawer__tab {
+    position: absolute;
+
+    /* Same visual vertical position */
+    top: 50%;
+    left: -32px;
+
+    width: 32px;
+    height: 96px;
+
+    transform: translateY(-50%);
+
+    border: none;
+    padding: 0;
+    margin: 0;
+
+    cursor: pointer;
+
+    background: #D9D9D9;
+
+    border-radius: 18px 0 0 18px;
+
+    box-shadow: -8px 8px 22px rgba(0, 0, 0, 0.12);
+}
+
+/* White arrow */
+.questions-drawer__tab::before {
+    content: "";
+
+    position: absolute;
+
+    top: 50%;
+    left: 50%;
+
+    width: 12px;
+    height: 12px;
+
+    border-left: 4px solid #FFFFFF;
+    border-bottom: 4px solid #FFFFFF;
+
+    transform: translate(-35%, -50%) rotate(45deg);
+}
+
+
+/* ==========================================================
+   12.1 Q&A Drawer Panel
+   Purpose:
+   Header + filters stay fixed.
+   Question list gets the remaining height and scrolls inside.
+========================================================== */
+
+.questions-drawer__panel {
+    width: 100%;
+    height: 100%;
+
+    padding: 26px 22px;
+
+    display: flex;
+    flex-direction: column;
+
+    overflow: hidden;
+
+    background: transparent;
+    color: #090000;
+}
+
+/* ==========================================================
+   12.2 Q&A Drawer Header
+   Purpose:
+   Title and question counter.
+========================================================== */
+
+.qa-drawer__header {
+    flex: 0 0 auto;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    margin-bottom: 18px;
+}
+
+.qa-drawer__title {
+    margin: 0;
+
+    font-size: 28px;
+    font-weight: 900;
+
+    color: #090000;
+}
+
+.qa-drawer__count {
+    min-width: 30px;
+    height: 30px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 999px;
+
+    background: #ff3b6b;
+    color: #ffffff;
+
+    font-size: 13px;
+    font-weight: 900;
+}
+
+
+/* ==========================================================
+   12.3 Q&A Drawer Filters
+   Purpose:
+   Filter between all questions and current page.
+========================================================== */
+
+.qa-drawer__filters {
+    flex: 0 0 auto;
+
+    display: flex;
+    gap: 8px;
+
+    margin-bottom: 16px;
+}
+
+.qa-drawer__filter-button {
+    padding: 7px 12px;
+
+    border: none;
+    border-radius: 999px;
+
+    background: rgba(0, 0, 0, 0.08);
+    color: #090000;
+
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 800;
+
+    cursor: pointer;
+}
+
+.qa-drawer__filter-button.is-active {
+    background: #090000;
+    color: #ffffff;
+}
+
+
+/* ==========================================================
+   12.4 Q&A Drawer List
+   Purpose:
+   Scroll only the question list inside the drawer.
+========================================================== */
+
+.qa-drawer__list {
+    flex: 1 1 auto;
+
+    /* Critical in flex column:
+       Allows the list to shrink and create internal scroll.
+    */
+    min-height: 0;
+
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    padding-inline-end: 6px;
+    padding-bottom: 18px;
+}
+
+/* Clean internal scrollbar */
+.qa-drawer__list::-webkit-scrollbar {
+    width: 8px;
+}
+
+.qa-drawer__list::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.06);
+    border-radius: 999px;
+}
+
+.qa-drawer__list::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.24);
+    border-radius: 999px;
+}
+
+
+/* ==========================================================
+   12.5 Q&A Question Card
+   Purpose:
+   Single saved question card.
+========================================================== */
+
+.qa-question-card {
+    flex: 0 0 auto;
+
+    width: 100%;
+
+    padding: 12px;
+
+    border: none;
+    border-radius: 14px;
+
+    background: rgba(255, 255, 255, 0.72);
+    color: #090000;
+
+    font-family: inherit;
+    text-align: start;
+
+    cursor: pointer;
+
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+
+    transition:
+        transform 0.16s ease,
+        background 0.16s ease;
+}
+
+.qa-question-card:hover {
+    transform: translateY(-2px);
+    background: #ffffff;
+}
+
+.qa-question-card__meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+
+    margin-bottom: 6px;
+
+    font-size: 11px;
+    font-weight: 800;
+
+    opacity: 0.72;
+}
+
+.qa-question-card__text {
+    margin: 0;
+
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.35;
+
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+.qa-question-card__status {
+    margin-top: 8px;
+
+    font-size: 11px;
+    font-weight: 800;
+
+    color: #ff3b6b;
+}
+
+.qa-drawer__empty {
+    padding: 18px;
+
+    border-radius: 14px;
+
+    background: rgba(255, 255, 255, 0.56);
+    color: rgba(0, 0, 0, 0.62);
+
+    font-size: 14px;
+    font-weight: 700;
+    text-align: center;
 }

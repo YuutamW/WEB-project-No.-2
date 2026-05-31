@@ -61,7 +61,8 @@ import { createPdfViewerManager } from "./pdf-viewer.js";
 import {
     createAndSaveQuestion,
     createPresentationId,
-    getQuestionsForPage
+    getQuestionsForPage,
+    getQuestionsForPresentation
 } from "./question-manager.js";
 
 /* ==========================================================
@@ -132,6 +133,11 @@ const questionComposeSaveButton = document.getElementById("questionComposeSaveBu
 const questionComposeCancelButton = document.getElementById("questionComposeCancelButton");
 const questionComposeCloseButton = document.getElementById("questionComposeCloseButton");
 
+/* Q&A drawer Elements */
+const qaDrawerCount = document.getElementById("qaDrawerCount");
+const qaDrawerList = document.getElementById("qaDrawerList");
+const qaShowAllButton = document.getElementById("qaShowAllButton");
+const qaShowCurrentPageButton = document.getElementById("qaShowCurrentPageButton");
 
 
 /* ==========================================================
@@ -164,6 +170,8 @@ let teacherControlsHideTimer = null;
 let shouldKeepToolbarHiddenUntilMouseLeavesBottom = false;
 
 let pendingQuestionDraft = null;
+
+let qaDrawerFilter = "all";
 
 /* ==========================================================
    2.1 Presentation Data JSON
@@ -273,19 +281,32 @@ function connectEvents() {
     if (questionComposeCancelButton) {
         questionComposeCancelButton.addEventListener("click", closeQuestionComposePopup);
     }
-        if(questionComposeCloseButton) {
-        questionComposeCloseButton.addEventListener("click",closeQuestionComposePopup);
+    if (questionComposeCloseButton) {
+        questionComposeCloseButton.addEventListener("click", closeQuestionComposePopup);
     }
 
     /* Added Save with Enter Press */
-    if(questionComposeInput) {
+    if (questionComposeInput) {
         questionComposeInput.addEventListener("keydown", function (event) {
-            if(event.key === "Enter" && event.ctrlKey) {
+            if (event.key === "Enter" && event.ctrlKey) {
                 savePendingQuestionFromPopup();
             }
-            if(event.key === "Escape") {
+            if (event.key === "Escape") {
                 closeQuestionComposePopup();
             }
+        });
+    }
+
+    /* Question Drawer Functionality */
+    if (qaShowAllButton) {
+        qaShowAllButton.addEventListener("click", function () {
+            setQaDrawerFilter("all");
+        });
+    }
+
+    if (qaShowCurrentPageButton) {
+        qaShowCurrentPageButton.addEventListener("click", function () {
+            setQaDrawerFilter("currentPage");
         });
     }
 }
@@ -682,6 +703,7 @@ function handlePdfPageChange(pageInfo) {
     ensurePageData(pageInfo.currentPage);
 
     renderQuestionsForCurrentPage();
+    renderQaDrawer();
 
     console.log("PDF page changed:", pageInfo);
     console.log("Current presentation JSON:", presentationData);
@@ -777,6 +799,8 @@ function saveQuestionPoint(relativePoint, pageNumber, questionText) {
         renderQuestionMarker(savedQuestion);
     }
 
+    renderQaDrawer();
+
     console.log("Saved question on page:", pageNumber);
     console.log("Saved question:", savedQuestion);
     console.log("Presentation runtime JSON:", presentationData);
@@ -837,7 +861,7 @@ function renderQuestionMarker(question) {
     marker.className = "question-marker";
     marker.type = "button";
 
-    marker.dataset.questionId = question.Id;
+    marker.dataset.questionId = question.id;
     marker.title = question.text || "Student question";
 
     /* Actual Marker */
@@ -965,6 +989,182 @@ function savePendingQuestionFromPopup() {
     saveQuestionPoint(relativePoint, pageNumber, questionText);
     closeQuestionComposePopup();
     updateStatus(" Question Saved 💾 ");
+}
+
+/* ==========================================================
+   Q&A DRAWER RENDERING
+   Purpose:
+   Render saved questions in the side drawer.
+========================================================== */
+
+function getActivePresentationId() {
+    return createPresentationId(presentationData.fileName);
+}
+
+
+function getQuestionsForDrawer() {
+    const presentationId = getActivePresentationId();
+
+    if (qaDrawerFilter === "currentPage") {
+        return getQuestionsForPage(
+            presentationId,
+            getActivePageNumber()
+        );
+    }
+
+    return getQuestionsForPresentation(presentationId);
+}
+
+
+function clearQaDrawer() {
+    if (!qaDrawerList) {
+        return;
+    }
+
+    qaDrawerList.innerHTML = "";
+}
+
+
+function renderQaDrawerEmptyState() {
+    const emptyMessage = document.createElement("div");
+
+    emptyMessage.className = "qa-drawer__empty";
+    emptyMessage.textContent = "No questions yet.";
+
+    qaDrawerList.appendChild(emptyMessage);
+}
+
+
+function renderQaQuestionCard(question) {
+    const card = document.createElement("button");
+
+    card.className = "qa-question-card";
+    card.type = "button";
+
+    card.dataset.questionId = question.id;
+
+    card.innerHTML = `
+        <div class="qa-question-card__meta">
+            <span>Page ${question.page}</span>
+            <span>${question.isAnonymous ? "Anonymous" : question.studentName}</span>
+        </div>
+
+        <p class="qa-question-card__text">
+            ${question.text || "No question text"}
+        </p>
+
+        <div class="qa-question-card__status">
+            ${question.status || "open"}
+        </div>
+    `;
+
+    card.addEventListener("click", function () {
+        goToQuestion(question.id);
+    });
+
+    qaDrawerList.appendChild(card);
+}
+
+
+function renderQaDrawer() {
+    if (!qaDrawerList) {
+        return;
+    }
+
+    clearQaDrawer();
+
+    const questions = getQuestionsForDrawer();
+
+    if (qaDrawerCount) {
+        qaDrawerCount.textContent = questions.length;
+    }
+
+    if (questions.length === 0) {
+        renderQaDrawerEmptyState();
+        return;
+    }
+
+    questions
+        .slice()
+        .sort(function (a, b) {
+            return a.page - b.page || a.createdAt.localeCompare(b.createdAt);
+        })
+        .forEach(function (question) {
+            renderQaQuestionCard(question);
+        });
+}
+
+
+function setQaDrawerFilter(nextFilter) {
+    qaDrawerFilter = nextFilter;
+
+    if (qaShowAllButton) {
+        qaShowAllButton.classList.toggle(
+            "is-active",
+            qaDrawerFilter === "all"
+        );
+    }
+
+    if (qaShowCurrentPageButton) {
+        qaShowCurrentPageButton.classList.toggle(
+            "is-active",
+            qaDrawerFilter === "currentPage"
+        );
+    }
+
+    renderQaDrawer();
+}
+
+/* ==========================================================
+   QUESTION NAVIGATION
+   Purpose:
+   Jump to the page of a selected question.
+========================================================== */
+
+function findQuestionById(questionId) {
+    const questions = getQuestionsForPresentation(getActivePresentationId());
+
+    return questions.find(function (question) {
+        return question.id === questionId;
+    });
+}
+
+
+async function goToQuestion(questionId) {
+    const question = findQuestionById(questionId);
+
+    if (!question) {
+        updateStatus("Question not found.");
+        return;
+    }
+
+    await pdfViewerManager.goToPage(question.page);
+
+    presentationState.questionMarkersVisible = true;
+
+    renderQuestionsForCurrentPage();
+    renderQaDrawer();
+
+    highlightQuestionMarker(question.id);
+
+    updateStatus(`Moved to question on page ${question.page}.`);
+}
+
+
+function highlightQuestionMarker(questionId) {
+    const marker = domLayer.querySelector(
+        `[data-question-id="${questionId}"]`
+    );
+
+    if (!marker) {
+        return;
+    }
+
+    marker.classList.add("question-marker--highlighted");
+
+    setTimeout(function () {
+        marker.classList.remove("question-marker--highlighted");
+    }, 2500);
 }
 
 /* ==========================================================

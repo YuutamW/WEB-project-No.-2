@@ -138,10 +138,10 @@
                     <h3 class="question-compose-popup__title">
                         ➕ Add Question ❓
                     </h3>
-                    <button id="questionComposeCloseButton" class="question-compose-popup__close" type="button"
+                    <!-- <button id="questionComposeCloseButton" class="question-compose-popup__close" type="button"
                         aria-label="Close question popup">
                         ❌
-                    </button>
+                    </button> -->
                 </header>
 
                 <textarea id="questionComposeInput" class="question-compose-popup__input"
@@ -172,11 +172,11 @@
         <div id="laserPointer" class="laser-pointer"></div>
 
         <!-- =====================================================
-     Q&A DRAWER
-     Purpose:
-     Right side Q&A drawer.
-     The side tab is attached to the drawer and opens it on hover.
-====================================================== -->
+         Q&A DRAWER
+         Purpose:
+         Right side Q&A drawer.
+         The side tab is attached to the drawer and opens it on hover.
+        ====================================================== -->
 
         <aside id="questionsDrawer" class="questions-drawer">
 
@@ -186,7 +186,7 @@
             </button>
 
             <!-- Drawer content -->
-            <section class="questions-drawer__panel">
+            <!-- <section class="questions-drawer__panel">
 
                 <h2 class="questions-drawer__title">
                     Q&amp;A
@@ -198,8 +198,32 @@
                 <p>🔴🟢🟡</p>
                 <p>🔵</p>
 
-            </section>
+            </section> -->
 
+            <!-- Fixed Version -->
+            <!-- Q&A content panel -->
+            <section class="questions-drawer__panel">
+
+                <header class="qa-drawer__header">
+                    <h2 class="qa-drawer__title">Q&A</h2>
+
+                    <span id="qaDrawerCount" class="qa-drawer__count">0</span>
+                </header>
+
+                <div class="qa-drawer__filters">
+                    <button id="qaShowAllButton" class="qa-drawer__filter-button is-active" type="button">
+                        All
+                    </button>
+
+                    <button id="qaShowCurrentPageButton" class="qa-drawer__filter-button" type="button">
+                        Current Page
+                    </button>
+                </div>
+
+                <section id="qaDrawerList" class="qa-drawer__list" aria-label="Questions list">
+                </section>
+
+            </section>
         </aside>
 
 
