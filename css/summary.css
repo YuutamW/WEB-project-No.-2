@@ -1,0 +1,301 @@
+/* ==========================================================
+   DLS SUMMARY PAGE
+   File: css/summary.css
+
+   Purpose:
+   Styles the questions summary page.
+========================================================== */
+
+* {
+    /* All elements include padding/border inside their width/height */
+    box-sizing: border-box;
+}
+
+/* ==========================================================
+   1. Page Base
+   Purpose:
+   Full-page background and default typography.
+========================================================== */
+
+.summary-page {
+    min-height: 100vh;
+    margin: 0;
+
+    font-family: "Heebo", Arial, sans-serif;
+
+    background:
+        radial-gradient(circle at top left, rgba(255, 167, 121, 0.28), transparent 34%),
+        radial-gradient(circle at bottom right, rgba(180, 137, 255, 0.18), transparent 36%),
+        linear-gradient(135deg, #12091f, #251033 52%, #35142e);
+
+    color: #ffffff;
+}
+
+
+/* ==========================================================
+   2. Summary Shell
+   Purpose:
+   Main centered content wrapper.
+========================================================== */
+
+.summary-shell {
+    width: min(1120px, calc(100% - 40px));
+
+    margin: 0 auto;
+    padding: 48px 0;
+}
+
+
+/* ==========================================================
+   3. Header
+   Purpose:
+   Main title area.
+========================================================== */
+
+.summary-header {
+    margin-bottom: 28px;
+}
+
+.summary-header__eyebrow {
+    margin: 0 0 8px;
+
+    color: #ffb085;
+
+    font-size: 14px;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.summary-header__title {
+    margin: 0;
+
+    font-size: clamp(34px, 5vw, 58px);
+    font-weight: 900;
+    line-height: 1.05;
+}
+
+.summary-header__subtitle {
+    margin: 12px 0 0;
+
+    color: rgba(255, 255, 255, 0.72);
+
+    font-size: 17px;
+    font-weight: 600;
+}
+
+
+/* ==========================================================
+   4. Stats Cards
+   Purpose:
+   Small dashboard-like cards.
+========================================================== */
+
+.summary-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+
+    margin-bottom: 22px;
+}
+
+.summary-stat-card {
+    padding: 22px;
+
+    border-radius: 24px;
+
+    background: rgba(255, 255, 255, 0.11);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.18);
+}
+
+.summary-stat-card__value {
+    display: block;
+
+    color: #ffb085;
+
+    font-size: 38px;
+    font-weight: 900;
+}
+
+.summary-stat-card__label {
+    display: block;
+
+    margin-top: 4px;
+
+    color: rgba(255, 255, 255, 0.74);
+
+    font-size: 14px;
+    font-weight: 800;
+}
+
+
+/* ==========================================================
+   5. Actions
+   Purpose:
+   Back / refresh buttons.
+========================================================== */
+
+.summary-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+
+    margin-bottom: 22px;
+}
+
+.summary-action-button {
+    padding: 11px 18px;
+
+    border: none;
+    border-radius: 999px;
+
+    background: rgba(255, 255, 255, 0.14);
+    color: #ffffff;
+
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 900;
+    text-decoration: none;
+
+    cursor: pointer;
+}
+
+.summary-action-button:hover {
+    background: rgba(255, 255, 255, 0.22);
+}
+
+.summary-action-button--primary {
+    background: linear-gradient(135deg, #b994ff, #ff9b73);
+    color: #160b25;
+}
+
+
+/* ==========================================================
+   6. Questions List
+   Purpose:
+   Holds all page groups.
+========================================================== */
+
+.summary-questions-list {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+
+/* ==========================================================
+   7. Page Group
+   Purpose:
+   One group of questions for one PDF page.
+========================================================== */
+
+.summary-page-group {
+    padding: 18px;
+
+    border-radius: 24px;
+
+    background: rgba(255, 255, 255, 0.93);
+    color: #1d102b;
+
+    box-shadow: 0 18px 42px rgba(0, 0, 0, 0.18);
+}
+
+.summary-page-group__title {
+    margin: 0 0 12px;
+
+    font-size: 21px;
+    font-weight: 900;
+
+    color: #1d102b;
+}
+
+
+/* ==========================================================
+   8. Question Item
+   Purpose:
+   Clickable question row.
+========================================================== */
+
+.summary-question-item {
+    width: 100%;
+
+    display: block;
+
+    padding: 14px 16px;
+    margin-bottom: 10px;
+
+    border: none;
+    border-radius: 16px;
+
+    background: #f4f0fa;
+    color: #1d102b;
+
+    font-family: inherit;
+    text-align: start;
+
+    cursor: pointer;
+}
+
+.summary-question-item:last-child {
+    margin-bottom: 0;
+}
+
+.summary-question-item:hover {
+    background: #ffffff;
+}
+
+.summary-question-item__text {
+    margin: 0;
+
+    font-size: 15px;
+    font-weight: 800;
+    line-height: 1.45;
+}
+
+.summary-question-item__meta {
+    margin-top: 7px;
+
+    color: rgba(0, 0, 0, 0.58);
+
+    font-size: 12px;
+    font-weight: 700;
+}
+
+
+/* ==========================================================
+   9. Empty State
+   Purpose:
+   Message when no questions exist.
+========================================================== */
+
+.summary-empty-state {
+    padding: 26px;
+
+    border-radius: 24px;
+
+    background: rgba(255, 255, 255, 0.92);
+    color: #1d102b;
+
+    font-size: 16px;
+    font-weight: 800;
+}
+
+
+/* ==========================================================
+   10. Responsive
+   Purpose:
+   Make layout usable on smaller screens.
+========================================================== */
+
+@media (max-width: 760px) {
+    .summary-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .summary-shell {
+        width: min(100% - 24px, 1120px);
+        padding: 28px 0;
+    }
+}

@@ -675,9 +675,7 @@ function updateLaserPointerPosition(event) {
 ========================================================== */
 
 function stopPresentation() {
-    endScreen.classList.add("is-visible");
-
-    updateStatus("Presentation stopped.");
+    openSummaryPage();
 }
 
 /* ==========================================================
@@ -1165,6 +1163,22 @@ function highlightQuestionMarker(questionId) {
     setTimeout(function () {
         marker.classList.remove("question-marker--highlighted");
     }, 2500);
+}
+
+/* ==========================================================
+   Open Summary Page
+   Purpose:
+   Move from the active presentation into the questions summary.
+   We pass the presentationId in the URL so summary.js knows
+   which questions to load from localStorage.
+========================================================== */
+
+function openSummaryPage() {
+    const presentationId =
+        createPresentationId(presentationData.fileName);
+
+    window.location.href =
+        `summary.html?presentation=${encodeURIComponent(presentationId)}`;
 }
 
 /* ==========================================================
