@@ -28,7 +28,7 @@ const USERS_JSON_PATH = "data/sample-users.json";
 const REGISTERED_USERS_STORAGE_KEY = "dlsRegisteredUsers";
 const CURRENT_USER_STORAGE_KEY = "dlsCurrentUser";
 /* when front + back together - put "https://your-backend-url.com" */
-const API_BASE_URL = "https://dls-backend-uelx.onrender.com/";
+const API_BASE_URL = "https://dls-backend-uelx.onrender.com";
 
 
 /* =========================================================
