@@ -27,7 +27,7 @@
 const USERS_JSON_PATH = "data/sample-users.json";
 const REGISTERED_USERS_STORAGE_KEY = "dlsRegisteredUsers";
 const CURRENT_USER_STORAGE_KEY = "dlsCurrentUser";
-/* when front + back together - put "" */
+/* when front + back together - put "https://your-backend-url.com" */
 const API_BASE_URL = "http://localhost:3000";
 
 
@@ -236,7 +236,7 @@ function getRedirectByUser(user) {
 }
 
 /* HELPER - Send real Post to Server */
-async function registeredUserOnServer(registeredPayload) {
+async function registerUserOnServer(registeredPayload) {
     const response = await fetch(API_BASE_URL + "/api/users", {
         method: "POST",
         headers: {
