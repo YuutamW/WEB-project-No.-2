@@ -34,7 +34,7 @@ to keep question-manager clean from fetch + socket details
 */
 
 /* BACKEND URL - Later will replace w/ : https://your-render-backend-url.onrender.com */
-const DLS_BACKEND_URL = "http://localhost:3000";
+const DLS_BACKEND_URL = "https://dls-backend-uelx.onrender.com/";
 
 /* REST API HELPER - create full backend API URL */
 function buildApiUrl(path) { return `${DLS_BACKEND_URL}${path}`; }
@@ -190,3 +190,11 @@ const DLS_SOCKET = {
 Other files can use: DLS_API.getQuestions(), DLS_SOCKET.joinPresentation() */
 window.DLS_API = DLS_API;
 window.DLS_SOCKET = DLS_SOCKET;
+
+/* CHAIN OF OPS: 
+PART A CONSOLE -> 
+DLS_API.createQ -> 
+PART B REST_API ->
+BeckendStore -> 
+SocketIO room emit -> 
+PART A Recieves live event */

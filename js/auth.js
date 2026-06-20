@@ -27,6 +27,8 @@
 const USERS_JSON_PATH = "data/sample-users.json";
 const REGISTERED_USERS_STORAGE_KEY = "dlsRegisteredUsers";
 const CURRENT_USER_STORAGE_KEY = "dlsCurrentUser";
+/* when front + back together - put "" */
+const API_BASE_URL = "http://localhost:3000";
 
 
 /* =========================================================
@@ -187,7 +189,7 @@ async function findMatchingUserByEmail(email, password) {
         const userEmail = user.email.toLowerCase();
 
         return userEmail === normalizedEmail &&
-               user.password === password;
+            user.password === password;
     });
 }
 
@@ -199,7 +201,7 @@ async function isEmailAlreadyRegistered(email) {
 
     return users.some(function (user) {
         return user.email &&
-               user.email.toLowerCase() === normalizedEmail;
+            user.email.toLowerCase() === normalizedEmail;
     });
 }
 
@@ -231,6 +233,26 @@ function getRedirectByUser(user) {
     }
 
     return "dashboard.html";
+}
+
+/* HELPER - Send real Post to Server */
+async function registeredUserOnServer(registeredPayload) {
+    const response = await fetch(API_BASE_URL + "/api/users", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(registeredPayload)
+    });
+
+    const data = await response.json().catch(function () {
+        return {};
+    });
+
+    if (!response.ok) {
+        throw new Error(data.message || "Register request failed. ");
+    }
+    return data;
 }
 
 
@@ -301,37 +323,67 @@ async function handleRegisterSubmit(event) {
         return;
     }
 
-    const newUser = {
-        id: createUserId(),
+    // const newUser = {
+    //     id: createUserId(),
 
+    //     firstName: firstName,
+    //     lastName: lastName,
+
+    //     email: email,
+    //     password: password,
+    //     role: role,
+
+    //     redirect: role === "lecturer" || role === "assistant"
+    //         ? "dashboard.html"
+    //         : "dashboard.html",
+
+    //     createdAt: new Date().toISOString(),
+    //     source: "localStorage"
+    // };
+
+
+    // const registeredUsers = loadRegisteredUsersFromStorage();
+
+    // registeredUsers.push(newUser);
+
+    // saveRegisteredUsersToStorage(registeredUsers);
+
+    // showMessage(
+    //     message,
+    //     "success",
+    //     "ההרשמה הצליחה. עכשיו אפשר להתחבר עם האימייל והסיסמה."
+    // );
+
+    // registerForm.reset();
+
+    /* Sends Signup to Backend */
+    const registerPayload = {
         firstName: firstName,
         lastName: lastName,
-
         email: email,
-        password: password,
         role: role,
-
-        redirect: role === "lecturer" || role === "assistant"
-            ? "dashboard.html"
-            : "dashboard.html",
-
-        createdAt: new Date().toISOString(),
-        source: "localStorage"
+        password: password,
+        termsAccepted: termsAccepted
     };
 
-    const registeredUsers = loadRegisteredUsersFromStorage();
+    try {
+        const result = await registerUserOnServer(registerPayload);
 
-    registeredUsers.push(newUser);
+        showMessage(
+            message,
+            "success",
+            result.message || "ההרשמה הצליחה. עכשיו אפשר להתחבר עם האימייל והסיסמה."
+        );
 
-    saveRegisteredUsersToStorage(registeredUsers);
+        registerForm.reset();
+    } catch (error) {
+        showMessage(
+            message,
+            "error",
+            error.message || "שגיאה בהרשמה מול השרת."
+        );
+    }
 
-    showMessage(
-        message,
-        "success",
-        "ההרשמה הצליחה. עכשיו אפשר להתחבר עם האימייל והסיסמה."
-    );
-
-    registerForm.reset();
 }
 
 
