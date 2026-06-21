@@ -300,7 +300,7 @@ async function handleRegisterSubmit(event) {
 
     try {
         // Send signup data to backend
-        const response = await fetch("http://localhost:3000/signup", {
+        const response = await fetch("https://dls-backend-uelx.onrender.com/signup", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
