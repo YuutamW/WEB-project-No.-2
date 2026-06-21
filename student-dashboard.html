@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DLS | Student Dashboard</title>
+
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/theme.css">
+</head>
+
+<body>
+    <main class="student-dashboard-shell">
+        <section class="dashboard-hero glass-card">
+            <div>
+                <p class="eyebrow">Student Dashboard</p>
+                <h1>שלום, <span id="studentName">Student</span></h1>
+                <p id="studentEmail">Loading...</p>
+            </div>
+
+            <div class="role-pill" id="studentRole">student</div>
+        </section>
+
+        <section class="dashboard-two-columns">
+            <article class="glass-card">
+                <div class="card-header">
+                    <h2>ההרצאה הנוכחית</h2>
+                    <button id="joinLectureButton">כניסה להרצאה</button>
+                </div>
+
+                <p>
+                    כאן תוכל להיכנס למצגת, לצפות בהרצאה, ולשאול שאלות על שקפים.
+                </p>
+            </article>
+
+            <article class="glass-card">
+                <div class="card-header">
+                    <div>
+                        <p class="eyebrow">My Questions</p>
+                        <h2>השאלות שלי</h2>
+                    </div>
+                </div>
+
+                <p id="studentQuestionsEmpty" class="empty-state" hidden>
+                    עדיין לא שאלת שאלות בהרצאה הזו.
+                </p>
+
+                <div id="studentQuestionsList" class="student-questions-list"></div>
+            </article>
+        </section>
+
+        <section class="glass-card calendar-card">
+            <h2>יומן הרצאות</h2>
+
+            <div id="calendarContainer">
+                <p class="empty-state">
+                    <!-- calender api will be added later / integration with google acc. -->
+                <h2>Calendar</h2>
+                <div id="calendarContainer">
+                    <iframe src="https://calendar.google.com/calendar/embed?src=YOUR_CALENDAR_ID&ctz=Asia%2FJerusalem"
+                        style="border: 0" width="100%" height="500" frameborder="0" scrolling="no">
+                    </iframe>
+                </div>
+                </p>
+            </div>
+        </section>
+
+        <p id="studentDashboardError" class="dashboard-error"></p>
+    </main>
+
+    <script src="js/dls-api.js"></script>
+    <script src="js/student-dashboard.js"></script>
+</body>
+
+</html>

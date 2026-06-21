@@ -205,15 +205,16 @@ async function isEmailAlreadyRegistered(email) {
     });
 }
 
-
+// Updated to support MongoDB _id as well
 function saveCurrentUser(user) {
     const safeUser = {
-        id: user.id || null,
+        id: user.id || user._id || null,
+        _id: user._id || user.id || null,
         firstName: user.firstName || null,
         lastName: user.lastName || null,
         email: user.email,
         role: user.role || "student",
-        source: user.source || "sample-users.json"
+        source: user.source || "backend"
     };
 
     localStorage.setItem(
@@ -224,15 +225,13 @@ function saveCurrentUser(user) {
 
 
 function getRedirectByUser(user) {
-    if (user.redirect) {
-        return user.redirect;
-    }
+    const role = (user.role || "student").toLowerCase();
 
-    if (user.role === "lecturer" || user.role === "assistant") {
+    if (role === "lecturer" || role === "assistant") {
         return "dashboard.html";
     }
 
-    return "dashboard.html";
+    return "student-dashboard.html";
 }
 
 /* HELPER - Send real Post to Server */
@@ -323,38 +322,6 @@ async function handleRegisterSubmit(event) {
         return;
     }
 
-    // const newUser = {
-    //     id: createUserId(),
-
-    //     firstName: firstName,
-    //     lastName: lastName,
-
-    //     email: email,
-    //     password: password,
-    //     role: role,
-
-    //     redirect: role === "lecturer" || role === "assistant"
-    //         ? "dashboard.html"
-    //         : "dashboard.html",
-
-    //     createdAt: new Date().toISOString(),
-    //     source: "localStorage"
-    // };
-
-
-    // const registeredUsers = loadRegisteredUsersFromStorage();
-
-    // registeredUsers.push(newUser);
-
-    // saveRegisteredUsersToStorage(registeredUsers);
-
-    // showMessage(
-    //     message,
-    //     "success",
-    //     "ההרשמה הצליחה. עכשיו אפשר להתחבר עם האימייל והסיסמה."
-    // );
-
-    // registerForm.reset();
 
     /* Sends Signup to Backend */
     const registerPayload = {

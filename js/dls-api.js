@@ -1,4 +1,8 @@
 /*
+   DLS API CONFIG
+   ---------------------------------------------------------
+   One place to change/update backend URL, API routes, and local keys.
+   ---
 Stage 3A:
     Create frontend API helper file
 
@@ -33,27 +37,53 @@ DLS_SOCKET.onQuestionDeleted()  - listen to question:deleted
 to keep question-manager clean from fetch + socket details
 */
 
-/* BACKEND URL - Later will replace w/ : https://your-render-backend-url.onrender.com */
-const DLS_BACKEND_URL = "https://dls-backend-uelx.onrender.com/";
+const DLS_CONFIG = {
+    BACKEND_URL: "https://dls-backend-uelx.onrender.com",
+
+    ROUTES: {
+        SIGNUP: "/signup",
+        QUESTIONS: "/api/questions"
+    },
+
+    STORAGE_KEYS: {
+        CURRENT_USER: "dlsCurrentUser"
+    },
+
+    DEFAULTS: {
+        PRESENTATION_ID: "demo-presentation"
+    },
+
+    // for questions:
+    STORAGE_KEYS: {
+        CURRENT_USER: "dlsCurrentUser",
+        PENDING_QUESTIONS: "dlsPendingQuestions"
+    }
+};
 
 /* REST API HELPER - create full backend API URL */
-function buildApiUrl(path) { return `${DLS_BACKEND_URL}${path}`; }
+function buildApiUrl(path) { return `${DLS_CONFIG.BACKEND_URL}${path}`; }
 
-/* SEND JSON[momoa/derulo] REQUEST - for small fetch req 
-Used by: - GET - POST - PUT - DELETE Returns: server JSON response */
+/* SEND JSON[momoa/derulo] REQUEST - for small fetch req WRAPPER
+Used by: - GET - POST - PUT - DELETE Returns: server JSON response 
+changed order if options has own header will be first */
 async function sendJsonRequest(path, options = {}) {
     const response = await fetch(buildApiUrl(path), {
+        // ... = spreadOperator = take all fields from this object and paste them here.
+        ...options,
         headers: {
             "Content-Type": "application/json",
             ...(options.headers || {})
-        },
-        ...options
+        }
     });
-    const responseData = await response.json();
+
+    const responseData = await response.json().catch(function () {
+        return {};
+    });
 
     if (!response.ok) {
         throw new Error(responseData.message || "API request failed");
     }
+
     return responseData;
 }
 
@@ -73,11 +103,40 @@ function buildQueryString(filters = {}) {
     if (filters.search) {
         params.set("search", filters.search);
     }
+    if (filters.studentId) {
+        params.set("studentId", filters.studentId);
+    }
+
+    if (filters.studentEmail) {
+        params.set("studentEmail", filters.studentEmail);
+    }
     const queryString = params.toString();
     if (!queryString) {
         return "";
     }
     return `?${queryString}`;
+}
+
+/* CURRENT USER HELPER
+    Read current logged-in user from one known place.
+        Later:   If we replace localStorage with real session/JWT,
+                 we update this function only. */
+
+function getCurrentDlsUser() {
+    const savedUserJson = localStorage.getItem(
+        DLS_CONFIG.STORAGE_KEYS.CURRENT_USER
+    );
+
+    if (!savedUserJson) {
+        return null;
+    }
+
+    try {
+        return JSON.parse(savedUserJson);
+    } catch (error) {
+        console.warn("Invalid current user in localStorage:", error);
+        return null;
+    }
 }
 
 /* DLS_API - REST/FETCH funcs */
@@ -91,36 +150,80 @@ const DLS_API = {
         const queryString = buildQueryString(filters);
 
         const responseData = await sendJsonRequest(
-            `/api/questions${queryString}`,
+            `${DLS_CONFIG.ROUTES.QUESTIONS}${queryString}`,
             { method: "GET" });
-        return responseData.data;
+        return responseData.data || [];
+    },
+    /* GET MY QUESTIONS
+     Route:
+     GET /api/questions
+     Optional filters:
+     { presentationId, page, status, search } 
+     This function adds studentId and studentEmail to the filter params. */
+    async getMyQuestions(filters = {}) {
+        const currentUser = getCurrentDlsUser();
+
+        if (!currentUser) {
+            return [];
+        }
+
+        const myFilters = {
+            ...filters,
+            studentId: currentUser.id || currentUser._id || null,
+            studentEmail: currentUser.email || null
+        };
+
+        return this.getQuestions(myFilters);
     },
 
     /* CREATE QUESTION
      Route: POST /api/questions 
      Required: { presentationId, page, x, y, text } */
     async createQuestion(questionData) {
+
+        const currentUser = getCurrentDlsUser();
+
+        const questionPayload = {
+            ...questionData,
+
+            studentId: currentUser?.id || currentUser?._id || null,
+            studentEmail: currentUser?.email || null,
+            studentName: currentUser
+                ? `${currentUser.firstName || ""} ${currentUser.lastName || ""}`.trim()
+                : "Anonymous"
+        };
+
         const responseData = await sendJsonRequest(
-            "/api/questions", { method: "POST", body: JSON.stringify(questionData) }); return responseData.data;
-    }, /* UPDATE QUESTION Route: PUT /api/questions/:id */
+            DLS_CONFIG.ROUTES.QUESTIONS,
+            { method: "POST", body: JSON.stringify(questionPayload) }); return responseData.data;
+    },
+
+    /* UPDATE QUESTION Route: PUT /api/questions/:id */
     async updateQuestion(questionId, updateData) {
         const responseData = await sendJsonRequest(
-            `/api/questions/${questionId}`,
+            `${DLS_CONFIG.ROUTES.QUESTIONS}/${questionId}`,
             {
                 method: "PUT",
                 body: JSON.stringify(updateData)
             });
         return responseData.data;
     },
+
     /* DELETE QUESTION Route: DELETE /api/questions/:id */
     async deleteQuestion(questionId) {
         const responseData = await sendJsonRequest(
-            `/api/questions/${questionId}`, {
+            `${DLS_CONFIG.ROUTES.QUESTIONS}/${questionId}`, {
             method: "DELETE"
         });
         return responseData.data;
     }
 };
+
+window.DLS_CONFIG = DLS_CONFIG;
+window.DLS_API = DLS_API;
+window.getCurrentDlsUser = getCurrentDlsUser;
+// only if neccessary:
+window.DLS_BACKEND_URL = DLS_CONFIG.BACKEND_URL;
 
 /* SOCKET IO HELPER */
 
@@ -143,7 +246,7 @@ const DLS_SOCKET = {
         if (dlsSocketInstance) {
             return dlsSocketInstance;
         }
-        dlsSocketInstance = io(DLS_BACKEND_URL);
+        dlsSocketInstance = io(DLS_CONFIG.BACKEND_URL);
         dlsSocketInstance.on("connect", function () {
             console.log(`DLS socket connected: ${dlsSocketInstance.id}`);
         });
