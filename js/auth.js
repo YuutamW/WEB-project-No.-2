@@ -285,7 +285,7 @@ async function handleRegisterSubmit(event) {
         showMessage(
             message,
             "error",
-            "הסיסמה חייבת להכיל לפחות 6 תווים, אות קטנה, אות גדולה ומספר."
+            "הסיסמה חייבת להכיל לפחות 6 תווים, בהם אות קטנה, אות גדולה ומספר."
         );
         return;
     }
@@ -385,7 +385,7 @@ async function handleLoginSubmit(event) {
 
     const email = emailInput.value.trim();
     const password = passwordInput.value;
-    const rememberMe = rememberMeInput ? rememberMeInput.checked : false;
+    //const rememberMe = rememberMeInput ? rememberMeInput.checked : false;
 
     if (!isValidEmail(email)) {
         showMessage(message, "error", "יש להזין אימייל תקין.");
@@ -397,32 +397,72 @@ async function handleLoginSubmit(event) {
         return;
     }
 
-    const matchedUser = await findMatchingUserByEmail(email, password);
+    //const matchedUser = await findMatchingUserByEmail(email, password);
 
-    if (!matchedUser) {
-        showMessage(message, "error", "אימייל או סיסמה לא נכונים.");
-        return;
+    // if (!matchedUser) {
+    //     showMessage(message, "error", "אימייל או סיסמה לא נכונים.");
+    //     return;
+    // }
+
+    showMessage(message, "info", "מעבדת את ההתחברות...");
+
+    // saveCurrentUser(matchedUser);
+
+    // if (rememberMe) {
+    //     localStorage.setItem("dlsRememberEmail", email);
+    // } else {
+    //     localStorage.removeItem("dlsRememberEmail");
+    // }
+
+    // if (matchedUser.effect) {
+    //     localStorage.setItem("dlsPendingEffect", matchedUser.effect);
+    // }
+
+    // showMessage(message, "success", "ההתחברות הצליחה. מעביר אותך...");
+
+    // const redirectUrl = getRedirectByUser(matchedUser);
+
+    // setTimeout(function () {
+    //     window.location.href = redirectUrl;
+    // }, 600);
+
+    try {
+        const response = await fetch("http://localhost:3000/login", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ email, password })
+        });
+        
+        const data = await response.json();
+        
+        if (!response.ok) {
+            showMessage(message, "error", data.message || "אימייל או סיסמה לא נכונים.");
+            return;
+        }
+        
+        // Save user to localStorage
+        const user = {
+            id: data.data.id,
+            firstName: data.data.firstName,
+            lastName: data.data.lastName,
+            email: data.data.email,
+            role: data.data.role,
+            source: "backend"
+        };
+        
+        saveCurrentUser(user);
+        showMessage(message, "success", "ההתחברות הצליחה. מעביר אותך...");
+        
+        setTimeout(() => {
+            window.location.href = "dashboard.html";
+        }, 600);
+        
+    } catch (error) {
+        console.error("Login error:", error);
+        showMessage(message, "error", "שגיאה בתקשורת עם השרת.");
     }
-
-    saveCurrentUser(matchedUser);
-
-    if (rememberMe) {
-        localStorage.setItem("dlsRememberEmail", email);
-    } else {
-        localStorage.removeItem("dlsRememberEmail");
-    }
-
-    if (matchedUser.effect) {
-        localStorage.setItem("dlsPendingEffect", matchedUser.effect);
-    }
-
-    showMessage(message, "success", "ההתחברות הצליחה. מעביר אותך...");
-
-    const redirectUrl = getRedirectByUser(matchedUser);
-
-    setTimeout(function () {
-        window.location.href = redirectUrl;
-    }, 600);
 }
 
 
