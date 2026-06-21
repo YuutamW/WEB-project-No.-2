@@ -328,6 +328,9 @@ async function handleRegisterSubmit(event) {
         firstName: firstName,
         lastName: lastName,
         email: email,
+        // ----DEBUG ---- added username for test purposes
+        username: email,
+        
         role: role,
         password: password,
         termsAccepted: termsAccepted
