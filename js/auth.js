@@ -354,6 +354,27 @@ async function handleRegisterSubmit(event) {
 }
 
 
+/*Helper function to send login request to server */
+async function loginUserOnServer(email,password) { 
+    const response = await fetch(API_BASE_URL + "/login" , {
+        method: "POST" ,
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            email: email,
+            password: password
+            })
+        });
+        const data = await response.json().catch(function () { return {}; });
+        
+        if(!response.ok) {
+            throw new Error(data.message || "Login Reqest Failed");
+        }
+        return data;
+}
+
+
 /* =========================================================
    7. Login Flow
    Purpose:
@@ -389,32 +410,30 @@ async function handleLoginSubmit(event) {
         return;
     }
 
-    const matchedUser = await findMatchingUserByEmail(email, password);
+    try {
+        const result = await loginUserOnServer(email,password);
 
-    if (!matchedUser) {
-        showMessage(message, "error", "אימייל או סיסמה לא נכונים.");
-        return;
+        const matchedUser = result.data;
+
+        saveCurrentUser(matchedUser);
+        if(rememberMe) 
+            localStorage.setItem("dlsRememberEmail" , email);
+        else 
+            localStorage.removeItem("dlsRememberEmail");
+        
+        showMessage(message, "success", "Login Succesfull");
+        showMessage(message, "success", "ההתחברות הצליחה. מעביר אותך...");
+
+        const redirectUrl = getRedirectByUser(matchedUser);
+
+        setTimeout(function () {
+            window.location.href = redirectUrl;
+        }, 600);
+    } catch (error) {
+        // If the server returns a 401 (Invalid credentials) or 500, it drops here
+        showMessage(message, "error", error.message || "אימייל או סיסמה לא נכונים.");
     }
 
-    saveCurrentUser(matchedUser);
-
-    if (rememberMe) {
-        localStorage.setItem("dlsRememberEmail", email);
-    } else {
-        localStorage.removeItem("dlsRememberEmail");
-    }
-
-    if (matchedUser.effect) {
-        localStorage.setItem("dlsPendingEffect", matchedUser.effect);
-    }
-
-    showMessage(message, "success", "ההתחברות הצליחה. מעביר אותך...");
-
-    const redirectUrl = getRedirectByUser(matchedUser);
-
-    setTimeout(function () {
-        window.location.href = redirectUrl;
-    }, 600);
 }
 
 
