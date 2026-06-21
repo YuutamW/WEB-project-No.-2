@@ -1,5 +1,6 @@
 // Dor Mandel :       ID: 315313825
 // Yotam Weintraub:   ID: 321610859
+// Alex Tkachenkov:   ID: 318760543
 /* =========================================================
    DLS AUTH MANAGER — POC VERSION
    ---------------------------------------------------------
@@ -27,8 +28,6 @@
 const USERS_JSON_PATH = "data/sample-users.json";
 const REGISTERED_USERS_STORAGE_KEY = "dlsRegisteredUsers";
 const CURRENT_USER_STORAGE_KEY = "dlsCurrentUser";
-/* when front + back together - put "https://your-backend-url.com" */
-const API_BASE_URL = "http://localhost:3000";
 
 
 /* =========================================================
@@ -189,7 +188,7 @@ async function findMatchingUserByEmail(email, password) {
         const userEmail = user.email.toLowerCase();
 
         return userEmail === normalizedEmail &&
-            user.password === password;
+               user.password === password;
     });
 }
 
@@ -201,7 +200,7 @@ async function isEmailAlreadyRegistered(email) {
 
     return users.some(function (user) {
         return user.email &&
-            user.email.toLowerCase() === normalizedEmail;
+               user.email.toLowerCase() === normalizedEmail;
     });
 }
 
@@ -233,26 +232,6 @@ function getRedirectByUser(user) {
     }
 
     return "dashboard.html";
-}
-
-/* HELPER - Send real Post to Server */
-async function registerUserOnServer(registeredPayload) {
-    const response = await fetch(API_BASE_URL + "/api/users", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(registeredPayload)
-    });
-
-    const data = await response.json().catch(function () {
-        return {};
-    });
-
-    if (!response.ok) {
-        throw new Error(data.message || "Register request failed. ");
-    }
-    return data;
 }
 
 
@@ -316,74 +295,70 @@ async function handleRegisterSubmit(event) {
         return;
     }
 
-    const alreadyExists = await isEmailAlreadyRegistered(email);
-
-    if (alreadyExists) {
-        showMessage(message, "error", "משתמש עם האימייל הזה כבר קיים.");
-        return;
-    }
-
-    // const newUser = {
-    //     id: createUserId(),
-
-    //     firstName: firstName,
-    //     lastName: lastName,
-
-    //     email: email,
-    //     password: password,
-    //     role: role,
-
-    //     redirect: role === "lecturer" || role === "assistant"
-    //         ? "dashboard.html"
-    //         : "dashboard.html",
-
-    //     createdAt: new Date().toISOString(),
-    //     source: "localStorage"
-    // };
-
-
-    // const registeredUsers = loadRegisteredUsersFromStorage();
-
-    // registeredUsers.push(newUser);
-
-    // saveRegisteredUsersToStorage(registeredUsers);
-
-    // showMessage(
-    //     message,
-    //     "success",
-    //     "ההרשמה הצליחה. עכשיו אפשר להתחבר עם האימייל והסיסמה."
-    // );
-
-    // registerForm.reset();
-
-    /* Sends Signup to Backend */
-    const registerPayload = {
-        firstName: firstName,
-        lastName: lastName,
-        email: email,
-        role: role,
-        password: password,
-        termsAccepted: termsAccepted
-    };
+    // Show loading message
+    showMessage(message, "info", "מעבדת את ההרשמה...");
 
     try {
-        const result = await registerUserOnServer(registerPayload);
+        // Send signup data to backend
+        const response = await fetch("http://localhost:3000/signup", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                firstName: firstName,
+                lastName: lastName,
+                email: email,
+                password: password,
+                role: role
+            })
+        });
 
-        showMessage(
-            message,
-            "success",
-            result.message || "ההרשמה הצליחה. עכשיו אפשר להתחבר עם האימייל והסיסמה."
-        );
+        const data = await response.json();
 
+        if (!response.ok) {
+            // Handle error response from backend
+            const errorMessage = data.message || "הרשמה נכשלה. אנא נסה שוב.";
+            showMessage(message, "error", errorMessage);
+            return;
+        }
+
+        // Success response
+        const successMessage = data.message || "ההרשמה הצליחה! עכשיו אפשר להתחבר.";
+        showMessage(message, "success", successMessage);
+
+        // Save user data to localStorage
+        const newUser = {
+            id: data.data?.id || createUserId(),
+            firstName: data.data?.firstName || firstName,
+            lastName: data.data?.lastName || lastName,
+            email: data.data?.email || email,
+            password: password,
+            role: data.data?.role || role,
+            redirect: role === "lecturer" || role === "assistant"
+                ? "dashboard.html"
+                : "dashboard.html",
+            createdAt: new Date().toISOString(),
+            source: "backend"
+        };
+
+        const registeredUsers = loadRegisteredUsersFromStorage();
+        registeredUsers.push(newUser);
+        saveRegisteredUsersToStorage(registeredUsers);
+        saveCurrentUser(newUser);
+
+        // Reset form
         registerForm.reset();
-    } catch (error) {
-        showMessage(
-            message,
-            "error",
-            error.message || "שגיאה בהרשמה מול השרת."
-        );
-    }
 
+        // Redirect after a short delay
+        setTimeout(() => {
+            window.location.href = "login.html";
+        }, 1500);
+
+    } catch (error) {
+        console.error("Registration error:", error);
+        showMessage(message, "error", "שגיאה בתקשורת עם השרת. אנא בדוק את החיבור האינטרנט.");
+    }
 }
 
 
