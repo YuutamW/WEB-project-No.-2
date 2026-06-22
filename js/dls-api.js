@@ -286,7 +286,19 @@ const DLS_SOCKET = {
         const socket = this.connect();
         if (!socket) { return; }
         socket.on("question:deleted", callback);
+    },
+
+    /* Added Disconnection for end connection */
+    disconnect() {
+    if (!dlsSocketInstance) {
+        return;
     }
+
+    dlsSocketInstance.disconnect();
+    dlsSocketInstance = null;
+
+    console.log("DLS socket disconnected by logout");
+}
 };
 
 /* GLOBAL EXPORTS - expose helpers to VanillaJS files (other) 
