@@ -11,6 +11,12 @@
 ========================================================== */
 
 const DASHBOARD_CONFIG = {
+    API: {
+        BASE_URL: "https://dls-backend-uelx.onrender.com",
+        USERS_PATH: "/api/users",
+        EDIT_USER_PATH: "/api/users/edit"
+    },
+
     STORAGE_KEYS: {
         CURRENT_USER: "dlsCurrentUser",
         REMEMBER_EMAIL: "dlsRememberEmail",
@@ -87,6 +93,75 @@ function getCurrentDashboardUser() {
         return null;
     }
 }
+
+/* ==========================================================
+   EDIT CURRENT USER
+   ----------------------------------------------------------
+   Sends updated user fields to backend and syncs localStorage.
+
+   Backend route expected:
+   PUT /api/users/edit
+
+   Body example:
+   {
+       _id: "mongo_user_id",
+       firstName: "Dor"
+   }
+========================================================== */
+async function editCurrentUser(updatedFields) {
+    const currentUser = getCurrentDashboardUser();
+
+    if (!currentUser) {
+        throw new Error("No logged-in user found.");
+    }
+
+    const userId = currentUser.id || currentUser._id;
+
+    if (!userId) {
+        throw new Error("Missing user id.");
+    }
+
+    const response = await fetch(
+        DASHBOARD_CONFIG.API.BASE_URL + DASHBOARD_CONFIG.API.EDIT_USER_PATH,
+        {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                _id: userId,
+                ...updatedFields
+            })
+        }
+    );
+
+    const result = await response.json().catch(function () {
+        return {};
+    });
+
+    if (!response.ok) {
+        throw new Error(result.message || "User update failed.");
+    }
+
+    const updatedUser = result.data || result.user || updatedFields;
+
+    const mergedUser = {
+        ...currentUser,
+        ...updatedUser,
+        id: updatedUser.id || updatedUser._id || currentUser.id || currentUser._id,
+        _id: updatedUser._id || updatedUser.id || currentUser._id || currentUser.id
+    };
+
+    localStorage.setItem(
+        DASHBOARD_CONFIG.STORAGE_KEYS.CURRENT_USER,
+        JSON.stringify(mergedUser, null, 2)
+    );
+
+    renderDashboardUser();
+
+    return mergedUser;
+}
+
 
 function renderDashboardUser() {
     const user = getCurrentDashboardUser();
@@ -173,7 +248,7 @@ press settings ->
             insert userId into #settingsUserId ->
                 insert userEmail into #settingsUserEmail ->
                     Display #settingsOverlay;
-
+ 
 */
 function openSettingsOverlay(event) {
     event.preventDefault();
@@ -209,7 +284,7 @@ function closeSettingsOverlay() {
         return;
     }
 
-    overlay.hidden = false;
+    overlay.classList.remove("is-open");
 
     setTimeout(function () {
         overlay.hidden = true;
@@ -233,7 +308,7 @@ function setupSettingsOverlay() {
         button.addEventListener("click", closeSettingsOverlay);
     });
 
-        document.addEventListener("keydown", function (event) {
+    document.addEventListener("keydown", function (event) {
         if (event.key === "Escape") {
             closeSettingsOverlay();
         }
@@ -252,4 +327,9 @@ document.addEventListener("DOMContentLoaded", function () {
     setupDashboardLogout();
     setupSettingsOverlay();
 });
+
+window.dlsDashboardDebug = {
+    getCurrentDashboardUser,
+    editCurrentUser
+};
 
