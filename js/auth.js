@@ -357,9 +357,9 @@ async function handleRegisterSubmit(event) {
 }
 
 
-/*Helper function to send login request to server */
+/* Helper function to send login request to server --- /api/users/login --- */
 async function loginUserOnServer(email,password) { 
-    const response = await fetch(API_BASE_URL + "/api/users/login" , {
+    const response = await fetch(API_BASE_URL + "/login" , {
         method: "POST" ,
         headers: {
             "Content-Type": "application/json"
