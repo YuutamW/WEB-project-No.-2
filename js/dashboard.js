@@ -316,6 +316,59 @@ function setupSettingsOverlay() {
 }
 
 /* ==========================================================
+   RECENT SESSIONS
+========================================================== */
+async function renderRecentSessions() {
+    const container = document.querySelector("#dashboardRecentSessionsPanel");
+    if(!container) return;
+
+    try {
+        const sessions = await DLS_API.getRecentSessions(5);
+        if(!sessions || sessions.length === 0) {
+            container.innerHTML = '<p class="dashboard-empty-state">אין סשנים קודמים להצגה.</p>';
+            return;
+        }
+
+        container.innerHTML ="";
+
+        sessions.forEach(session => {
+            const sessionDate = new Date(session.date).toLocaleDateString("he-IL", {
+                day: "2-digit", 
+                month: "2-digit", 
+                year: "numeric", 
+                hour: "2-digit", 
+                minute: "2-digit"
+            });
+
+            const card = document.createElement("a");
+            // Placeholder link - update when session view is ready
+            card.href = `session.html?id=${encodeURIComponent(session.id)}`; 
+            card.className = "session-card";
+
+            const titleEl = document.createElement('h4');
+            titleEl.className = 'session-card__title';
+            titleEl.textContent = session.title;
+
+            const dateEl = document.createElement('span');
+            dateEl.className = 'session-card__date';
+            dateEl.textContent = sessionDate;
+            card.innerHTML = `
+                <div class="session-card__info">
+                    <span class="session-card__date">${sessionDate}</span>
+                </div>
+                <div class="session-card__action">▶</div>
+            `;
+            card.querySelector('.session-card__info').prepend(titleEl);
+            container.appendChild(card);
+        });
+    } catch(error) { 
+        console.error("Failed to Load recent Sessions:" ,error);
+        container.innerHTML = '<p class="dashboard-empty-state" style="color: #ff637d;">שגיאה בטעינת סשנים.</p>';
+    }
+}
+
+
+/* ==========================================================
    INIT
 ========================================================== */
 
@@ -326,6 +379,7 @@ document.addEventListener("DOMContentLoaded", function () {
     renderDashboardUser();
     setupDashboardLogout();
     setupSettingsOverlay();
+    renderRecentSessions();
 });
 
 window.dlsDashboardDebug = {

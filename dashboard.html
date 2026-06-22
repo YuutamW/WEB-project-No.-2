@@ -10,7 +10,9 @@
     <title> DLS Dashboard </title>
 
     <link rel="stylesheet" href="css/dashboard.css">
+    <script src="js/dls-api.js" defer></script>
     <script src="js/dashboard.js" defer></script>
+    
 
     <!-- favicon -->
     <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
@@ -178,28 +180,16 @@
                 </article>
 
 
-                <!-- Questions -->
-                <article class="dashboard-panel dashboard-panel--questions">
+                <!-- Recent Sessions -->
+                <article class="dashboard-panel dashboard-panel--sessions-list">
                     <div class="dashboard-panel__header">
                         <h3 class="dashboard-panel__title">
-                            שאלות
+                            סשנים אחרונים
                         </h3>
                     </div>
 
-                    <div id="dashboardQuestionsPanel" class="questions-from-last-session">
-                        <p class="dashboard-empty-state">
-                            כדי להציג שאלות אמיתיות צריך:
-                        </p>
-
-                        <ul class="dashboard-requirements-list">
-                            <li>Session ID לכל הרצאה.</li>
-                            <li>שמירת שאלות לפי sessionId.</li>
-                            <li>API לסינון שאלות לפי סשן, מרצה וסטטוס.</li>
-                        </ul>
-
-                        <p class="dashboard-empty-state">
-                            לאחר מכן נוכל להציג כאן שאלות מסשן פעיל או מהשיעור האחרון.
-                        </p>
+                    <div id="dashboardRecentSessionsPanel" class="dashboard-recent-sessions">
+                        <p class="dashboard-empty-state">טוען סשנים...</p>
                     </div>
                 </article>
 
@@ -251,11 +241,11 @@
             </div>
 
             <div class="dashboard-settings-actions">
-                <button type="button" class="dashboard-secondary-button" >
+                <button type="button" class="dashboard-secondary-button">
                     עריכת משתמש - בקרוב
                 </button>
 
-                <button type="button" class="danger-button" >
+                <button type="button" class="danger-button">
                     מחיקת משתמש - בקרוב
                 </button>
             </div>

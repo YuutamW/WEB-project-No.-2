@@ -42,7 +42,8 @@ const DLS_CONFIG = {
 
     ROUTES: {
         SIGNUP: "/signup",
-        QUESTIONS: "/api/questions"
+        QUESTIONS: "/api/questions",
+        SESSIONS: "/api/sessions/recent" // This Path may change
     },
 
     STORAGE_KEYS: {
@@ -216,6 +217,33 @@ const DLS_API = {
             method: "DELETE"
         });
         return responseData.data;
+    },
+
+    /* GET RECENT SESSIONS 
+     Route: GET /api/sessions/recent (Planned) */
+    async getRecentSessions(limit = 5) {
+        if (!window.DLS_API) {
+            console.error("DLS_API not loaded – recent sessions will not render.");
+            return;
+        }
+        const currentUser = getCurrentDlsUser();
+
+        if (!currentUser) {
+            // No logged‑in user → return empty list (or maybe throw? - need to decide.)
+            return [];
+        }
+
+        const query = buildQueryString({
+            lecturerId: currentUser.id || currentUser._id,
+            limit
+        });
+
+        const responseData = await sendJsonRequest(
+            `${DLS_CONFIG.ROUTES.SESSIONS}${query}`,
+            { method: "GET" }
+        );
+
+        return responseData.data || [];
     }
 };
 
@@ -290,15 +318,15 @@ const DLS_SOCKET = {
 
     /* Added Disconnection for end connection */
     disconnect() {
-    if (!dlsSocketInstance) {
-        return;
+        if (!dlsSocketInstance) {
+            return;
+        }
+
+        dlsSocketInstance.disconnect();
+        dlsSocketInstance = null;
+
+        console.log("DLS socket disconnected by logout");
     }
-
-    dlsSocketInstance.disconnect();
-    dlsSocketInstance = null;
-
-    console.log("DLS socket disconnected by logout");
-}
 };
 
 /* GLOBAL EXPORTS - expose helpers to VanillaJS files (other) 

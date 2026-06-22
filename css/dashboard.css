@@ -657,10 +657,76 @@ body {
 }
 
 /* sections spacing */
-.dashboard-panel--questions {
+/* Sessions List Container */
+.dashboard-panel--sessions-list {
     min-height: 300px;
+    display: flex;
+    flex-direction: column;
 }
 
+.dashboard-recent-sessions {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding-right: 6px; /* Space for the scrollbar */
+    max-height: 250px; /* Adjust based on your preferred panel height */
+}
+
+/* Custom sleek scrollbar for the sessions list */
+.dashboard-recent-sessions::-webkit-scrollbar {
+    width: 6px;
+}
+.dashboard-recent-sessions::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+}
+
+/* Session Card Styling */
+.session-card {
+    padding: 14px 16px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: 0.2s ease;
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.session-card:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
+    border-color: rgba(255, 255, 255, 0.25);
+}
+
+.session-card__info {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.session-card__title {
+    font-size: 15px;
+    font-weight: 700;
+    margin: 0;
+    color: #ffffff;
+}
+
+.session-card__date {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.6);
+    margin: 0;
+}
+
+.session-card__action {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 12px;
+}
 .dashboard-panel--session {
     min-height: 210px;
 }

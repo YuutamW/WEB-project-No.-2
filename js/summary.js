@@ -54,7 +54,6 @@ function getQuestionsForSummary(presentationId) {
     return presentation.questions || [];
 }
 
-
 /* ==========================================================
    5. Grouping Logic
    
@@ -130,7 +129,6 @@ function renderEmptyState() {
         </section>
     `;
 }
-
 
 /* ==========================================================
    8. Jump URL Builder
@@ -310,7 +308,6 @@ function renderSummaryPage() {
    Purpose:
    Connect buttons to behavior.
 ========================================================== */
-
 function connectEvents() {
     summaryRefreshButton.addEventListener("click", function () {
         renderSummaryPage();
@@ -323,7 +320,6 @@ function connectEvents() {
    Purpose:
    Start the summary page.
 ========================================================== */
-
 function initSummaryPage() {
     connectEvents();
     renderSummaryPage();
