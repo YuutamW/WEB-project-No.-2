@@ -365,7 +365,7 @@ async function handleRegisterSubmit(event) {
 
 /* Helper function to send login request to server --- /api/users/login --- */
 async function loginUserOnServer(email,password) { 
-    const response = await fetch(API_BASE_URL + "/login" , {
+    const response = await fetch(API_BASE_URL + USERS_PATH + "/login" , {
         method: "POST" ,
         headers: {
             "Content-Type": "application/json"
@@ -452,7 +452,6 @@ async function handleLoginSubmit(event) {
    Purpose:
    Validate email fields visually while typing.
 ========================================================= */
-
 const emailInputs = document.querySelectorAll("[data-email-input]");
 
 emailInputs.forEach(function (input) {
