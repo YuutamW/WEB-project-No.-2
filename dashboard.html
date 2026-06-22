@@ -11,7 +11,7 @@
 
     <link rel="stylesheet" href="css/dashboard.css">
     <script src="js/dashboard.js" defer></script>
-    
+
     <!-- favicon -->
     <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 </head>
@@ -45,20 +45,36 @@
                     🏠 דף הבית
                 </a>
 
-                <a class="dashboard-sidebar__link" href="presentetion.html">
+                <!-- <a class="dashboard-sidebar__link" href="presentetion.html">
                     🎞️ מצגות
-                </a>
+                </a> -->
 
-                <a class="dashboard-sidebar__link" href="#">
+                <!-- <a class="dashboard-sidebar__link" href="#">
                     ❓ שאלות סטודנטים
-                </a>
+                </a> -->
 
-                <a class="dashboard-sidebar__link" href="#">
+                <!-- <a class="dashboard-sidebar__link" href="#">
                     📊 Heatmap
+                </a> -->
+
+                <a class="dashboard-sidebar__link" href="#accountSettings" data-dashboard-section="settings">
+                    ⚙️ הגדרות
                 </a>
 
-                <a class="dashboard-sidebar__link" href="#">
-                    ⚙️ הגדרות
+                <section id="accountSettings" class="dashboard-panel dashboard-panel--danger">
+                    <h3>הגדרות משתמש</h3>
+
+                    <p>
+                        כאן בעתיד יהיה אפשר להשבית או למחוק משתמש.
+                    </p>
+
+                    <button type="button" class="danger-button" disabled>
+                        מחיקת משתמש - בקרוב
+                    </button>
+                </section>
+
+                <a id="logoutButton" class="dashboard-sidebar__link" href="login.html" data-auth-action="logout">
+                    התנתק/י 🔑
                 </a>
                 <!-- TODO: Restore next lecture after calendar/API integration -->
             </nav>
@@ -80,11 +96,12 @@
                     </p>
 
                     <h2 class="dashboard-header__title">
-                        שלום, מרצה 👋
+                        שלום, <span id="dashboardUserName">מרצה</span> 👋
                     </h2>
 
                     <p class="dashboard-header__text">
-                        נהל מצגות, שאלות, ושיעורים חיים ממקום אחד.
+                        <span id="dashboardUserRole">Lecturer</span> workspace · נהל מצגות, שאלות, ושיעורים חיים ממקום
+                        אחד.
                     </p>
                 </section>
 
@@ -127,9 +144,9 @@
                         העלאת חומר
                     </h3>
 
-                    <p class="dashboard-action-card__text">
+                    <!-- <p class="dashboard-action-card__text">
                         העלה קובץ חדש לשיעור.
-                    </p>
+                    </p> -->
                 </button>
 
                 <button class="dashboard-action-card" type="button">
@@ -142,7 +159,7 @@
                     </h3>
 
                     <p class="dashboard-action-card__text">
-                        צפה בשאלות שנשאלו.
+                        צריך בשביל לעבוד: Session ID, שמירת שאלות לפי סשן, ו־API לסינון שאלות.
                     </p>
                 </button>
 
@@ -154,79 +171,38 @@
 
                 <!-- Recent lectures -->
                 <article class="dashboard-panel dashboard-panel--large">
-
-                    <div class="dashboard-panel__header">
-                        <h3 class="dashboard-panel__title">
-                            שיעורים אחרונים
-                        </h3>
-
-                        <a class="dashboard-panel__link" href="#">
-                            הצג הכל
-                        </a>
-                    </div>
-
-                    <div class="lecture-list">
-
-                        <div class="lecture-list__item">
-                            <span class="lecture-list__dot"></span>
-
-                            <div>
-                                <h4 class="lecture-list__title">
-                                    🕸️ Web & Cloud ☁️
-                                </h4>
-                                <p class="lecture-list__meta">
-                                    9 עמודים · 3 שאלות · עודכן היום
-                                </p>
-                            </div>
-                        </div>
-
-                        <div class="lecture-list__item">
-                            <span class="lecture-list__dot"></span>
-
-                            <div>
-                                <h4 class="lecture-list__title">
-                                    📺 Dynamic Lecture Demo 🎦
-                                </h4>
-                                <p class="lecture-list__meta">
-                                    6 עמודים · PDF
-                                </p>
-                            </div>
-                        </div>
-
-                    </div>
-
-                </article>
-
-
-                <!-- Calendar -->
-                <article class="dashboard-panel">
-
                     <div class="dashboard-panel__header">
                         <h3 class="dashboard-panel__title">
                             לוח שנה
                         </h3>
+
+                        <span class="dashboard-panel__link">
+                            Google Calendar
+                        </span>
                     </div>
 
-                    <div class="mini-calendar">
+                    <div class="dashboard-calendar-frame">
+                        <iframe
+                            src="https://calendar.google.com/calendar/embed?src=YOUR_CALENDAR_ID&ctz=Asia%2FJerusalem"
+                            style="border:0" width="100%" height="420" frameborder="0" scrolling="no">
+                        </iframe>
+                    </div>
+                </article>
 
-                        <div class="mini-calendar__day">א</div>
-                        <div class="mini-calendar__day">ב</div>
-                        <div class="mini-calendar__day">ג</div>
-                        <div class="mini-calendar__day">ד</div>
-                        <div class="mini-calendar__day">ה</div>
-                        <div class="mini-calendar__day">ו</div>
-                        <div class="mini-calendar__day">ש</div>
 
-                        <div class="mini-calendar__cell"></div>
-                        <div class="mini-calendar__cell">1</div>
-                        <div class="mini-calendar__cell">2</div>
-                        <div class="mini-calendar__cell">3</div>
-                        <div class="mini-calendar__cell is-today">4</div>
-                        <div class="mini-calendar__cell">5</div>
-                        <div class="mini-calendar__cell">6</div>
-
+                <!-- Last Questions from last Session -->
+                <article class="dashboard-panel">
+                    <div class="dashboard-panel__header">
+                        <h3 class="dashboard-panel__title">
+                            שאלות משיעור אחרון
+                        </h3>
                     </div>
 
+                    <div id="lastSessionQuestions" class="questions-from-last-session">
+                        <p class="dashboard-empty-state">
+                            יוצג לאחר שנוסיף Session ID לשאלות.
+                        </p>
+                    </div>
                 </article>
 
 
@@ -258,6 +234,10 @@
                                 שאלות
                             </span>
                         </div>
+
+                        <p class="dashboard-empty-state">
+                            עדיין אין סשן פעיל. יישמרו כאן כשיוטמעו.
+                        </p>
 
                     </div>
 

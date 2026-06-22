@@ -359,7 +359,7 @@ async function handleRegisterSubmit(event) {
 
 /*Helper function to send login request to server */
 async function loginUserOnServer(email,password) { 
-    const response = await fetch(API_BASE_URL + "/login" , {
+    const response = await fetch(API_BASE_URL + "/api/users/login" , {
         method: "POST" ,
         headers: {
             "Content-Type": "application/json"
@@ -527,6 +527,35 @@ function updateTopDateTime() {
 
 updateTopDateTime();
 setInterval(updateTopDateTime, 1000);
+
+/* =========================================================
+   11. Remember Me Restore
+        if user checked the remember me box -
+        refill email field next time
+========================================================= */
+function restoreRememberEmail() {
+    const rememberEmail = localStorage.getItem("dlsRemeberEmail");
+
+    if(!rememberEmail) {
+        return;
+    }
+
+    const emailInput = document.querySelector("#loginEmail");
+    const rememberMeInput = document.querySelector("#rememberMe");
+
+    if(emailInput) {
+        emailInput.value = rememberEmail;
+    }
+
+    if(rememberMeInput) {
+        rememberMeInput.checked = true;
+    }
+    
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+    restoreRememberedEmail();
+});
 
 
 /* =========================================================
