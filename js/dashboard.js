@@ -342,23 +342,17 @@ async function renderRecentSessions() {
 
             const card = document.createElement("a");
             // Placeholder link - update when session view is ready
-            card.href = `session.html?id=${encodeURIComponent(session.id)}`; 
+            card.href = `session.html?code=${encodeURIComponent(session.id)}`; 
             card.className = "session-card";
 
-            const titleEl = document.createElement('h4');
-            titleEl.className = 'session-card__title';
-            titleEl.textContent = session.title;
-
-            const dateEl = document.createElement('span');
-            dateEl.className = 'session-card__date';
-            dateEl.textContent = sessionDate;
             card.innerHTML = `
                 <div class="session-card__info">
+                    <h4 class="session-card__title"></h4>
                     <span class="session-card__date">${sessionDate}</span>
                 </div>
                 <div class="session-card__action">▶</div>
             `;
-            card.querySelector('.session-card__info').prepend(titleEl);
+            card.querySelector('.session-card__title').textContent = session.title || `סשן (${session.id})`;
             container.appendChild(card);
         });
     } catch(error) { 

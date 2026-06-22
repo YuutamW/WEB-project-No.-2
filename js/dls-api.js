@@ -43,7 +43,7 @@ const DLS_CONFIG = {
     ROUTES: {
         SIGNUP: "/signup",
         QUESTIONS: "/api/questions",
-        SESSIONS: "/api/sessions/recent" // This Path may change
+        SESSIONS: "/api/sessions" 
     },
 
     STORAGE_KEYS: {
@@ -111,18 +111,20 @@ function buildQueryString(filters = {}) {
     if (filters.studentEmail) {
         params.set("studentEmail", filters.studentEmail);
     }
-    const queryString = params.toString();
-    if (!queryString) {
-        return "";
+    if (filters.userId) {
+        params.set("userId", filters.userId);
     }
-    return `?${queryString}`;
+    if (filters.limit) {
+        params.set("limit", filters.limit);
+    }
+    const queryString = params.toString();
+    return queryString ? `?${queryString}` : "";
 }
 
 /* CURRENT USER HELPER
     Read current logged-in user from one known place.
         Later:   If we replace localStorage with real session/JWT,
                  we update this function only. */
-
 function getCurrentDlsUser() {
     const savedUserJson = localStorage.getItem(
         DLS_CONFIG.STORAGE_KEYS.CURRENT_USER
@@ -234,12 +236,12 @@ const DLS_API = {
         }
 
         const query = buildQueryString({
-            lecturerId: currentUser.id || currentUser._id,
+            userId: currentUser.id || currentUser._id,
             limit
         });
 
         const responseData = await sendJsonRequest(
-            `${DLS_CONFIG.ROUTES.SESSIONS}${query}`,
+            `${DLS_CONFIG.ROUTES.SESSIONS}/recent${query}`,
             { method: "GET" }
         );
 
