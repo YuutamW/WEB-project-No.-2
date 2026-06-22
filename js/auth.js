@@ -417,6 +417,7 @@ async function handleLoginSubmit(event) {
         const result = await loginUserOnServer(email,password);
 
         const matchedUser = result.data;
+        const userId = matchedUser.id;
 
         saveCurrentUser(matchedUser);
         if(rememberMe) 
