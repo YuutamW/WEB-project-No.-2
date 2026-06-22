@@ -346,6 +346,11 @@ async function handleRegisterSubmit(event) {
         );
 
         registerForm.reset();
+
+        setTimeout(function () {
+            window.location.href = "login.html";
+        }, 800);
+        
     } catch (error) {
         showMessage(
             message,
@@ -534,7 +539,7 @@ setInterval(updateTopDateTime, 1000);
         refill email field next time
 ========================================================= */
 function restoreRememberEmail() {
-    const rememberEmail = localStorage.getItem("dlsRemeberEmail");
+    const rememberEmail = localStorage.getItem("dlsRememberEmail");
 
     if(!rememberEmail) {
         return;

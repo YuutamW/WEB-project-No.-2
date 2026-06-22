@@ -57,21 +57,9 @@
                     📊 Heatmap
                 </a> -->
 
-                <a class="dashboard-sidebar__link" href="#accountSettings" data-dashboard-section="settings">
+                <a class="dashboard-sidebar__link" href="#" data-dashboard-action="open-settings">
                     ⚙️ הגדרות
                 </a>
-
-                <section id="accountSettings" class="dashboard-panel dashboard-panel--danger">
-                    <h3>הגדרות משתמש</h3>
-
-                    <p>
-                        כאן בעתיד יהיה אפשר להשבית או למחוק משתמש.
-                    </p>
-
-                    <button type="button" class="danger-button" disabled>
-                        מחיקת משתמש - בקרוב
-                    </button>
-                </section>
 
                 <a id="logoutButton" class="dashboard-sidebar__link" href="login.html" data-auth-action="logout">
                     התנתק/י 🔑
@@ -135,7 +123,7 @@
                     </p>
                 </a>
 
-                <button class="dashboard-action-card" type="button">
+                <button class="dashboard-action-card" type="button" disabled>
                     <span class="dashboard-action-card__icon">
                         📄
                     </span>
@@ -144,12 +132,12 @@
                         העלאת חומר
                     </h3>
 
-                    <!-- <p class="dashboard-action-card__text">
-                        העלה קובץ חדש לשיעור.
-                    </p> -->
+                    <p class="dashboard-action-card__text">
+                        בהמשך: שמירת מצגות ב־DB, שיוך למרצה ובחירת קובץ מתוך מאגר.
+                    </p>
                 </button>
 
-                <button class="dashboard-action-card" type="button">
+                <!-- <button class="dashboard-action-card" type="button">
                     <span class="dashboard-action-card__icon">
                         ❓
                     </span>
@@ -161,7 +149,7 @@
                     <p class="dashboard-action-card__text">
                         צריך בשביל לעבוד: Session ID, שמירת שאלות לפי סשן, ו־API לסינון שאלות.
                     </p>
-                </button>
+                </button> -->
 
             </section>
 
@@ -170,7 +158,7 @@
             <section class="dashboard-grid">
 
                 <!-- Recent lectures -->
-                <article class="dashboard-panel dashboard-panel--large">
+                <article class="dashboard-panel dashboard-panel--large dashboard-panel--calendar">
                     <div class="dashboard-panel__header">
                         <h3 class="dashboard-panel__title">
                             לוח שנה
@@ -190,63 +178,94 @@
                 </article>
 
 
-                <!-- Last Questions from last Session -->
-                <article class="dashboard-panel">
+                <!-- Questions -->
+                <article class="dashboard-panel dashboard-panel--questions">
                     <div class="dashboard-panel__header">
                         <h3 class="dashboard-panel__title">
-                            שאלות משיעור אחרון
+                            שאלות
                         </h3>
                     </div>
 
-                    <div id="lastSessionQuestions" class="questions-from-last-session">
+                    <div id="dashboardQuestionsPanel" class="questions-from-last-session">
                         <p class="dashboard-empty-state">
-                            יוצג לאחר שנוסיף Session ID לשאלות.
+                            כדי להציג שאלות אמיתיות צריך:
+                        </p>
+
+                        <ul class="dashboard-requirements-list">
+                            <li>Session ID לכל הרצאה.</li>
+                            <li>שמירת שאלות לפי sessionId.</li>
+                            <li>API לסינון שאלות לפי סשן, מרצה וסטטוס.</li>
+                        </ul>
+
+                        <p class="dashboard-empty-state">
+                            לאחר מכן נוכל להציג כאן שאלות מסשן פעיל או מהשיעור האחרון.
                         </p>
                     </div>
                 </article>
 
 
-                <!-- Stats -->
-                <article class="dashboard-panel">
-
+                <!-- Active Session -->
+                <article class="dashboard-panel dashboard-panel--session">
                     <div class="dashboard-panel__header">
                         <h3 class="dashboard-panel__title">
-                            סטטיסטיקה מהירה
+                            סשן פעיל
                         </h3>
                     </div>
 
-                    <div class="dashboard-stats">
-
-                        <div class="dashboard-stat">
-                            <span class="dashboard-stat__value">
-                                12
-                            </span>
-                            <span class="dashboard-stat__label">
-                                מצגות
-                            </span>
-                        </div>
-
-                        <div class="dashboard-stat">
-                            <span class="dashboard-stat__value">
-                                34
-                            </span>
-                            <span class="dashboard-stat__label">
-                                שאלות
-                            </span>
-                        </div>
-
-                        <p class="dashboard-empty-state">
-                            עדיין אין סשן פעיל. יישמרו כאן כשיוטמעו.
-                        </p>
-
-                    </div>
-
+                    <p class="dashboard-empty-state">
+                        עדיין אין סשן פעיל. בעתיד “התחל מצגת” ייצור Session ID,
+                        וכל השאלות והאנוטציות יישמרו תחת אותו סשן.
+                    </p>
                 </article>
 
             </section>
 
         </main>
 
+    </div>
+
+    <div id="settingsOverlay" class="dashboard-modal" hidden>
+        <div class="dashboard-modal__backdrop" data-dashboard-action="close-settings"></div>
+
+        <section class="dashboard-modal__panel" role="dialog" aria-modal="true">
+            <button type="button" class="dashboard-modal__close" data-dashboard-action="close-settings">
+                ✕
+            </button>
+
+            <h2 class="dashboard-modal__title">
+                הגדרות משתמש
+            </h2>
+
+            <p class="dashboard-modal__text">
+                כאן יהיה אפשר בעתיד לערוך פרטי משתמש, להשבית משתמש או למחוק משתמש.
+            </p>
+
+            <div class="dashboard-settings-row">
+                <strong>זיהוי משתמש:</strong>
+                <span id="settingsUserId">לא נטען</span>
+            </div>
+
+            <div class="dashboard-settings-row">
+                <strong>אימייל:</strong>
+                <span id="settingsUserEmail">לא נטען</span>
+            </div>
+
+            <div class="dashboard-settings-actions">
+                <button type="button" class="dashboard-secondary-button" disabled>
+                    עריכת משתמש - בקרוב
+                </button>
+
+                <button type="button" class="danger-button" disabled>
+                    מחיקת משתמש - בקרוב
+                </button>
+            </div>
+
+            <p class="dashboard-modal__note">
+                כדי להפעיל מחיקה אמיתית צריך לשלוח את user.id מה־localStorage אל השרת.
+
+            </p>
+
+        </section>
     </div>
 
 </body>

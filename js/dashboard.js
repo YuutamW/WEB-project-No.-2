@@ -26,7 +26,13 @@ const DASHBOARD_CONFIG = {
         DATE: "#dashboardDate",
         USER_NAME: "#dashboardUserName",
         USER_ROLE: "#dashboardUserRole",
-        LOGOUT_BUTTON: "[data-auth-action='logout']"
+        LOGOUT_BUTTON: "[data-auth-action='logout']",
+
+        SETTINGS_OPEN_BUTTON: "[data-dashboard-action='open-settings']",
+        SETTINGS_CLOSE_BUTTONS: "[data-dashboard-action='close-settings']",
+        SETTINGS_OVERLAY: "#settingsOverlay",
+        SETTINGS_USER_ID: "#settingsUserId",
+        SETTINGS_USER_EMAIL: "#settingsUserEmail"
     }
 };
 
@@ -154,6 +160,87 @@ function setupDashboardLogout() {
 }
 
 /* ==========================================================
+   SETTINGS OVERLAY
+   ----------------------------------------------------------
+   Opens the user settings modal and injects current user data.
+========================================================== */
+
+/* OPEN SETTINGS OVERLAY - how it works:  
+press settings ->
+ id elem with js:[data-dashboard-action="open-settings"] ->
+    run openSSettingsOverlay()->
+        read dlsCurrentUser from localstorage. ->
+            insert userId into #settingsUserId ->
+                insert userEmail into #settingsUserEmail ->
+                    Display #settingsOverlay;
+
+*/
+function openSettingsOverlay(event) {
+    event.preventDefault();
+
+    const user = getCurrentDashboardUser();
+    const overlay = document.querySelector(DASHBOARD_CONFIG.SELECTORS.SETTINGS_OVERLAY);
+    const userIdElement = document.querySelector(DASHBOARD_CONFIG.SELECTORS.SETTINGS_USER_ID);
+    const userEmailElement = document.querySelector(DASHBOARD_CONFIG.SELECTORS.SETTINGS_USER_EMAIL);
+
+    if (!overlay) {
+        return;
+    }
+
+    if (userIdElement) {
+        userIdElement.textContent = user?.id || user?._id || "לא נמצא";
+    }
+
+    if (userEmailElement) {
+        userEmailElement.textContent = user?.email || "לא נמצא";
+    }
+
+    overlay.hidden = false;
+
+    requestAnimationFrame(function () {
+        overlay.classList.add("is-open");
+    });
+}
+
+function closeSettingsOverlay() {
+    const overlay = document.querySelector(DASHBOARD_CONFIG.SELECTORS.SETTINGS_OVERLAY);
+
+    if (!overlay) {
+        return;
+    }
+
+    overlay.hidden = false;
+
+    setTimeout(function () {
+        overlay.hidden = true;
+    }, 220);
+}
+
+function setupSettingsOverlay() {
+    const openButton = document.querySelector(
+        DASHBOARD_CONFIG.SELECTORS.SETTINGS_OPEN_BUTTON
+    );
+
+    const closeButtons = document.querySelectorAll(
+        DASHBOARD_CONFIG.SELECTORS.SETTINGS_CLOSE_BUTTONS
+    );
+
+    if (openButton) {
+        openButton.addEventListener("click", openSettingsOverlay);
+    }
+
+    closeButtons.forEach(function (button) {
+        button.addEventListener("click", closeSettingsOverlay);
+    });
+
+        document.addEventListener("keydown", function (event) {
+        if (event.key === "Escape") {
+            closeSettingsOverlay();
+        }
+    });
+}
+
+/* ==========================================================
    INIT
 ========================================================== */
 
@@ -163,4 +250,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     renderDashboardUser();
     setupDashboardLogout();
+    setupSettingsOverlay();
 });
+
