@@ -29,6 +29,7 @@ const REGISTERED_USERS_STORAGE_KEY = "dlsRegisteredUsers";
 const CURRENT_USER_STORAGE_KEY = "dlsCurrentUser";
 /* when front + back together - put "https://your-backend-url.com" */
 const API_BASE_URL = "https://dls-backend-uelx.onrender.com";
+const USERS_PATH = "/api/users";
 
 
 /* =========================================================
@@ -236,7 +237,7 @@ function getRedirectByUser(user) {
 
 /* HELPER - Send real Post to Server */
 async function registerUserOnServer(registeredPayload) {
-    const response = await fetch(API_BASE_URL + "/signup", {
+    const response = await fetch(API_BASE_URL + USERS_PATH + "/signup", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
@@ -350,7 +351,7 @@ async function handleRegisterSubmit(event) {
         setTimeout(function () {
             window.location.href = "login.html";
         }, 800);
-        
+
     } catch (error) {
         showMessage(
             message,
