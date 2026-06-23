@@ -1430,6 +1430,19 @@ body {
     .dashboard-panel--student-calendar .dashboard-calendar-frame iframe {
         height: 360px;
     }
+
+    .dashboard-panel--student-stack {
+        display: flex;
+        min-height: auto;
+    }
+
+    .student-recent-sessions-list {
+        max-height: 350px; /* Increased from 220px so more items show on mobile */
+    }
+
+    .dashboard-panel--student-calendar .dashboard-calendar-frame iframe {
+        height: 360px;
+    }
 }
 
 /* =========================================================

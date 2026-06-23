@@ -894,7 +894,47 @@ function setupStudentLogout() {
    Backend needs : GET /api/sessions/recent?userId=...&limit=...
 ========================================================== */
 async function renderRecentStudentSessions() {
-    const container = 
+    const container = document.querySelector("#studentRecentSessionsList");
+    if(!container) return;
+
+    try {
+        const sessions = await DLS_API.getRecentSessions(8);
+         if (!sessions || sessions.length === 0) {
+            container.innerHTML = '<p class="dashboard-empty-state">אין סשנים קודמים להצגה.</p>';
+            return;
+        }
+
+        container.innerHTML = "";
+
+        sessions.forEach(session => {
+            const sessionDate = new Date(session.date).toLocaleDateString("he-IL", {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit"
+            });
+
+            const card = document.createElement("a");
+
+            // Directs the student into the presentation using the session code
+            card.href = `${STUDENT_DASHBOARD_CONFIG.ROUTES.PRESENTATION}?sessionCode=${encodeURIComponent(session.id)}`;
+            card.className = "session-card";
+            card.innerHTML = `
+                <div class="session-card__info">
+                    <h4 class="session-card__title"></h4>
+                    <span class="session-card__date">${sessionDate}</span>
+                </div>
+                <div class="session-card__action">▶</div>
+            `;
+            card.querySelector('.session-card__title').textContent = session.title || `סשן (${session.id})`;
+            container.appendChild(card);
+        });
+    } catch(error) {
+        console.error("Failed to Load recent Sessions:", error);
+        container.innerHTML = '<p class="dashboard-empty-state" style="color: #ff637d;">שגיאה בטעינת סשנים.</p>';
+    }
+    
 }
 
 /* 
@@ -926,6 +966,6 @@ document.addEventListener("DOMContentLoaded", function () {
     loadStudentDashboard();
     prefillJoinCodeFromUrl();
     renderActiveSession();
-
     setupStudentQrScanner();
+    renderRecentStudentSessions();
 });
