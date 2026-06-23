@@ -887,7 +887,7 @@ async function renderRecentSessions() {
                 </div>
                 <div class="session-card__action">▶</div>
             `;
-            card.querySelector('.session-card__title').textContent = session.title || `סשן (${session.id})`;
+            card.querySelector('.session-card__title').textContent = session.title || ` (${session.id})`;
             container.appendChild(card);
         });
     } catch (error) {

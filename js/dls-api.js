@@ -84,9 +84,14 @@ function getDlsBackendUrl() {
         return DLS_ENV.PROD_BACKEND_URL;
     }
 
+    /*
+    // this section forces to use backend URL if the front is run localy 
     return isLocalFrontend()
         ? DLS_ENV.LOCAL_BACKEND_URL
         : DLS_ENV.PROD_BACKEND_URL;
+    */
+   // Force production backend for now
+    return DLS_ENV.PROD_BACKEND_URL;
 }
 
 /* Apply backend URL after helper exists */
@@ -97,7 +102,8 @@ function buildApiUrl(path) { return `${DLS_CONFIG.BACKEND_URL}${path}`; }
 
 /* SEND JSON[momoa/derulo] REQUEST - for small fetch req WRAPPER
 Used by: - GET - POST - PUT - DELETE Returns: server JSON response 
-changed order if options has own header will be first */
+changed order if options has own header will be first 
+*/
 async function sendJsonRequest(path, options = {}) {
     const response = await fetch(buildApiUrl(path), {
         // ... = spreadOperator = take all fields from this object and paste them here.
