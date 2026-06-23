@@ -917,8 +917,8 @@ async function renderRecentStudentSessions() {
 
             const card = document.createElement("a");
 
-            // Directs the student into the presentation using the session code
-            card.href = `${STUDENT_DASHBOARD_CONFIG.ROUTES.PRESENTATION}?sessionCode=${encodeURIComponent(session.id)}`;
+            // Placeholder link - update when session view is ready
+            card.href = `session.html?code=${encodeURIComponent(session.id)}`;
             card.className = "session-card";
             card.innerHTML = `
                 <div class="session-card__info">
