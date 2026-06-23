@@ -258,17 +258,18 @@ async function handleEditUserSubmit(event) {
     const lastNameInput = document.querySelector("#settingsEditLastName");
     const emailInput = document.querySelector("#settingsEditEmail");
 
-    const updatedFields = {
-        firstName: firstNameInput ? firstNameInput.value.trim() : "",
-        lastName: lastNameInput ? lastNameInput.value.trim() : "",
-        email: emailInput ? emailInput.value.trim() : ""
-    };
-
     const passwordInput = document.querySelector("#settingsEditPassword");
     const confirmPasswordInput = document.querySelector("#settingsEditConfirmPassword");
 
     const password = passwordInput ? passwordInput.value : "";
     const confirmPassword = confirmPasswordInput ? confirmPasswordInput.value : "";
+
+    const updatedFields = {
+        firstName: firstNameInput ? firstNameInput.value.trim() : "",
+        lastName: lastNameInput ? lastNameInput.value.trim() : "",
+        email: emailInput ? emailInput.value.trim() : "",
+        password: passwordInput ? passwordInput.value : ""
+    };
 
     try {
         const updatedUser = await editCurrentUser(updatedFields);
