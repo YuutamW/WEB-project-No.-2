@@ -6,68 +6,355 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DLS | Student Dashboard</title>
 
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/theme.css">
+    <!-- <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/theme.css"> -->
+    <link rel="stylesheet" href="css/dashboard.css">
+
 </head>
 
 <body>
-    <main class="student-dashboard-shell">
-        <section class="dashboard-hero glass-card">
-            <div>
-                <p class="eyebrow">Student Dashboard</p>
-                <h1>שלום, <span id="studentName">Student</span></h1>
-                <p id="studentEmail">Loading...</p>
+
+    <div class="dashboard-page dashboard-page--student">
+
+        <aside class="dashboard-sidebar">
+            <div class="dashboard-sidebar__brand">
+                <div class="dashboard-sidebar__logo">DLS</div>
+
+                <div>
+                    <h1 class="dashboard-sidebar__title">
+                        Dynamic Lecture System
+                    </h1>
+                    <p class="dashboard-sidebar__subtitle">
+                        Student workspace
+                    </p>
+                </div>
             </div>
 
-            <div class="role-pill" id="studentRole">student</div>
-        </section>
+            <nav class="dashboard-sidebar__nav">
+                <a class="dashboard-sidebar__link is-active" href="student-dashboard.html">
+                    🏠 דף הבית
+                </a>
 
-        <section class="dashboard-two-columns">
-            <article class="glass-card">
-                <div class="card-header">
-                    <h2>ההרצאה הנוכחית</h2>
-                    <button id="joinLectureButton">כניסה להרצאה</button>
-                </div>
+                <!-- <a class="dashboard-sidebar__link" href="#studentJoinSession">
+                    🎟️ הצטרפות לסשן
+                </a> -->
 
-                <p>
-                    כאן תוכל להיכנס למצגת, לצפות בהרצאה, ולשאול שאלות על שקפים.
-                </p>
-            </article>
+                <!-- <a class="dashboard-sidebar__link" href="#studentQuestionsPanel">
+                    ❓ השאלות שלי
+                </a> -->
 
-            <article class="glass-card">
-                <div class="card-header">
-                    <div>
-                        <p class="eyebrow">My Questions</p>
-                        <h2>השאלות שלי</h2>
+                <a class="dashboard-sidebar__link" href="#" data-dashboard-action="open-settings">
+                    ⚙️ הגדרות
+                </a>
+
+                <a class="dashboard-sidebar__link" href="login.html" data-auth-action="logout">
+                    התנתק/י 🔑
+                </a>
+            </nav>
+        </aside>
+
+        <main class="dashboard-main">
+
+            <button type="button" class="dashboard-mobile-menu-button" data-dashboard-action="toggle-mobile-menu"
+                aria-expanded="false" aria-controls="dashboardMobileNav" aria-label="פתיחת תפריט">
+                <span class="dashboard-mobile-menu-button__line"></span>
+                <span class="dashboard-mobile-menu-button__line"></span>
+                <span class="dashboard-mobile-menu-button__line"></span>
+            </button>
+
+            <nav id="dashboardMobileNav" class="dashboard-mobile-nav" hidden>
+                <a href="student-dashboard.html">🏠 דף הבית</a>
+
+                <button type="button" data-dashboard-action="open-settings">
+                    ⚙️ הגדרות
+                </button>
+
+                <a href="login.html" data-auth-action="logout">
+                    התנתק/י 🔑
+                </a>
+            </nav>
+
+            <header class="dashboard-header">
+                <section>
+                    <p class="dashboard-header__eyebrow">
+                        ברוך הבא
+                    </p>
+
+                    <h2 class="dashboard-header__title">
+                        שלום, <span id="studentName">סטודנט</span> 👋
+                    </h2>
+
+                    <p class="dashboard-header__text">
+                        <span id="studentRole">student</span> workspace · הצטרף להרצאות, שאל שאלות, ונהל את ההערות שלך.
+                    </p>
+
+                    <p id="studentEmail" class="dashboard-header__text">
+                        Loading...
+                    </p>
+                </section>
+
+                <section class="dashboard-clock-card">
+                    <span id="dashboardClock" class="dashboard-clock-card__time">
+                        00:00
+                    </span>
+
+                    <span id="dashboardDate" class="dashboard-clock-card__date">
+                        Loading date...
+                    </span>
+                </section>
+            </header>
+
+            <!-- ===============================
+                STUDENT QUICK ACTIONS
+                - Join session opens overlay.
+                - Questions + notes opens demo overlay.
+                - Active session placeholder for future.
+            ================================ -->
+            <section class="dashboard-actions dashboard-actions--student">
+
+                <button class="dashboard-action-card dashboard-action-card--primary" type="button"
+                    data-student-action="open-join-session">
+                    <span class="dashboard-action-card__icon">🎟️</span>
+
+                    <h3 class="dashboard-action-card__title">
+                        הצטרפות לסשן
+                    </h3>
+
+                    <p class="dashboard-action-card__text">
+                        הכנס קוד בן 6 ספרות או סרוק QR.
+                    </p>
+                </button>
+
+                <article id="studentActiveSessionCard"
+                    class="dashboard-action-card student-active-session-card is-disabled">
+                    <span class="dashboard-action-card__icon">📡</span>
+
+                    <h3 class="dashboard-action-card__title">
+                        סשן פעיל
+                    </h3>
+
+                    <p id="studentActiveSessionText" class="dashboard-action-card__text">
+                        אין סשן פעיל כרגע.
+                    </p>
+
+                    <a id="studentContinueSessionLink" class="dashboard-secondary-button student-active-session-link"
+                        href="presentetion.html" hidden>
+                        המשך לסשן
+                    </a>
+                </article>
+
+                <article class="dashboard-action-card student-split-action-card">
+                    <button class="student-split-action-card__section" type="button"
+                        data-student-action="open-notes-demo">
+                        <span class="dashboard-action-card__icon">✍️</span>
+
+                        <h3 class="dashboard-action-card__title">
+                            ההערות שלי
+                        </h3>
+
+                        <p class="dashboard-action-card__text">
+                            notes ו־annotations בהמשך.
+                        </p>
+                    </button>
+
+                    <button class="student-split-action-card__section" type="button"
+                        data-student-action="open-questions-demo">
+                        <span class="dashboard-action-card__icon">❓</span>
+
+                        <h3 class="dashboard-action-card__title">
+                            השאלות שלי
+                        </h3>
+
+                        <p class="dashboard-action-card__text">
+                            צפייה בשאלות ששאלת.
+                        </p>
+                    </button>
+                </article>
+
+            </section>
+
+            <!-- ===============================
+             STUDENT MAIN WORKSPACE
+             Left: questions + recent sessions
+             Right: calendar
+            ================================ -->
+            <section class="dashboard-grid dashboard-grid--student">
+
+                <article id="studentLearningPanel" class="dashboard-panel dashboard-panel--student-stack">
+
+                    <section class="student-stack-section student-stack-section--questions">
+                        <div class="dashboard-panel__header">
+                            <h3 class="dashboard-panel__title">
+                                השאלות שלי
+                            </h3>
+                        </div>
+
+                        <p id="studentQuestionsEmpty" class="dashboard-empty-state" hidden>
+                            עדיין לא שאלת שאלות.
+                        </p>
+
+                        <div id="studentQuestionsList" class="student-questions-list"></div>
+                    </section>
+
+                    <section class="student-stack-section student-stack-section--sessions">
+                        <div class="dashboard-panel__header">
+                            <h3 class="dashboard-panel__title">
+                                סשנים אחרונים
+                            </h3>
+                        </div>
+
+                        <div id="studentRecentSessionsList" class="student-recent-sessions-list">
+                            <p class="dashboard-empty-state">
+                                יוצג אחרי חיבור ל־session participants.
+                            </p>
+                        </div>
+                    </section>
+
+                </article>
+
+                <article class="dashboard-panel dashboard-panel--student-calendar">
+                    <div class="dashboard-panel__header">
+                        <h3 class="dashboard-panel__title">
+                            לוח שנה
+                        </h3>
                     </div>
-                </div>
 
-                <p id="studentQuestionsEmpty" class="empty-state" hidden>
-                    עדיין לא שאלת שאלות בהרצאה הזו.
-                </p>
+                    <div class="dashboard-calendar-frame">
+                        <iframe
+                            src="https://calendar.google.com/calendar/embed?src=YOUR_CALENDAR_ID&ctz=Asia%2FJerusalem"
+                            width="100%" height="440" frameborder="0" scrolling="no">
+                        </iframe>
+                    </div>
+                </article>
 
-                <div id="studentQuestionsList" class="student-questions-list"></div>
-            </article>
-        </section>
+            </section>
 
-        <section class="glass-card calendar-card">
-            <h2>יומן הרצאות</h2>
+            <!-- ADD missing overlays -->
+            <!-- ===============================
+             JOIN SESSION OVERLAY
+            ================================ -->
+            <div id="studentJoinOverlay" class="dashboard-modal" hidden>
+                <div class="dashboard-modal__backdrop"></div>
 
-            <div id="calendarContainer">
-                <p class="empty-state">
-                    <!-- calender api will be added later / integration with google acc. -->
-                <h2>Calendar</h2>
-                <div id="calendarContainer">
-                    <iframe src="https://calendar.google.com/calendar/embed?src=YOUR_CALENDAR_ID&ctz=Asia%2FJerusalem"
-                        style="border: 0" width="100%" height="500" frameborder="0" scrolling="no">
-                    </iframe>
-                </div>
-                </p>
+                <section class="dashboard-modal__panel" role="dialog" aria-modal="true">
+
+                    <button type="button" class="dashboard-modal__close" data-student-action="close-overlay">
+                        ×
+                    </button>
+
+                    <h2 class="dashboard-modal__title">
+                        הצטרפות לסשן
+                    </h2>
+
+                    <p class="dashboard-modal__note">
+                        הכנס קוד סשן שקיבלת מהמרצה. בהמשך נוסיף סריקת QR מהמצלמה.
+                    </p>
+
+                    <form id="studentJoinSessionForm" class="dashboard-edit-form">
+                        <label class="dashboard-edit-field">
+                            <span>קוד סשן</span>
+
+                            <input id="studentSessionCodeInput" type="text" inputmode="text" maxlength="8"
+                                placeholder="D7E2B5 / 123456">
+                        </label>
+
+                        <div class="dashboard-settings-actions">
+                            <button type="submit" class="dashboard-secondary-button">
+                                כניסה לסשן
+                            </button>
+
+                            <button type="button" class="dashboard-secondary-button" data-student-action="scan-qr">
+                                סריקת QR
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- QR SCAN SECTION -->
+                    <div id="studentQrScannerBox" class="student-qr-scanner-box" hidden>
+                        <div id="studentQrReader" class="student-qr-reader"></div>
+
+                        <button type="button" class="dashboard-secondary-button" data-student-action="stop-qr">
+                            עצירת סריקה
+                        </button>
+                    </div>
+
+                    <p id="studentJoinSessionFeedback" class="dashboard-modal__feedback" hidden></p>
+
+                </section>
             </div>
-        </section>
 
-        <p id="studentDashboardError" class="dashboard-error"></p>
-    </main>
+
+            <!-- ===============================
+             QUESTIONS + NOTES DEMO OVERLAY
+            ================================ -->
+            <div id="studentStudyOverlay" class="dashboard-modal" hidden>
+                <div class="dashboard-modal__backdrop"></div>
+
+                <section class="dashboard-modal__panel dashboard-modal__panel--wide" role="dialog" aria-modal="true">
+
+                    <button type="button" class="dashboard-modal__close" data-student-action="close-overlay">
+                        ×
+                    </button>
+
+                    <h2 id="studentStudyOverlayTitle" class="dashboard-modal__title">
+                        השאלות וההערות שלי
+                    </h2>
+
+                    <p class="dashboard-modal__note">
+                        תצוגת דמו. בהמשך כאן יופיעו שאלות, notes, ו־annotations לפי session.
+                    </p>
+
+                    <div class="student-study-overlay-grid">
+
+                        <section class="student-study-overlay-card">
+                            <h3>ההערות שלי</h3>
+
+                            <div class="student-study-scroll">
+                                <p class="dashboard-empty-state">
+                                    כאן יופיעו notes ו־annotations אחרי שנבנה את מערכת השכבות.
+                                </p>
+                            </div>
+                        </section>
+
+                        <section class="student-study-overlay-card">
+                            <h3>השאלות שלי</h3>
+
+                            <div class="student-study-scroll">
+                                <p class="dashboard-empty-state">
+                                    כאן נציג שאלות מסשן פעיל / סשן אחרון.
+                                </p>
+                            </div>
+                        </section>
+
+                    </div>
+
+                </section>
+            </div>
+
+            <div id="studentSettingsOverlay" class="dashboard-modal" hidden>
+                <div class="dashboard-modal__backdrop"></div>
+
+                <section class="dashboard-modal__panel" role="dialog" aria-modal="true">
+                    <button type="button" class="dashboard-modal__close" data-student-action="close-overlay">
+                        ×
+                    </button>
+
+                    <h2 class="dashboard-modal__title">
+                        הגדרות משתמש
+                    </h2>
+
+                    <p class="dashboard-modal__note">
+                        כאן נעתיק בהמשך את edit/delete user מה־Lecturer dashboard.
+                    </p>
+                </section>
+            </div>
+
+            <p id="studentDashboardError" class="dashboard-error"></p>
+        </main>
+    </div>
+
+    <!-- QR API | later download : js/vendor/html5-qrcode.min.js -->
+    <script src="https://unpkg.com/html5-qrcode"></script>
 
     <script src="js/dls-api.js"></script>
     <script src="js/student-dashboard.js"></script>

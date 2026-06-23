@@ -43,11 +43,7 @@ const DLS_CONFIG = {
     ROUTES: {
         SIGNUP: "/signup",
         QUESTIONS: "/api/questions",
-        SESSIONS: "/api/sessions" 
-    },
-
-    STORAGE_KEYS: {
-        CURRENT_USER: "dlsCurrentUser"
+        SESSIONS: "/api/sessions"
     },
 
     DEFAULTS: {
@@ -57,8 +53,9 @@ const DLS_CONFIG = {
     // for questions:
     STORAGE_KEYS: {
         CURRENT_USER: "dlsCurrentUser",
+        CURRENT_SESSION: "dlsCurrentSession",
         PENDING_QUESTIONS: "dlsPendingQuestions"
-    }
+    },
 };
 
 /* REST API HELPER - create full backend API URL */
@@ -246,6 +243,34 @@ const DLS_API = {
         );
 
         return responseData.data || [];
+    },
+
+    /* JOIN SESSION
+        Route:
+        POST /api/sessions/:code/join
+        
+        Used by:
+        student-dashboard.html -> Join session overlay
+        
+        Payload:
+        { userId }
+    */
+    async joinSession(code, payload = {}) {
+        const cleanCode = String(code || "").trim();
+
+        if (!cleanCode) {
+            throw new Error("Missing session code");
+        }
+
+        const responseData = await sendJsonRequest(
+            `${DLS_CONFIG.ROUTES.SESSIONS}/${encodeURIComponent(cleanCode)}/join`,
+            {
+                method: "POST",
+                body: JSON.stringify(payload)
+            }
+        );
+
+        return responseData.data || responseData;
     }
 };
 
@@ -299,6 +324,36 @@ const DLS_SOCKET = {
         }
         socket.emit("presentation:join", { presentationId });
     },
+
+    /* --- DEBUG CHECK IF REALLY NEEDED HERE --- */
+    /* JOIN SESSION
+        Route:
+        POST /api/sessions/:code/join
+
+        Used by:
+        student-dashboard.html -> Join session overlay
+
+        Payload:
+        { userId }
+    */
+    // async joinSession(code, payload = {}) {
+    //     const cleanCode = String(code || "").trim();
+
+    //     if (!cleanCode) {
+    //         throw new Error("Missing session code");
+    //     }
+
+    //     const responseData = await sendJsonRequest(
+    //         `${DLS_CONFIG.ROUTES.SESSIONS}/${encodeURIComponent(cleanCode)}/join`,
+    //         {
+    //             method: "POST",
+    //             body: JSON.stringify(payload)
+    //         }
+    //     );
+
+    //     return responseData.data || responseData;
+    // },
+    
     /* ON QUESTION CREATED Purpose: Listen to new question events. */
     onQuestionCreated(callback) {
         const socket = this.connect();
@@ -343,3 +398,4 @@ PART B REST_API ->
 BeckendStore -> 
 SocketIO room emit -> 
 PART A Recieves live event */
+

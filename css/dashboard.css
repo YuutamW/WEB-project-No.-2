@@ -1186,3 +1186,274 @@ body {
 }
 
 /* ============================================ */
+
+/* =========================================================
+   STUDENT DASHBOARD LAYOUT
+   ---------------------------------------------------------
+   Purpose:
+   Student dashboard uses the same visual system as lecturer,
+   but with a different workspace:
+   - left: questions + recent sessions
+   - right: calendar
+========================================================= */
+
+.dashboard-page--student .dashboard-actions--student {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.dashboard-page--student .dashboard-grid--student {
+    direction: ltr;
+
+    grid-template-columns: minmax(280px, 0.95fr) minmax(0, 1.55fr);
+    align-items: stretch;
+}
+
+.dashboard-page--student .dashboard-grid--student>* {
+    direction: rtl;
+}
+
+.dashboard-panel--student-stack {
+    display: grid;
+    grid-template-rows: minmax(220px, 1fr) minmax(180px, 0.8fr);
+    gap: 18px;
+}
+
+.student-stack-section {
+    min-height: 0;
+    padding: 4px;
+    overflow: hidden;
+}
+
+.student-stack-section--questions {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    padding-bottom: 18px;
+}
+
+.student-stack-section--sessions {
+    padding-top: 4px;
+}
+
+.student-questions-list,
+.student-recent-sessions-list {
+    max-height: 260px;
+    overflow-y: auto;
+    padding-inline-end: 6px;
+}
+
+.dashboard-panel--student-calendar {
+    min-height: 520px;
+}
+
+.dashboard-panel--student-calendar .dashboard-calendar-frame iframe {
+    height: 440px;
+}
+
+
+/* =========================================================
+   STUDENT QUESTIONS CARDS
+========================================================= */
+
+.student-question-card {
+    display: grid;
+    gap: 8px;
+
+    margin-top: 10px;
+    padding: 12px;
+
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.student-question-card__top {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.72);
+}
+
+.student-question-text {
+    margin: 0;
+    line-height: 1.55;
+}
+
+.student-question-meta {
+    font-size: 0.78rem;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+
+/* =========================================================
+   STUDENT STUDY OVERLAY
+========================================================= */
+
+.dashboard-modal__panel--wide {
+    width: min(880px, calc(100vw - 32px));
+}
+
+.student-study-overlay-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+
+    margin-top: 18px;
+}
+
+.student-study-overlay-card {
+    min-height: 300px;
+    padding: 16px;
+
+    border-radius: 18px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.student-study-overlay-card h3 {
+    margin: 0 0 12px;
+}
+
+.student-study-scroll {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+/* =========================================================
+   STUDENT QR SCANNER
+========================================================= */
+
+.student-qr-scanner-box[hidden] {
+    display: none !important;
+}
+
+.student-qr-scanner-box {
+    margin-top: 16px;
+    display: grid;
+    gap: 12px;
+}
+
+.student-qr-reader {
+    overflow: hidden;
+
+    border-radius: 18px;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+
+    background: rgba(0, 0, 0, 0.28);
+}
+
+.student-qr-reader video {
+    border-radius: 18px;
+}
+
+/* =========================================================
+   STUDENT SPLIT ACTION CARD
+   ---------------------------------------------------------
+   Purpose:
+   One dashboard action tile split into:
+   - top: notes
+   - bottom: questions
+========================================================= */
+
+.student-split-action-card {
+    display: grid;
+    grid-template-rows: 1fr 1fr;
+
+    padding: 0;
+    overflow: hidden;
+}
+
+.student-split-action-card__section {
+    width: 100%;
+    padding: 18px 22px;
+
+    border: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+
+    background: transparent;
+    color: inherit;
+
+    text-align: right;
+    font: inherit;
+
+    cursor: pointer;
+
+    transition: background 180ms ease;
+}
+
+.student-split-action-card__section:last-child {
+    border-bottom: none;
+}
+
+.student-split-action-card__section:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.student-split-action-card__section .dashboard-action-card__icon {
+    margin-bottom: 10px;
+}
+
+@media (max-width: 850px) {
+    .student-split-action-card {
+        min-height: 120px;
+    }
+}
+
+/* =========================================================
+   STUDENT MOBILE OVERRIDES
+========================================================= */
+
+@media (max-width: 850px) {
+
+    .dashboard-page--student .dashboard-actions--student,
+    .dashboard-page--student .dashboard-grid--student,
+    .student-study-overlay-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .dashboard-panel--student-stack {
+        grid-template-rows: auto;
+    }
+
+    .student-questions-list,
+    .student-recent-sessions-list {
+        max-height: 220px;
+    }
+
+    .dashboard-panel--student-calendar .dashboard-calendar-frame iframe {
+        height: 360px;
+    }
+}
+
+/* =========================================================
+   MOBILE REAL SCROLL FIX
+   ---------------------------------------------------------
+   Global body overflow is hidden for desktop.
+   On mobile we must restore natural scrolling.
+========================================================= */
+
+@media (max-width: 850px) {
+    html,
+    body {
+        height: auto;
+        min-height: 100%;
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
+
+    .dashboard-page {
+        height: auto;
+        min-height: 100dvh;
+        overflow: visible;
+    }
+
+    .dashboard-main {
+        height: auto;
+        min-height: 100dvh;
+        overflow: visible;
+        padding-bottom: 96px;
+    }
+}
+
