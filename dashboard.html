@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="css/dashboard.css">
     <script src="js/dls-api.js" defer></script>
     <script src="js/dashboard.js" defer></script>
-    
+
 
     <!-- favicon -->
     <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
@@ -76,6 +76,25 @@
              MAIN CONTENT
         ================================ -->
         <main class="dashboard-main">
+            <!-- Burger Menu Treatment for mobile ☰ -->
+            <button type="button" class="dashboard-mobile-menu-button" data-dashboard-action="toggle-mobile-menu"
+                aria-expanded="false" aria-controls="dashboardMobileNav" aria-label="פתיחת תפריט">
+                <span class="dashboard-mobile-menu-button__line"></span>
+                <span class="dashboard-mobile-menu-button__line"></span>
+                <span class="dashboard-mobile-menu-button__line"></span>
+            </button>
+
+            <nav id="dashboardMobileNav" class="dashboard-mobile-nav" hidden>
+                <a href="dashboard.html">🏠 דף הבית</a>
+
+                <button type="button" data-dashboard-action="open-settings">
+                    ⚙️ הגדרות
+                </button>
+
+                <a href="login.html" data-auth-action="logout">
+                    התנתק/י 🔑
+                </a>
+            </nav>
 
             <!-- Header -->
             <header class="dashboard-header">
@@ -125,7 +144,7 @@
                     </p>
                 </a>
 
-                <button class="dashboard-action-card" type="button" disabled>
+                <button class="dashboard-action-card is-disabled" type="button" disabled>
                     <span class="dashboard-action-card__icon">
                         📄
                     </span>
@@ -240,13 +259,81 @@
                 <span id="settingsUserEmail">לא נטען</span>
             </div>
 
+            <div id="settingsFeedback" class="dashboard-modal__feedback" hidden></div>
+
+            <form id="settingsEditForm" class="dashboard-edit-form" hidden>
+                <label class="dashboard-edit-field">
+                    <span>שם פרטי</span>
+                    <input id="settingsEditFirstName" type="text" autocomplete="given-name">
+                </label>
+
+                <label class="dashboard-edit-field">
+                    <span>שם משפחה</span>
+                    <input id="settingsEditLastName" type="text" autocomplete="family-name">
+                </label>
+
+                <label class="dashboard-edit-field">
+                    <span>אימייל</span>
+                    <input id="settingsEditEmail" type="email" autocomplete="email">
+                </label>
+
+                <div class="dashboard-settings-actions">
+                    <button type="submit" class="dashboard-secondary-button">
+                        שמירת שינויים
+                    </button>
+
+                    <button type="button" class="dashboard-secondary-button" data-dashboard-action="cancel-edit-user">
+                        ביטול
+                    </button>
+                </div>
+            </form>
+
+            <div id="deleteUserConfirmBox" class="dashboard-confirm-box" hidden>
+                <p>
+                    האם למחוק את המשתמש? פעולה זו כרגע בלתי הפיכה.
+                </p>
+
+                <div class="dashboard-settings-actions">
+                    <button type="button" class="danger-button" data-dashboard-action="confirm-delete-user">
+                        כן, מחק משתמש
+                    </button>
+
+                    <button type="button" class="dashboard-secondary-button" data-dashboard-action="cancel-delete-user">
+                        ביטול
+                    </button>
+                </div>
+            </div>
+
+            <div id="abortSettingsConfirmBox" class="dashboard-submodal" hidden>
+                <div class="dashboard-submodal__card">
+                    <h3 class="dashboard-submodal__title">
+                        פעולה פתוחה
+                    </h3>
+
+                    <p id="abortSettingsMessage" class="dashboard-submodal__text">
+                        יש פעולה פתוחה. האם לבטל אותה ולסגור את ההגדרות?
+                    </p>
+
+                    <div class="dashboard-settings-actions">
+                        <button type="button" class="danger-button" data-dashboard-action="confirm-abort-settings">
+                            כן, בטל וסגור
+                        </button>
+
+                        <button type="button" class="dashboard-secondary-button"
+                            data-dashboard-action="cancel-abort-settings">
+                            המשך פעולה
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             <div class="dashboard-settings-actions">
-                <button type="button" class="dashboard-secondary-button">
-                    עריכת משתמש - בקרוב
+                <button type="button" class="dashboard-secondary-button" data-dashboard-action="edit-user">
+                    עריכת משתמש 🖊️
                 </button>
 
-                <button type="button" class="danger-button">
-                    מחיקת משתמש - בקרוב
+                <button type="button" class="danger-button" data-dashboard-action="delete-user">
+                    מחיקת משתמש
                 </button>
             </div>
 

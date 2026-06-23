@@ -162,6 +162,262 @@ async function editCurrentUser(updatedFields) {
     return mergedUser;
 }
 
+/* ==========================================================
+   SETTINGS FEEDBACK
+========================================================== */
+
+function showSettingsFeedback(type, text) {
+    const feedback = document.querySelector("#settingsFeedback");
+
+    if (!feedback) {
+        return;
+    }
+
+    feedback.hidden = false;
+    feedback.className = `dashboard-modal__feedback ${type}`;
+    feedback.textContent = text;
+}
+
+function clearSettingsFeedback() {
+    const feedback = document.querySelector("#settingsFeedback");
+
+    if (!feedback) {
+        return;
+    }
+
+    feedback.hidden = true;
+    feedback.textContent = "";
+}
+
+
+/* ==========================================================
+   EDIT USER FORM
+========================================================== */
+
+function fillEditUserForm(user) {
+    const firstNameInput = document.querySelector("#settingsEditFirstName");
+    const lastNameInput = document.querySelector("#settingsEditLastName");
+    const emailInput = document.querySelector("#settingsEditEmail");
+
+    if (firstNameInput) {
+        firstNameInput.value = user.firstName || "";
+    }
+
+    if (lastNameInput) {
+        lastNameInput.value = user.lastName || "";
+    }
+
+    if (emailInput) {
+        emailInput.value = user.email || "";
+    }
+}
+
+function handleEditUserClick() {
+    const currentUser = getCurrentDashboardUser();
+
+    if (!currentUser) {
+        showSettingsFeedback("error", "לא נמצא משתמש מחובר.");
+        return;
+    }
+
+    const editForm = document.querySelector("#settingsEditForm");
+    const deleteBox = document.querySelector("#deleteUserConfirmBox");
+
+    clearSettingsFeedback();
+    fillEditUserForm(currentUser);
+
+    if (deleteBox) {
+        deleteBox.hidden = true;
+    }
+
+    if (editForm) {
+        editForm.hidden = false;
+    }
+}
+
+function handleCancelEditUserClick() {
+    /* Added this for pressing cancel to initiate popup of Assurence */
+    if (isEditFormDirty()) {
+        showAbortSettingsConfirmBox("edit");
+        return;
+    }
+
+    const editForm = document.querySelector("#settingsEditForm");
+
+    if (editForm) {
+        editForm.hidden = true;
+    }
+
+    clearSettingsFeedback();
+}
+
+async function handleEditUserSubmit(event) {
+    event.preventDefault();
+
+    const firstNameInput = document.querySelector("#settingsEditFirstName");
+    const lastNameInput = document.querySelector("#settingsEditLastName");
+    const emailInput = document.querySelector("#settingsEditEmail");
+
+    const updatedFields = {
+        firstName: firstNameInput ? firstNameInput.value.trim() : "",
+        lastName: lastNameInput ? lastNameInput.value.trim() : "",
+        email: emailInput ? emailInput.value.trim() : ""
+    };
+
+    try {
+        const updatedUser = await editCurrentUser(updatedFields);
+
+        const editForm = document.querySelector("#settingsEditForm");
+
+        if (editForm) {
+            editForm.hidden = true;
+        }
+
+        const userIdElement = document.querySelector(DASHBOARD_CONFIG.SELECTORS.SETTINGS_USER_ID);
+        const userEmailElement = document.querySelector(DASHBOARD_CONFIG.SELECTORS.SETTINGS_USER_EMAIL);
+
+        if (userIdElement) {
+            userIdElement.textContent = updatedUser.id || updatedUser._id || "לא נמצא";
+        }
+
+        if (userEmailElement) {
+            userEmailElement.textContent = updatedUser.email || "לא נמצא";
+        }
+
+        showSettingsFeedback("success", "המשתמש עודכן בהצלחה.");
+    } catch (error) {
+        showSettingsFeedback("error", error.message || "עדכון משתמש נכשל.");
+    }
+}
+
+
+/* ==========================================================
+   DELETE USER FLOW
+========================================================== */
+
+function handleDeleteUserClick() {
+    const editForm = document.querySelector("#settingsEditForm");
+    const deleteBox = document.querySelector("#deleteUserConfirmBox");
+
+    clearSettingsFeedback();
+
+    if (editForm) {
+        editForm.hidden = true;
+    }
+
+    if (deleteBox) {
+        deleteBox.hidden = false;
+    }
+}
+
+function handleCancelDeleteUserClick() {
+    const deleteBox = document.querySelector("#deleteUserConfirmBox");
+
+    if (deleteBox) {
+        deleteBox.hidden = true;
+    }
+
+    clearSettingsFeedback();
+}
+
+async function deleteCurrentUser() {
+    const currentUser = getCurrentDashboardUser();
+
+    if (!currentUser) {
+        throw new Error("No logged-in user found.");
+    }
+
+    const userId = currentUser.id || currentUser._id;
+
+    if (!userId) {
+        throw new Error("Missing user id.");
+    }
+
+    const response = await fetch(
+        DASHBOARD_CONFIG.API.BASE_URL +
+        DASHBOARD_CONFIG.API.USERS_PATH +
+        "/" +
+        encodeURIComponent(userId),
+        {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json"
+            }
+        }
+    );
+
+    const result = await response.json().catch(function () {
+        return {};
+    });
+
+    if (!response.ok) {
+        throw new Error(result.message || "Delete user failed.");
+    }
+
+    clearDashboardSession();
+
+    window.location.href = DASHBOARD_CONFIG.ROUTES.LOGIN;
+
+    return result;
+}
+
+async function handleConfirmDeleteUserClick() {
+    try {
+        await deleteCurrentUser();
+    } catch (error) {
+        showSettingsFeedback("error", error.message || "מחיקת משתמש נכשלה.");
+    }
+}
+
+
+/* ==========================================================
+   SETUP SETTINGS USER BUTTONS
+========================================================== */
+
+function setupSettingsActions() {
+    const editButton = document.querySelector("[data-dashboard-action='edit-user']");
+    const deleteButton = document.querySelector("[data-dashboard-action='delete-user']");
+    const cancelEditButton = document.querySelector("[data-dashboard-action='cancel-edit-user']");
+    const cancelDeleteButton = document.querySelector("[data-dashboard-action='cancel-delete-user']");
+    const confirmDeleteButton = document.querySelector("[data-dashboard-action='confirm-delete-user']");
+    const editForm = document.querySelector("#settingsEditForm");
+
+    const confirmAbortButton = document.querySelector("[data-dashboard-action='confirm-abort-settings']");
+    const cancelAbortButton = document.querySelector("[data-dashboard-action='cancel-abort-settings']");
+
+    if (confirmAbortButton) {
+        confirmAbortButton.addEventListener("click", handleConfirmAbortSettingsClick);
+    }
+
+    if (cancelAbortButton) {
+        cancelAbortButton.addEventListener("click", handleCancelAbortSettingsClick);
+    }
+
+    if (editButton) {
+        editButton.addEventListener("click", handleEditUserClick);
+    }
+
+    if (deleteButton) {
+        deleteButton.addEventListener("click", handleDeleteUserClick);
+    }
+
+    if (cancelEditButton) {
+        cancelEditButton.addEventListener("click", handleCancelEditUserClick);
+    }
+
+    if (cancelDeleteButton) {
+        cancelDeleteButton.addEventListener("click", handleCancelDeleteUserClick);
+    }
+
+    if (confirmDeleteButton) {
+        confirmDeleteButton.addEventListener("click", handleConfirmDeleteUserClick);
+    }
+
+    if (editForm) {
+        editForm.addEventListener("submit", handleEditUserSubmit);
+    }
+}
+
 
 function renderDashboardUser() {
     const user = getCurrentDashboardUser();
@@ -223,15 +479,14 @@ function handleDashboardLogout(event) {
 }
 
 function setupDashboardLogout() {
-    const logoutButton = document.querySelector(
+    const logoutButtons = document.querySelectorAll(
         DASHBOARD_CONFIG.SELECTORS.LOGOUT_BUTTON
     );
 
-    if (!logoutButton) {
-        return;
-    }
-
-    logoutButton.addEventListener("click", handleDashboardLogout);
+    // for single querry: logoutButton.addEventListener("click", handleDashboardLogout);
+    logoutButtons.forEach(function (button) {
+        button.addEventListener("click", handleDashboardLogout);
+    });
 }
 
 /* ==========================================================
@@ -251,7 +506,10 @@ press settings ->
  
 */
 function openSettingsOverlay(event) {
-    event.preventDefault();
+
+    if (event) {
+        event.preventDefault();
+    }
 
     const user = getCurrentDashboardUser();
     const overlay = document.querySelector(DASHBOARD_CONFIG.SELECTORS.SETTINGS_OVERLAY);
@@ -277,7 +535,119 @@ function openSettingsOverlay(event) {
     });
 }
 
-function closeSettingsOverlay() {
+// function closeSettingsOverlay() {
+//     const overlay = document.querySelector(DASHBOARD_CONFIG.SELECTORS.SETTINGS_OVERLAY);
+
+//     if (!overlay) {
+//         return;
+//     }
+
+//     overlay.classList.remove("is-open");
+
+//     setTimeout(function () {
+//         overlay.hidden = true;
+//     }, 220);
+// }
+
+// added Abort / Apply action Popup Menu :
+function isSettingsActionActive() {
+    const editForm = document.querySelector("#settingsEditForm");
+    const deleteBox = document.querySelector("#deleteUserConfirmBox");
+
+    return (
+        (editForm && !editForm.hidden) ||
+        (deleteBox && !deleteBox.hidden)
+    );
+}
+
+function getEditFormValues() {
+    const firstNameInput = document.querySelector("#settingsEditFirstName");
+    const lastNameInput = document.querySelector("#settingsEditLastName");
+    const emailInput = document.querySelector("#settingsEditEmail");
+
+    return {
+        firstName: firstNameInput ? firstNameInput.value.trim() : "",
+        lastName: lastNameInput ? lastNameInput.value.trim() : "",
+        email: emailInput ? emailInput.value.trim() : ""
+    };
+}
+
+function isEditFormDirty() {
+    const currentUser = getCurrentDashboardUser();
+    const values = getEditFormValues();
+
+    if (!currentUser) {
+        return false;
+    }
+
+    return (
+        values.firstName !== (currentUser.firstName || "") ||
+        values.lastName !== (currentUser.lastName || "") ||
+        values.email !== (currentUser.email || "")
+    );
+}
+
+function getActiveSettingsAction() {
+    const editForm = document.querySelector("#settingsEditForm");
+    const deleteBox = document.querySelector("#deleteUserConfirmBox");
+
+    if (editForm && !editForm.hidden) {
+        return "edit";
+    }
+
+    if (deleteBox && !deleteBox.hidden) {
+        return "delete";
+    }
+
+    return null;
+}
+
+function showAbortSettingsConfirmBox(actionType) {
+    const abortBox = document.querySelector("#abortSettingsConfirmBox");
+    const message = document.querySelector("#abortSettingsMessage");
+
+    if (!abortBox) {
+        return;
+    }
+
+    if (message) {
+        if (actionType === "edit") {
+            message.textContent = "יש שינויים שלא נשמרו. האם לבטל אותם ולסגור את ההגדרות?";
+        } else if (actionType === "delete") {
+            message.textContent = "מחיקת משתמש פתוחה. האם לבטל את הפעולה ולסגור את ההגדרות?";
+        } else {
+            message.textContent = "יש פעולה פתוחה. האם לבטל אותה ולסגור את ההגדרות?";
+        }
+    }
+
+    abortBox.hidden = false;
+}
+
+function hideAbortSettingsConfirmBox() {
+    const abortBox = document.querySelector("#abortSettingsConfirmBox");
+
+    if (abortBox) {
+        abortBox.hidden = true;
+    }
+}
+
+function resetSettingsActionPanels() {
+    const editForm = document.querySelector("#settingsEditForm");
+    const deleteBox = document.querySelector("#deleteUserConfirmBox");
+
+    if (editForm) {
+        editForm.hidden = true;
+    }
+
+    if (deleteBox) {
+        deleteBox.hidden = true;
+    }
+
+    hideAbortSettingsConfirmBox();
+    clearSettingsFeedback();
+}
+
+function forceCloseSettingsOverlay() {
     const overlay = document.querySelector(DASHBOARD_CONFIG.SELECTORS.SETTINGS_OVERLAY);
 
     if (!overlay) {
@@ -288,11 +658,47 @@ function closeSettingsOverlay() {
 
     setTimeout(function () {
         overlay.hidden = true;
+        resetSettingsActionPanels();
     }, 220);
 }
 
+function requestCloseSettingsOverlay(event) {
+    if (event) {
+        event.preventDefault();
+    }
+
+    const activeAction = getActiveSettingsAction();
+
+    if (activeAction === "edit") {
+        if (isEditFormDirty()) {
+            showAbortSettingsConfirmBox("edit");
+            return;
+        }
+
+        forceCloseSettingsOverlay();
+        return;
+    }
+
+    if (activeAction === "delete") {
+        showAbortSettingsConfirmBox("delete");
+        return;
+    }
+
+    forceCloseSettingsOverlay();
+}
+
+function handleConfirmAbortSettingsClick() {
+    resetSettingsActionPanels();
+    forceCloseSettingsOverlay();
+}
+
+function handleCancelAbortSettingsClick() {
+    hideAbortSettingsConfirmBox();
+}
+
+
 function setupSettingsOverlay() {
-    const openButton = document.querySelector(
+    const openButtons = document.querySelectorAll(
         DASHBOARD_CONFIG.SELECTORS.SETTINGS_OPEN_BUTTON
     );
 
@@ -300,49 +706,141 @@ function setupSettingsOverlay() {
         DASHBOARD_CONFIG.SELECTORS.SETTINGS_CLOSE_BUTTONS
     );
 
-    if (openButton) {
-        openButton.addEventListener("click", openSettingsOverlay);
-    }
+    openButtons.forEach(function (button) {
+        button.addEventListener("click", openSettingsOverlay);
+    });
 
     closeButtons.forEach(function (button) {
-        button.addEventListener("click", closeSettingsOverlay);
+        button.addEventListener("click", requestCloseSettingsOverlay);
     });
 
     document.addEventListener("keydown", function (event) {
         if (event.key === "Escape") {
-            closeSettingsOverlay();
+            requestCloseSettingsOverlay(event);
         }
+    });
+}
+
+// setup Mobile Menu:
+function openMobileMenu(mobileNav, toggleButton) {
+    mobileNav.hidden = false;
+    toggleButton.classList.add("is-open");
+    toggleButton.setAttribute("aria-expanded", "true");
+
+    requestAnimationFrame(function () {
+        mobileNav.classList.add("is-open");
+    });
+}
+
+function closeMobileMenu(mobileNav, toggleButton) {
+    mobileNav.classList.remove("is-open");
+    toggleButton.classList.remove("is-open");
+    toggleButton.setAttribute("aria-expanded", "false");
+
+    setTimeout(function () {
+        if (!mobileNav.classList.contains("is-open")) {
+            mobileNav.hidden = true;
+        }
+    }, 180);
+}
+
+function setupMobileMenu() {
+    const toggleButton = document.querySelector("[data-dashboard-action='toggle-mobile-menu']");
+    const mobileNav = document.querySelector("#dashboardMobileNav");
+
+    if (!toggleButton || !mobileNav) {
+        return;
+    }
+
+    toggleButton.addEventListener("click", function (event) {
+        event.stopPropagation();
+
+        if (mobileNav.hidden) {
+            openMobileMenu(mobileNav, toggleButton);
+        } else {
+            closeMobileMenu(mobileNav, toggleButton);
+        }
+    });
+
+    mobileNav.addEventListener("click", function (event) {
+        event.stopPropagation();
+
+        const clickedItem =
+            event.target.closest("a") ||
+            event.target.closest("button");
+
+        if (clickedItem) {
+            closeMobileMenu(mobileNav, toggleButton);
+        }
+    });
+
+    document.addEventListener("click", function (event) {
+        if (mobileNav.hidden) {
+            return;
+        }
+
+        const clickedInsideMenu = mobileNav.contains(event.target);
+        const clickedToggle = toggleButton.contains(event.target);
+
+        if (!clickedInsideMenu && !clickedToggle) {
+            closeMobileMenu(mobileNav, toggleButton);
+        }
+    });
+
+    document.addEventListener("keydown", function (event) {
+        if (event.key === "Escape" && !mobileNav.hidden) {
+            closeMobileMenu(mobileNav, toggleButton);
+        }
+    });
+}
+
+/* HELPER - Call Settings Via URL */
+function openSettingsFromUrlIfNeeded() {
+    const params = new URLSearchParams(window.location.search);
+
+    const shouldOpenSettings =
+        params.get("settings") === "1" ||
+        window.location.hash === "#settings";
+
+    if (!shouldOpenSettings) {
+        return;
+    }
+
+    openSettingsOverlay({
+        preventDefault: function () { }
     });
 }
 
 /* ==========================================================
    RECENT SESSIONS
+   
+   Backend needs : GET /api/sessions/recent?userId=...&limit=...
 ========================================================== */
 async function renderRecentSessions() {
     const container = document.querySelector("#dashboardRecentSessionsPanel");
-    if(!container) return;
+    if (!container) return;
 
     try {
         const sessions = await DLS_API.getRecentSessions(5);
-        if(!sessions || sessions.length === 0) {
+        if (!sessions || sessions.length === 0) {
             container.innerHTML = '<p class="dashboard-empty-state">אין סשנים קודמים להצגה.</p>';
             return;
         }
 
-        container.innerHTML ="";
+        container.innerHTML = "";
 
         sessions.forEach(session => {
             const sessionDate = new Date(session.date).toLocaleDateString("he-IL", {
-                day: "2-digit", 
-                month: "2-digit", 
-                year: "numeric", 
-                hour: "2-digit", 
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric",
+                hour: "2-digit",
                 minute: "2-digit"
             });
 
             const card = document.createElement("a");
             // Placeholder link - update when session view is ready
-            card.href = `session.html?code=${encodeURIComponent(session.id)}`; 
+            card.href = `session.html?code=${encodeURIComponent(session.id)}`;
             card.className = "session-card";
 
             card.innerHTML = `
@@ -355,8 +853,8 @@ async function renderRecentSessions() {
             card.querySelector('.session-card__title').textContent = session.title || `סשן (${session.id})`;
             container.appendChild(card);
         });
-    } catch(error) { 
-        console.error("Failed to Load recent Sessions:" ,error);
+    } catch (error) {
+        console.error("Failed to Load recent Sessions:", error);
         container.innerHTML = '<p class="dashboard-empty-state" style="color: #ff637d;">שגיאה בטעינת סשנים.</p>';
     }
 }
@@ -374,10 +872,17 @@ document.addEventListener("DOMContentLoaded", function () {
     setupDashboardLogout();
     setupSettingsOverlay();
     renderRecentSessions();
+    setupSettingsActions();
+    setupMobileMenu();
+    //openSettingsFromUrlIfNeeded();// for debug purposes only
 });
 
-window.dlsDashboardDebug = {
-    getCurrentDashboardUser,
-    editCurrentUser
-};
+// DEBUG ONLY - enable when needed:!
+// window.dlsDashboardDebug = {
+//     getCurrentDashboardUser,
+//     editCurrentUser,
+//     deleteCurrentUser,
+//     openSettingsOverlay,
+//     requestCloseSettingsOverlay
+// };
 

@@ -670,14 +670,17 @@ body {
     display: flex;
     flex-direction: column;
     gap: 12px;
-    padding-right: 6px; /* Space for the scrollbar */
-    max-height: 250px; /* Adjust based on your preferred panel height */
+    padding-right: 6px;
+    /* Space for the scrollbar */
+    max-height: 250px;
+    /* Adjust based on your preferred panel height */
 }
 
 /* Custom sleek scrollbar for the sessions list */
 .dashboard-recent-sessions::-webkit-scrollbar {
     width: 6px;
 }
+
 .dashboard-recent-sessions::-webkit-scrollbar-thumb {
     background: rgba(255, 255, 255, 0.2);
     border-radius: 10px;
@@ -727,6 +730,7 @@ body {
     color: rgba(255, 255, 255, 0.5);
     font-size: 12px;
 }
+
 .dashboard-panel--session {
     min-height: 210px;
 }
@@ -739,14 +743,141 @@ body {
     height: 440px;
 }
 
-/* Responsive */
-@media (max-width: 900px) {
+/* Form and Feedback for edit/delete user panel */
+.dashboard-edit-form {
+    margin-top: 18px;
+    display: grid;
+    gap: 12px;
+
+    padding: 16px;
+
+    border-radius: 18px;
+    border: 1px solid rgba(199, 167, 255, 0.28);
+    background: rgba(255, 255, 255, 0.025);
+}
+
+.dashboard-edit-form[hidden],
+.dashboard-confirm-box[hidden],
+.dashboard-modal__feedback[hidden] {
+    display: none !important;
+}
+
+.dashboard-edit-field {
+    display: grid;
+    gap: 8px;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+/* Match Input Field to Theme */
+.dashboard-edit-field input {
+    width: 100%;
+    box-sizing: border-box;
+
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 12px;
+
+    padding: 0.75rem 0.9rem;
+
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+
+}
+
+.dashboard-edit-field input:focus {
+    outline: none;
+    border-color: rgba(199, 167, 255, 0.75);
+}
+
+/* Box that contains the UserDelete Confirmation Message */
+.dashboard-confirm-box {
+    margin-top: 18px;
+    padding: 14px;
+
+    border-radius: 16px;
+    border: 1px solid rgba(255, 120, 150, 0.35);
+
+    background: rgba(255, 120, 150, 0.12);
+}
+
+.dashboard-modal__feedback {
+    margin-top: 14px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    font-size: 0.95rem;
+}
+
+/* Edit success Box of text */
+.dashboard-modal__feedback.success {
+    background: rgba(80, 220, 150, 0.15);
+    /* Thin Border of Green */
+    border: 1px solid rgba(80, 220, 150, 0.35);
+    color: #bfffe0;
+}
+
+.dashboard-modal__feedback.error {
+    background: rgba(255, 99, 125, 0.35);
+    border: 1px solid rgba(255, 99, 125, 0.35);
+    color: #ffd4dc;
+}
+
+/* ============================================ */
+/* =========================================================
+   MOBILE DASHBOARD LAYOUT
+   ---------------------------------------------------------
+   Purpose:
+   - Hide desktop sidebar on mobile.
+   - Make dashboard one-column.
+   - Show burger button only on mobile.
+========================================================= */
+
+.dashboard-mobile-menu-button,
+.dashboard-mobile-nav {
+    display: none;
+}
+
+@media (max-width: 850px) {
     .dashboard-page {
-        grid-template-columns: 1fr;
+        width: 100%;
+        height: auto;
+        min-height: 100dvh;
+
+        display: block;
+
+        overflow: visible;
     }
 
     .dashboard-sidebar {
         display: none;
+    }
+
+    .dashboard-main {
+        height: auto;
+        min-height: 100dvh;
+
+        padding: 72px 20px 28px;
+
+        overflow: visible;
+    }
+
+    .dashboard-header {
+        min-height: auto;
+        padding: 28px;
+
+        flex-direction: column;
+        align-items: flex-start;
+
+        border-radius: 0 0 28px 28px;
+        background-size: 210px;
+    }
+
+    .dashboard-header__title {
+        font-size: clamp(28px, 8vw, 40px);
+    }
+
+    .dashboard-clock-card {
+        width: 65%;
+        /* @640 make 55 -540 */
+        min-width: 0;
     }
 
     .dashboard-actions,
@@ -754,9 +885,307 @@ body {
         grid-template-columns: 1fr;
     }
 
-    .dashboard-header {
+    .dashboard-panel--large {
+        grid-row: auto;
+    }
+}
+
+/* =========================================================
+   MOBILE BURGER BUTTON ☰
+   ---------------------------------------------------------
+   - Visible only on mobile.
+   - Fixed to the top-right side for RTL.
+   - Uses equal-size burger lines.
+   - Animates from hamburger into X.
+========================================================= */
+
+@media (max-width: 850px) {
+    .dashboard-mobile-menu-button {
+        display: flex;
         flex-direction: column;
-        align-items: flex-start;
+        align-items: center;
+        justify-content: center;
+
+        position: fixed;
+        top: 16px;
+        right: 16px;
+        left: auto;
+        z-index: 1001;
+
+        width: 44px;
+        height: 44px;
+
+        padding: 0;
+        gap: 5px;
+
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        border-radius: 14px;
+
+        background: rgba(255, 255, 255, 0.1);
+        color: #ffffff;
+
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+
+        box-shadow: 0 12px 35px rgba(0, 0, 0, 0.28);
+
+        cursor: pointer;
+
+        transition:
+            background 180ms ease,
+            border-color 180ms ease,
+            transform 180ms ease;
     }
 
+    .dashboard-mobile-menu-button:hover {
+        background: rgba(255, 255, 255, 0.14);
+        border-color: rgba(255, 255, 255, 0.24);
+    }
+
+    .dashboard-mobile-menu-button__line {
+        display: block;
+
+        width: 22px;
+        height: 2px;
+
+        border-radius: 999px;
+        background: #ffffff;
+
+        transform-origin: center;
+
+        transition:
+            transform 220ms ease,
+            opacity 160ms ease;
+    }
+
+    .dashboard-mobile-menu-button.is-open {
+        background: rgba(255, 255, 255, 0.14);
+    }
+
+    .dashboard-mobile-menu-button.is-open .dashboard-mobile-menu-button__line:nth-child(1) {
+        transform: translateY(7px) rotate(45deg);
+    }
+
+    .dashboard-mobile-menu-button.is-open .dashboard-mobile-menu-button__line:nth-child(2) {
+        opacity: 0;
+        transform: scaleX(0.2);
+    }
+
+    .dashboard-mobile-menu-button.is-open .dashboard-mobile-menu-button__line:nth-child(3) {
+        transform: translateY(-7px) rotate(-45deg);
+    }
 }
+
+/* =========================================================
+   MOBILE TOP CURTAIN MENU
+   ---------------------------------------------------------
+   Purpose:
+   - Full-width top curtain.
+   - No rounded box.
+   - Blurry glass background.
+   - Separated menu rows.
+   - Opens below the fixed burger button.
+========================================================= */
+
+@media (max-width: 850px) {
+    .dashboard-mobile-nav {
+        display: grid;
+
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 1000;
+
+        width: 100%;
+        padding-top: 16px;
+
+        overflow: hidden;
+
+        border-radius: 0;
+        border: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+
+        background: rgba(20, 11, 34, 0.94);
+
+        backdrop-filter: blur(22px);
+        -webkit-backdrop-filter: blur(22px);
+
+        box-shadow: 0 22px 70px rgba(0, 0, 0, 0.38);
+
+        opacity: 0;
+        transform: translateY(-100%);
+        pointer-events: none;
+
+        transition:
+            opacity 220ms ease,
+            transform 220ms ease;
+    }
+
+    .dashboard-mobile-nav.is-open {
+        opacity: 1;
+        transform: translateY(0);
+        pointer-events: auto;
+    }
+
+    .dashboard-mobile-nav[hidden] {
+        display: none !important;
+    }
+
+    .dashboard-mobile-nav a,
+    .dashboard-mobile-nav button {
+        width: 100%;
+
+        padding: 20px 80px;
+
+        border: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 0;
+
+        background: transparent;
+        color: #ffffff;
+
+        text-align: right;
+        text-decoration: none;
+        font: inherit;
+
+        cursor: pointer;
+    }
+
+    .dashboard-mobile-nav a:last-child,
+    .dashboard-mobile-nav button:last-child {
+        border-bottom: none;
+    }
+
+    .dashboard-mobile-nav a:hover,
+    .dashboard-mobile-nav button:hover {
+        background: rgba(255, 255, 255, 0.08);
+    }
+}
+
+/* =========================================================
+   MOBILE HEADER CLOCK FIXES
+   ---------------------------------------------------------
+   Purpose:
+   Prevent the clock card from colliding with the DLS logo
+   background on smaller mobile widths.
+========================================================= */
+
+@media (max-width: 850px) {
+    .dashboard-clock-card {
+        width: 65%;
+        min-width: 0;
+        /* align-self: flex-end; */
+    }
+}
+
+@media (max-width: 640px) {
+    .dashboard-header {
+        background-size: 190px;
+    }
+
+    .dashboard-clock-card {
+        width: 55%;
+    }
+
+    .dashboard-clock-card__time {
+        font-size: 36px;
+    }
+}
+
+@media (max-width: 540px) {
+    .dashboard-header {
+        background-size: 165px;
+    }
+
+    .dashboard-clock-card {
+        width: 52%;
+        padding: 18px;
+    }
+
+    .dashboard-clock-card__time {
+        font-size: 32px;
+    }
+
+    .dashboard-clock-card__date {
+        font-size: 12px;
+    }
+}
+
+/* ============================================ */
+
+/* GENERIC TRANSITION */
+.dashboard-edit-form:not([hidden]),
+.dashboard-confirm-box:not([hidden]),
+.dashboard-modal__feedback:not([hidden]) {
+    animation: dashboardPanelEnter 180ms ease both;
+}
+
+@keyframes dashboardPanelEnter {
+    from {
+        opacity: 0;
+        transform: translateY(10px) scale(0.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.dashboard-confirm-box--warning {
+    border-color: rgba(255, 190, 110, 0.42);
+    background: rgba(255, 190, 110, 0.12);
+}
+
+/* ============================================ */
+
+/* Differenciate between Abort as inrternal Popup */
+.dashboard-submodal[hidden] {
+    display: none !important;
+}
+
+.dashboard-submodal {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+
+    display: grid;
+    place-items: center;
+
+    padding: 18px;
+
+    border-radius: 28px;
+
+    background: rgba(0, 0, 0, 0.32);
+    backdrop-filter: blur(6px);
+
+    animation: dashboardPanelEnter 180ms ease both;
+}
+
+.dashboard-submodal__card {
+    width: min(360px, 100%);
+
+    padding: 20px;
+
+    border-radius: 20px;
+    border: 1px solid rgba(255, 190, 110, 0.42);
+
+    background: rgba(66, 38, 63, 0.96);
+    color: #ffffff;
+
+    box-shadow: 0 18px 60px rgba(0, 0, 0, 0.35);
+}
+
+.dashboard-submodal__title {
+    margin: 0 0 10px;
+    font-size: 18px;
+}
+
+.dashboard-submodal__text {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.82);
+    line-height: 1.6;
+}
+
+/* ============================================ */
