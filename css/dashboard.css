@@ -1223,16 +1223,20 @@ body {
     padding: 4px;
     overflow: hidden;
 }
-
-.student-stack-section--questions {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-    padding-bottom: 18px;
+.dashboard-panel--student-stack {
+    display: flex;
+    flex-direction: column;
+    min-height: 520px; /* Matches the calendar height */
 }
-
-.student-stack-section--sessions {
-    padding-top: 4px;
+.student-recent-sessions-list {
+    flex: 1;
+    max-height: 440px; /* Increased from 260px to fill the space */
+    overflow-y: auto;
+    padding-inline-end: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
-
 .student-questions-list,
 .student-recent-sessions-list {
     max-height: 260px;

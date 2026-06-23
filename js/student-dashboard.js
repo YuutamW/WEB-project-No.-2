@@ -215,7 +215,7 @@ function setupStudentOverlays() {
 
     notesButtons.forEach(function (button) {
         button.addEventListener("click", function () {
-            setText("#studentStudyOverlayTitle", "ההערות שלי");
+            setText("#studentStudyOverlayTitle", "הסשנים שלי");
             openStudentOverlay(STUDENT_DASHBOARD_CONFIG.SELECTORS.studyOverlay);
         });
     });
@@ -888,6 +888,14 @@ function setupStudentLogout() {
     });
 }
 
+/* ==========================================================
+   STUDENT RECENT SESSIONS
+   
+   Backend needs : GET /api/sessions/recent?userId=...&limit=...
+========================================================== */
+async function renderRecentStudentSessions() {
+    const container = 
+}
 
 /* 
    PAGE INIT
