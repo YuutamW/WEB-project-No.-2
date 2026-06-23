@@ -28,7 +28,7 @@ shows only personal question cards
 /* 
    Page Constants
    Keep all selectors and page-specific values in one place.
- */
+*/
 const STUDENT_DASHBOARD_CONFIG = {
     PRESENTATION_ID: DLS_CONFIG.DEFAULTS.PRESENTATION_ID,
 
@@ -785,7 +785,7 @@ function setupStudentQrScanner() {
    MOBILE MENU
  */
 
-function openMobileMenu(mobileNav, toggleButton) {
+function dashboardOpenMobileMenu(mobileNav, toggleButton) {
     mobileNav.hidden = false;
     toggleButton.classList.add("is-open");
     toggleButton.setAttribute("aria-expanded", "true");
@@ -795,7 +795,7 @@ function openMobileMenu(mobileNav, toggleButton) {
     });
 }
 
-function closeMobileMenu(mobileNav, toggleButton) {
+function dashboardCloseMobileMenu(mobileNav, toggleButton) {
     mobileNav.classList.remove("is-open");
     toggleButton.classList.remove("is-open");
     toggleButton.setAttribute("aria-expanded", "false");
@@ -824,9 +824,9 @@ function setupStudentMobileMenu() {
         event.stopPropagation();
 
         if (mobileNav.hidden) {
-            openMobileMenu(mobileNav, toggleButton);
+            dashboardOpenMobileMenu(mobileNav, toggleButton);
         } else {
-            closeMobileMenu(mobileNav, toggleButton);
+            dashboardCloseMobileMenu(mobileNav, toggleButton);
         }
     });
 
@@ -838,7 +838,7 @@ function setupStudentMobileMenu() {
             event.target.closest("button");
 
         if (clickedItem) {
-            closeMobileMenu(mobileNav, toggleButton);
+            dashboardCloseMobileMenu(mobileNav, toggleButton);
         }
     });
 
@@ -851,13 +851,13 @@ function setupStudentMobileMenu() {
         const clickedToggle = toggleButton.contains(event.target);
 
         if (!clickedInsideMenu && !clickedToggle) {
-            closeMobileMenu(mobileNav, toggleButton);
+            dashboardCloseMobileMenu(mobileNav, toggleButton);
         }
     });
 
     document.addEventListener("keydown", function (event) {
         if (event.key === "Escape" && !mobileNav.hidden) {
-            closeMobileMenu(mobileNav, toggleButton);
+            dashboardCloseMobileMenu(mobileNav, toggleButton);
         }
     });
 }
@@ -893,14 +893,27 @@ function setupStudentLogout() {
    PAGE INIT
  */
 
+// document.addEventListener("DOMContentLoaded", function () {
+//     updateStudentClock();
+//     setInterval(updateStudentClock, 1000);
+
+//     setupStudentOverlays();
+//     setupJoinSessionForm();
+//     setupStudentMobileMenu();
+//     setupStudentLogout();
+
+//     loadStudentDashboard();
+//     prefillJoinCodeFromUrl();
+//     renderActiveSession();
+
+//     setupStudentQrScanner();
+// });
+
 document.addEventListener("DOMContentLoaded", function () {
-    updateStudentClock();
-    setInterval(updateStudentClock, 1000);
+    setupDashboardCore();
 
     setupStudentOverlays();
     setupJoinSessionForm();
-    setupStudentMobileMenu();
-    setupStudentLogout();
 
     loadStudentDashboard();
     prefillJoinCodeFromUrl();

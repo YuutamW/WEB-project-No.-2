@@ -32,23 +32,23 @@
 
             <nav class="dashboard-sidebar__nav">
                 <a class="dashboard-sidebar__link is-active" href="student-dashboard.html">
-                    🏠 דף הבית
+                     דף הבית
                 </a>
 
                 <!-- <a class="dashboard-sidebar__link" href="#studentJoinSession">
-                    🎟️ הצטרפות לסשן
+                     הצטרפות לסשן
                 </a> -->
 
                 <!-- <a class="dashboard-sidebar__link" href="#studentQuestionsPanel">
-                    ❓ השאלות שלי
+                     השאלות שלי
                 </a> -->
 
                 <a class="dashboard-sidebar__link" href="#" data-dashboard-action="open-settings">
-                    ⚙️ הגדרות
+                     הגדרות
                 </a>
 
                 <a class="dashboard-sidebar__link" href="login.html" data-auth-action="logout">
-                    התנתק/י 🔑
+                    התנתק/י 
                 </a>
             </nav>
         </aside>
@@ -63,14 +63,14 @@
             </button>
 
             <nav id="dashboardMobileNav" class="dashboard-mobile-nav" hidden>
-                <a href="student-dashboard.html">🏠 דף הבית</a>
+                <a href="student-dashboard.html"> דף הבית</a>
 
                 <button type="button" data-dashboard-action="open-settings">
-                    ⚙️ הגדרות
+                     הגדרות
                 </button>
 
                 <a href="login.html" data-auth-action="logout">
-                    התנתק/י 🔑
+                    התנתק/י 
                 </a>
             </nav>
 
@@ -81,7 +81,7 @@
                     </p>
 
                     <h2 class="dashboard-header__title">
-                        שלום, <span id="studentName">סטודנט</span> 👋
+                        שלום, <span id="studentName">סטודנט</span> 
                     </h2>
 
                     <p class="dashboard-header__text">
@@ -336,7 +336,11 @@
     <!-- QR API | later download : js/vendor/html5-qrcode.min.js -->
     <script src="https://unpkg.com/html5-qrcode"></script>
 
+    <!-- Front API connection -->
     <script src="js/dls-api.js"></script>
+    <!-- ADDED Generic Core for Dashboard -->
+     <script src="js/dashboard-core.js"></script>
+
     <script src="js/student-dashboard.js"></script>
 </body>
 
