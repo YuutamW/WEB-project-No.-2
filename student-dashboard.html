@@ -104,11 +104,13 @@
                 </section>
             </header>
 
+
             <!-- ===============================
-                STUDENT QUICK ACTIONS
-                - Join session opens overlay.
-                - Questions + notes opens demo overlay.
-                - Active session placeholder for future.
+                 STUDENT QUICK ACTIONS
+                 V1:
+                 - Join session
+                 - My notes
+                 - My questions
             ================================ -->
             <section class="dashboard-actions dashboard-actions--student">
 
@@ -121,55 +123,33 @@
                     </h3>
 
                     <p class="dashboard-action-card__text">
-                        הכנס קוד בן 6 ספרות או סרוק QR.
+                        הכנס קוד או סרוק QR.
                     </p>
                 </button>
 
-                <article id="studentActiveSessionCard"
-                    class="dashboard-action-card student-active-session-card is-disabled">
-                    <span class="dashboard-action-card__icon">📡</span>
+                <button class="dashboard-action-card" type="button" data-student-action="open-notes-demo">
+                    <span class="dashboard-action-card__icon">✍️</span>
 
                     <h3 class="dashboard-action-card__title">
-                        סשן פעיל
+                        ההערות שלי
                     </h3>
 
-                    <p id="studentActiveSessionText" class="dashboard-action-card__text">
-                        אין סשן פעיל כרגע.
+                    <p class="dashboard-action-card__text">
+                        notes ו־annotations בהמשך.
                     </p>
+                </button>
 
-                    <a id="studentContinueSessionLink" class="dashboard-secondary-button student-active-session-link"
-                        href="presentetion.html" hidden>
-                        המשך לסשן
-                    </a>
-                </article>
+                <button class="dashboard-action-card" type="button" data-student-action="open-questions-demo">
+                    <span class="dashboard-action-card__icon">❓</span>
 
-                <article class="dashboard-action-card student-split-action-card">
-                    <button class="student-split-action-card__section" type="button"
-                        data-student-action="open-notes-demo">
-                        <span class="dashboard-action-card__icon">✍️</span>
+                    <h3 class="dashboard-action-card__title">
+                        השאלות שלי
+                    </h3>
 
-                        <h3 class="dashboard-action-card__title">
-                            ההערות שלי
-                        </h3>
-
-                        <p class="dashboard-action-card__text">
-                            notes ו־annotations בהמשך.
-                        </p>
-                    </button>
-
-                    <button class="student-split-action-card__section" type="button"
-                        data-student-action="open-questions-demo">
-                        <span class="dashboard-action-card__icon">❓</span>
-
-                        <h3 class="dashboard-action-card__title">
-                            השאלות שלי
-                        </h3>
-
-                        <p class="dashboard-action-card__text">
-                            צפייה בשאלות ששאלת.
-                        </p>
-                    </button>
-                </article>
+                    <p class="dashboard-action-card__text">
+                        צפייה בשאלות ששאלת.
+                    </p>
+                </button>
 
             </section>
 
