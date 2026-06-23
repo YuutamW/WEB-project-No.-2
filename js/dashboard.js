@@ -264,6 +264,12 @@ async function handleEditUserSubmit(event) {
         email: emailInput ? emailInput.value.trim() : ""
     };
 
+    const passwordInput = document.querySelector("#settingsEditPassword");
+    const confirmPasswordInput = document.querySelector("#settingsEditConfirmPassword");
+
+    const password = passwordInput ? passwordInput.value : "";
+    const confirmPassword = confirmPasswordInput ? confirmPasswordInput.value : "";
+
     try {
         const updatedUser = await editCurrentUser(updatedFields);
 
@@ -282,6 +288,15 @@ async function handleEditUserSubmit(event) {
 
         if (userEmailElement) {
             userEmailElement.textContent = updatedUser.email || "לא נמצא";
+        }
+
+        if (password || confirmPassword) {
+            if (password !== confirmPassword) {
+                showSettingsFeedback("error", "הסיסמאות אינן תואמות.");
+                return;
+            }
+
+            updatedFields.password = password;
         }
 
         showSettingsFeedback("success", "המשתמש עודכן בהצלחה.");
@@ -535,20 +550,6 @@ function openSettingsOverlay(event) {
     });
 }
 
-// function closeSettingsOverlay() {
-//     const overlay = document.querySelector(DASHBOARD_CONFIG.SELECTORS.SETTINGS_OVERLAY);
-
-//     if (!overlay) {
-//         return;
-//     }
-
-//     overlay.classList.remove("is-open");
-
-//     setTimeout(function () {
-//         overlay.hidden = true;
-//     }, 220);
-// }
-
 // added Abort / Apply action Popup Menu :
 function isSettingsActionActive() {
     const editForm = document.querySelector("#settingsEditForm");
@@ -721,6 +722,41 @@ function setupSettingsOverlay() {
     });
 }
 
+function setupLecturerDashboardPolishActions() {
+    const nextLessonsButtons = document.querySelectorAll(
+        "[data-dashboard-action='open-next-lessons']"
+    );
+
+    const jumpSessionButtons = document.querySelectorAll(
+        "[data-dashboard-action='open-jump-session']"
+    );
+
+    const closeOverlayButtons = document.querySelectorAll(
+        "[data-dashboard-action='close-dashboard-overlay']"
+    );
+
+    nextLessonsButtons.forEach(function (button) {
+        button.addEventListener("click", function () {
+            openDashboardOverlay("#nextLessonsOverlay");
+        });
+    });
+
+    jumpSessionButtons.forEach(function (button) {
+        button.addEventListener("click", function () {
+            openDashboardOverlay("#jumpSessionOverlay");
+        });
+    });
+
+    closeOverlayButtons.forEach(function (button) {
+        button.addEventListener("click", function () {
+            const overlay = button.closest(".dashboard-modal");
+            closeDashboardOverlay(overlay);
+        });
+    });
+
+    setupDashboardOverlayBackdropClose(".dashboard-modal");
+}
+
 // setup Mobile Menu:
 function dashboardOpenMobileMenu(mobileNav, toggleButton) {
     mobileNav.hidden = false;
@@ -874,6 +910,8 @@ document.addEventListener("DOMContentLoaded", function () {
     renderRecentSessions();
     setupSettingsActions();
     setupMobileMenu();
+    setupLecturerDashboardPolishActions();
+
     //openSettingsFromUrlIfNeeded();// for debug purposes only
 });
 

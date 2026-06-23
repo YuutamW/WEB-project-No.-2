@@ -89,6 +89,9 @@ function getDlsBackendUrl() {
         : DLS_ENV.PROD_BACKEND_URL;
 }
 
+/* Apply backend URL after helper exists */
+DLS_CONFIG.BACKEND_URL = getDlsBackendUrl();
+
 /* REST API HELPER - create full backend API URL */
 function buildApiUrl(path) { return `${DLS_CONFIG.BACKEND_URL}${path}`; }
 

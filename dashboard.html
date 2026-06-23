@@ -44,7 +44,7 @@
 
             <nav class="dashboard-sidebar__nav">
                 <a class="dashboard-sidebar__link is-active" href="dashboard.html">
-                     דף הבית
+                    דף הבית
                 </a>
 
                 <!-- <a class="dashboard-sidebar__link" href="presentetion.html">
@@ -60,11 +60,11 @@
                 </a> -->
 
                 <a class="dashboard-sidebar__link" href="#" data-dashboard-action="open-settings">
-                     הגדרות
+                    הגדרות
                 </a>
 
                 <a id="logoutButton" class="dashboard-sidebar__link" href="login.html" data-auth-action="logout">
-                    התנתק/י 
+                    התנתק/י
                 </a>
                 <!-- TODO: Restore next lecture after calendar/API integration -->
             </nav>
@@ -88,11 +88,11 @@
                 <a href="dashboard.html"> דף הבית</a>
 
                 <button type="button" data-dashboard-action="open-settings">
-                     הגדרות
+                    הגדרות
                 </button>
 
                 <a href="login.html" data-auth-action="logout">
-                    התנתק/י 
+                    התנתק/י
                 </a>
             </nav>
 
@@ -105,7 +105,7 @@
                     </p>
 
                     <h2 class="dashboard-header__title">
-                        שלום, <span id="dashboardUserName">מרצה</span> 
+                        שלום, <span id="dashboardUserName">מרצה</span>
                     </h2>
 
                     <p class="dashboard-header__text">
@@ -144,33 +144,91 @@
                     </p>
                 </a>
 
-                <button class="dashboard-action-card is-disabled" type="button" disabled>
-                    <span class="dashboard-action-card__icon">
-                        📄
-                    </span>
+                <button class="dashboard-action-card" type="button" data-dashboard-action="open-next-lessons">
+                    <span class="dashboard-tile-icon dashboard-tile-icon--calendar"></span>
 
                     <h3 class="dashboard-action-card__title">
-                        העלאת חומר
+                        השיעורים הבאים
                     </h3>
 
                     <p class="dashboard-action-card__text">
-                        בהמשך: שמירת מצגות ב־DB, שיוך למרצה ובחירת קובץ מתוך מאגר.
+                        תצוגת לו״ז מהיומן / דמו.
                     </p>
                 </button>
 
-                <!-- <button class="dashboard-action-card" type="button">
-                    <span class="dashboard-action-card__icon">
-                        
-                    </span>
+                <div id="nextLessonsOverlay" class="dashboard-modal" hidden>
+                    <div class="dashboard-modal__backdrop"></div>
+
+                    <section class="dashboard-modal__panel" role="dialog" aria-modal="true">
+                        <button type="button" class="dashboard-modal__close"
+                            data-dashboard-action="close-dashboard-overlay">
+                            ×
+                        </button>
+
+                        <h2 class="dashboard-modal__title">
+                            השיעורים הבאים
+                        </h2>
+
+                        <p class="dashboard-modal__note">
+                            כרגע זוהי רשימת דמו. בהמשך נחבר ליומן Google.
+                        </p>
+
+                        <div class="dashboard-demo-list">
+                            <button class="dashboard-demo-list__item" type="button">
+                                Web & Cloud · שיעור הבא · 10:00
+                            </button>
+
+                            <button class="dashboard-demo-list__item" type="button">
+                                OOAD · בדיקת פרויקט DLS · 14:00
+                            </button>
+
+                            <button class="dashboard-demo-list__item" type="button">
+                                Networks · תרגול TCP · מחר
+                            </button>
+                        </div>
+                    </section>
+                </div>
+
+                <button class="dashboard-action-card" type="button" data-dashboard-action="open-jump-session">
+                    <span class="dashboard-tile-icon dashboard-tile-icon--session"></span>
 
                     <h3 class="dashboard-action-card__title">
-                        שאלות
+                        הסשנים שלי
                     </h3>
 
                     <p class="dashboard-action-card__text">
-                        צריך בשביל לעבוד: Session ID, שמירת שאלות לפי סשן, ו־API לסינון שאלות.
+                        פתיחת דף סשנים לחיפוש.
                     </p>
-                </button> -->
+                </button>
+
+                <div id="jumpSessionOverlay" class="dashboard-modal" hidden>
+                    <div class="dashboard-modal__backdrop"></div>
+
+                    <section class="dashboard-modal__panel" role="dialog" aria-modal="true">
+                        <button type="button" class="dashboard-modal__close"
+                            data-dashboard-action="close-dashboard-overlay">
+                            ×
+                        </button>
+
+                        <h2 class="dashboard-modal__title">
+                            מעבר לסשן
+                        </h2>
+
+                        <p class="dashboard-modal__note">
+                            כאן יופיע בהמשך דף סשן מלא: PDF, שאלות, AI assistance, שכבות annotations ו־participants.
+                        </p>
+
+                        <div class="dashboard-settings-actions">
+                            <a class="dashboard-secondary-button" href="session-landing.html">
+                                פתיחת skeleton page
+                            </a>
+
+                            <button class="dashboard-secondary-button" type="button" disabled>
+                                חיבור לסשן פעיל - בקרוב
+                            </button>
+                        </div>
+                    </section>
+                </div>
 
             </section>
 
@@ -199,35 +257,28 @@
                 </article>
 
 
-                <!-- Recent Sessions -->
+                <!-- Sessions + Recent Sessions -->
                 <article class="dashboard-panel dashboard-panel--sessions-list">
                     <div class="dashboard-panel__header">
                         <h3 class="dashboard-panel__title">
+                            סשנים
+                        </h3>
+                    </div>
+
+                    <hr class="dashboard-soft-separator">
+
+                    <section>
+                        <h2 class="dashboard-subtitle">
                             סשנים אחרונים
-                        </h3>
-                    </div>
+                        </h2>
 
-                    <div id="dashboardRecentSessionsPanel" class="dashboard-recent-sessions">
-                        <p class="dashboard-empty-state">טוען סשנים...</p>
-                    </div>
+                        <div id="dashboardRecentSessionsPanel" class="dashboard-recent-sessions">
+                            <p class="dashboard-empty-state">
+                                אין סשנים קודמים להצגה.
+                            </p>
+                        </div>
+                    </section>
                 </article>
-
-
-                <!-- Active Session -->
-                <article class="dashboard-panel dashboard-panel--session">
-                    <div class="dashboard-panel__header">
-                        <h3 class="dashboard-panel__title">
-                            סשן פעיל
-                        </h3>
-                    </div>
-
-                    <p class="dashboard-empty-state">
-                        עדיין אין סשן פעיל. בעתיד “התחל מצגת” ייצור Session ID,
-                        וכל השאלות והאנוטציות יישמרו תחת אותו סשן.
-                    </p>
-                </article>
-
-            </section>
 
         </main>
 
@@ -275,6 +326,20 @@
                 <label class="dashboard-edit-field">
                     <span>אימייל</span>
                     <input id="settingsEditEmail" type="email" autocomplete="email">
+                </label>
+
+                <label class="dashboard-edit-field">
+                    <span>סיסמה חדשה</span>
+
+                    <input id="settingsEditPassword" type="password" autocomplete="new-password"
+                        placeholder="השאר ריק אם לא רוצים לשנות">
+                </label>
+
+                <label class="dashboard-edit-field">
+                    <span>אימות סיסמה חדשה</span>
+
+                    <input id="settingsEditConfirmPassword" type="password" autocomplete="new-password"
+                        placeholder="הקלד שוב את הסיסמה">
                 </label>
 
                 <div class="dashboard-settings-actions">
@@ -329,7 +394,7 @@
 
             <div class="dashboard-settings-actions">
                 <button type="button" class="dashboard-secondary-button" data-dashboard-action="edit-user">
-                    עריכת משתמש 
+                    עריכת משתמש
                 </button>
 
                 <button type="button" class="danger-button" data-dashboard-action="delete-user">
