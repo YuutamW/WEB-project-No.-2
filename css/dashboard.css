@@ -1348,60 +1348,6 @@ body {
     border-radius: 18px;
 }
 
-/* NEED TO DELETE SPLIT - removed */
-/* =========================================================
-   STUDENT SPLIT ACTION CARD
-   ---------------------------------------------------------
-   Purpose:
-   One dashboard action tile split into:
-   - top: notes
-   - bottom: questions
-========================================================= */
-
-.student-split-action-card {
-    display: grid;
-    grid-template-rows: 1fr 1fr;
-
-    padding: 0;
-    overflow: hidden;
-}
-
-.student-split-action-card__section {
-    width: 100%;
-    padding: 18px 22px;
-
-    border: none;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-
-    background: transparent;
-    color: inherit;
-
-    text-align: right;
-    font: inherit;
-
-    cursor: pointer;
-
-    transition: background 180ms ease;
-}
-
-.student-split-action-card__section:last-child {
-    border-bottom: none;
-}
-
-.student-split-action-card__section:hover {
-    background: rgba(255, 255, 255, 0.08);
-}
-
-.student-split-action-card__section .dashboard-action-card__icon {
-    margin-bottom: 10px;
-}
-
-@media (max-width: 850px) {
-    .student-split-action-card {
-        min-height: 120px;
-    }
-}
-
 /* =========================================================
    STUDENT MOBILE OVERRIDES
 ========================================================= */
@@ -1519,5 +1465,142 @@ body {
 
     .dashboard-page--student .dashboard-action-card {
         min-height: 112px;
+    }
+}
+
+/* =========================================================
+   STUDENT DASHBOARD — POLISH V1
+   ---------------------------------------------------------
+   Goal:
+   Minimal comic-like tiles.
+   Keep information short in cards.
+   Long content goes to overlays.
+========================================================= */
+
+.dashboard-page--student .dashboard-main {
+    padding: 24px 34px;
+}
+
+/* Header: slightly tighter than lecturer */
+.dashboard-page--student .dashboard-header {
+    min-height: 168px;
+    padding: 28px 34px;
+}
+
+.dashboard-page--student .dashboard-header__title {
+    font-size: clamp(32px, 3.4vw, 42px);
+}
+
+.dashboard-page--student .dashboard-header__text {
+    font-size: 14px;
+}
+
+/* Quick action row */
+.dashboard-page--student .dashboard-actions--student {
+    margin-top: 18px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.dashboard-page--student .dashboard-action-card {
+    min-height: 118px;
+    padding: 16px 18px;
+
+    display: grid;
+    align-content: center;
+    gap: 7px;
+}
+
+.dashboard-page--student .dashboard-action-card__icon {
+    width: 38px;
+    height: 38px;
+
+    margin-bottom: 4px;
+
+    border-radius: 14px;
+    font-size: 16px;
+}
+
+.dashboard-page--student .dashboard-action-card__title {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.2;
+}
+
+.dashboard-page--student .dashboard-action-card__text {
+    margin: 0;
+
+    font-size: 12px;
+    line-height: 1.35;
+
+    opacity: 0.78;
+    overflow: hidden;
+}
+
+/* Workspace grid */
+.dashboard-page--student .dashboard-grid--student {
+    margin-top: 18px;
+
+    grid-template-columns: minmax(260px, 0.8fr) minmax(0, 1.45fr);
+    gap: 18px;
+    align-items: stretch;
+}
+
+.dashboard-page--student .dashboard-panel {
+    padding: 20px;
+}
+
+.dashboard-page--student .dashboard-panel--student-stack {
+    min-height: 500px;
+
+    display: grid;
+    grid-template-rows: 1fr 0.9fr;
+    gap: 16px;
+}
+
+.dashboard-page--student .dashboard-panel--student-calendar {
+    min-height: 500px;
+}
+
+.dashboard-page--student .dashboard-panel--student-calendar .dashboard-calendar-frame iframe {
+    height: 418px;
+}
+
+/* Panel titles */
+.dashboard-page--student .dashboard-panel__title {
+    font-size: 18px;
+}
+
+.dashboard-page--student .dashboard-empty-state {
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+/* Mobile */
+@media (max-width: 850px) {
+    .dashboard-page--student .dashboard-main {
+        padding: 72px 18px 96px;
+    }
+
+    .dashboard-page--student .dashboard-header {
+        padding: 26px;
+    }
+
+    .dashboard-page--student .dashboard-actions--student,
+    .dashboard-page--student .dashboard-grid--student {
+        grid-template-columns: 1fr;
+    }
+
+    .dashboard-page--student .dashboard-action-card {
+        min-height: 108px;
+    }
+
+    .dashboard-page--student .dashboard-panel--student-stack,
+    .dashboard-page--student .dashboard-panel--student-calendar {
+        min-height: auto;
+    }
+
+    .dashboard-page--student .dashboard-panel--student-calendar .dashboard-calendar-frame iframe {
+        height: 360px;
     }
 }
