@@ -15,3 +15,9 @@ node_modules/
 # Temporary files
 *.tmp
 *.temp
+
+# backups
+backups/
+
+# credentials
+credentials.md

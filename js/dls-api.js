@@ -39,6 +39,7 @@ to keep question-manager clean from fetch + socket details
 
 const DLS_CONFIG = {
     BACKEND_URL: "https://dls-backend-uelx.onrender.com",
+    FRONTEND_URL: "https://yuutamw.github.io/WEB-project-No.-2/",
 
     ROUTES: {
         SIGNUP: "/signup",
@@ -57,6 +58,36 @@ const DLS_CONFIG = {
         PENDING_QUESTIONS: "dlsPendingQuestions"
     },
 };
+
+/* URL DEV MODE ENV - BACKEND_URL: getDlsBackendUrl() in console */
+/*  */
+const DLS_ENV = {
+    LOCAL_BACKEND_URL: "http://localhost:3000",
+    PROD_BACKEND_URL: "https://dls-backend-uelx.onrender.com"
+};
+
+function isLocalFrontend() {
+    return (
+        window.location.hostname === "localhost" ||
+        window.location.hostname === "127.0.0.1"
+    );
+}
+
+function getDlsBackendUrl() {
+    const params = new URLSearchParams(window.location.search);
+
+    if (params.get("api") === "local") {
+        return DLS_ENV.LOCAL_BACKEND_URL;
+    }
+
+    if (params.get("api") === "prod") {
+        return DLS_ENV.PROD_BACKEND_URL;
+    }
+
+    return isLocalFrontend()
+        ? DLS_ENV.LOCAL_BACKEND_URL
+        : DLS_ENV.PROD_BACKEND_URL;
+}
 
 /* REST API HELPER - create full backend API URL */
 function buildApiUrl(path) { return `${DLS_CONFIG.BACKEND_URL}${path}`; }
@@ -353,7 +384,7 @@ const DLS_SOCKET = {
 
     //     return responseData.data || responseData;
     // },
-    
+
     /* ON QUESTION CREATED Purpose: Listen to new question events. */
     onQuestionCreated(callback) {
         const socket = this.connect();
