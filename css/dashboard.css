@@ -979,12 +979,9 @@ body {
 /* =========================================================
    MOBILE TOP CURTAIN MENU
    ---------------------------------------------------------
-   Purpose:
    - Full-width top curtain.
-   - No rounded box.
    - Blurry glass background.
    - Separated menu rows.
-   - Opens below the fixed burger button.
 ========================================================= */
 
 @media (max-width: 850px) {
