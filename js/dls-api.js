@@ -543,7 +543,30 @@ const DLS_SOCKET = {
         dlsSocketInstance = null;
 
         console.log("DLS socket disconnected by logout");
-    }
+    },
+
+    /* FETCH SESSION PDF BLOB
+       Route: GET /api/sessions/:code/pdf
+       Used by students to download the live presentation.
+    */
+    async fetchSessionPdfAsBlob(code) {
+        const cleanCode = String(code || "").trim();
+        if (!cleanCode) throw new Error("Missing session code.");
+
+        const response = await fetch(buildApiUrl(`${DLS_CONFIG.ROUTES.SESSIONS}/${cleanCode}/pdf`), {
+            method: "GET",
+            // Include auth header if our backend requireAuth middleware demands it for GETs too
+            headers: {
+                "x-user-id": getCurrentDlsUser()?.id || getCurrentDlsUser()?._id
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error("Failed to fetch presentation PDF.");
+        }
+
+        return await response.blob();
+    },
 };
 
 /* GLOBAL EXPORTS - expose helpers to VanillaJS files (other) 
