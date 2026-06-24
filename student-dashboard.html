@@ -31,25 +31,37 @@
             </div>
 
             <nav class="dashboard-sidebar__nav">
+
                 <a class="dashboard-sidebar__link is-active" href="student-dashboard.html">
-                     דף הבית
+                    <span class="dashboard-nav-icon">
+                        <img src="assets/icons/dashboard/home.svg" alt="">
+                    </span>
+
+                    <span class="dashboard-nav-text">
+                        דף הבית
+                    </span>
                 </a>
 
-                <!-- <a class="dashboard-sidebar__link" href="#studentJoinSession">
-                     הצטרפות לסשן
-                </a> -->
-
-                <!-- <a class="dashboard-sidebar__link" href="#studentQuestionsPanel">
-                     השאלות שלי
-                </a> -->
-
                 <a class="dashboard-sidebar__link" href="#" data-dashboard-action="open-settings">
-                     הגדרות
+                    <span class="dashboard-nav-icon">
+                        <img src="assets/icons/dashboard/settings.svg" alt="">
+                    </span>
+
+                    <span class="dashboard-nav-text">
+                        הגדרות
+                    </span>
                 </a>
 
                 <a class="dashboard-sidebar__link" href="login.html" data-auth-action="logout">
-                    התנתק/י 
+                    <span class="dashboard-nav-icon">
+                        <img src="assets/icons/dashboard/logout.svg" alt="">
+                    </span>
+
+                    <span class="dashboard-nav-text">
+                        התנתק/י
+                    </span>
                 </a>
+
             </nav>
         </aside>
 
@@ -63,15 +75,37 @@
             </button>
 
             <nav id="dashboardMobileNav" class="dashboard-mobile-nav" hidden>
-                <a href="student-dashboard.html"> דף הבית</a>
+
+                <a href="student-dashboard.html">
+                    <span class="dashboard-mobile-nav__icon">
+                        <img src="assets/icons/dashboard/home.svg" alt="">
+                    </span>
+
+                    <span class="dashboard-mobile-nav__text">
+                        דף הבית
+                    </span>
+                </a>
 
                 <button type="button" data-dashboard-action="open-settings">
-                     הגדרות
+                    <span class="dashboard-mobile-nav__icon">
+                        <img src="assets/icons/dashboard/settings.svg" alt="">
+                    </span>
+
+                    <span class="dashboard-mobile-nav__text">
+                        הגדרות
+                    </span>
                 </button>
 
                 <a href="login.html" data-auth-action="logout">
-                    התנתק/י 
+                    <span class="dashboard-mobile-nav__icon">
+                        <img src="assets/icons/dashboard/logout.svg" alt="">
+                    </span>
+
+                    <span class="dashboard-mobile-nav__text">
+                        התנתק/י
+                    </span>
                 </a>
+
             </nav>
 
             <header class="dashboard-header">
@@ -81,7 +115,7 @@
                     </p>
 
                     <h2 class="dashboard-header__title">
-                        שלום, <span id="studentName">סטודנט</span> 
+                        שלום, <span id="studentName">סטודנט</span>
                     </h2>
 
                     <p class="dashboard-header__text">
@@ -116,7 +150,10 @@
 
                 <button class="dashboard-action-card dashboard-action-card--primary" type="button"
                     data-student-action="open-join-session">
-                    <span class="dashboard-action-card__icon">🎟️</span>
+
+                    <span class="dashboard-action-card__icon">
+                        <img src="assets/icons/dashboard/join-session.svg" alt="">
+                    </span>
 
                     <h3 class="dashboard-action-card__title">
                         הצטרפות לסשן
@@ -128,19 +165,25 @@
                 </button>
 
                 <button class="dashboard-action-card" type="button" data-student-action="open-notes-demo">
-                    <span class="dashboard-action-card__icon">✍️</span>
+
+                    <span class="dashboard-action-card__icon">
+                        <img src="assets/icons/dashboard/sessions.svg" alt="">
+                    </span>
 
                     <h3 class="dashboard-action-card__title">
                         הסשנים שלי
                     </h3>
 
                     <p class="dashboard-action-card__text">
-                        כל הסשנים בהם השתתפתי
+                        צפייה בסשנים שהצטרפת אליהם.
                     </p>
                 </button>
 
                 <button class="dashboard-action-card" type="button" data-student-action="open-questions-demo">
-                    <span class="dashboard-action-card__icon">❓</span>
+
+                    <span class="dashboard-action-card__icon">
+                        <img src="assets/icons/dashboard/questions.svg" alt="">
+                    </span>
 
                     <h3 class="dashboard-action-card__title">
                         השאלות שלי
@@ -170,7 +213,7 @@
 
                         <div id="studentRecentSessionsList" class="student-recent-sessions-list">
                             <p class="dashboard-empty-state">
-                               טוען סשנים...
+                                טוען סשנים...
                             </p>
                         </div>
                     </section>
@@ -186,7 +229,7 @@
 
                     <div class="dashboard-calendar-frame">
                         <iframe
-                            src="https://calendar.google.com/calendar/embed?src=YOUR_CALENDAR_ID&ctz=Asia%2FJerusalem"
+                            src="https://calendar.google.com/calendar/embed?src=dls.sys.demo%40gmail.com&ctz=Asia%2FJerusalem"
                             width="100%" height="440" frameborder="0" scrolling="no">
                         </iframe>
                     </div>
@@ -296,6 +339,37 @@
                 </section>
             </div>
 
+            <!-- OVERLAY for SERACH SESSIONS -->
+            <div id="studentSessionsOverlay" class="dashboard-modal" hidden>
+                <div class="dashboard-modal__backdrop"></div>
+
+                <section class="dashboard-modal__panel dashboard-modal__panel--wide" role="dialog" aria-modal="true">
+                    <button type="button" class="dashboard-modal__close" data-student-action="close-overlay">
+                        ×
+                    </button>
+
+                    <h2 class="dashboard-modal__title">
+                        הסשנים שלי
+                    </h2>
+
+                    <p class="dashboard-modal__note">
+                        חיפוש מהיר בסשנים שהצטרפת אליהם. בהמשך נפתח מכאן דף סשן מלא.
+                    </p>
+
+                    <label class="dashboard-edit-field">
+                        <span>חיפוש סשן</span>
+
+                        <input id="studentSessionSearchInput" type="text" placeholder="חפש לפי שם, קוד או תאריך">
+                    </label>
+
+                    <div id="studentSessionsOverlayList" class="dashboard-demo-list">
+                        <p class="dashboard-empty-state">
+                            טוען סשנים...
+                        </p>
+                    </div>
+                </section>
+            </div>
+
             <div id="studentSettingsOverlay" class="dashboard-modal" hidden>
                 <div class="dashboard-modal__backdrop"></div>
 
@@ -305,12 +379,57 @@
                     </button>
 
                     <h2 class="dashboard-modal__title">
-                        הגדרות משתמש
+                        הגדרות סטודנט
                     </h2>
 
                     <p class="dashboard-modal__note">
-                        כאן נעתיק בהמשך את edit/delete user מה־Lecturer dashboard.
+                        עדכון פרטי משתמש וסיסמה.
                     </p>
+
+                    <form id="studentSettingsEditForm" class="dashboard-edit-form">
+
+                        <label class="dashboard-edit-field">
+                            <span>שם פרטי</span>
+                            <input id="studentSettingsFirstName" type="text">
+                        </label>
+
+                        <label class="dashboard-edit-field">
+                            <span>שם משפחה</span>
+                            <input id="studentSettingsLastName" type="text">
+                        </label>
+
+                        <label class="dashboard-edit-field">
+                            <span>אימייל</span>
+                            <input id="studentSettingsEmail" type="email">
+                        </label>
+
+                        <label class="dashboard-edit-field">
+                            <span>סיסמה חדשה</span>
+                            <input id="studentSettingsPassword" type="password" autocomplete="new-password"
+                                placeholder="השאר ריק אם לא משנים">
+                        </label>
+
+                        <label class="dashboard-edit-field">
+                            <span>אימות סיסמה חדשה</span>
+                            <input id="studentSettingsConfirmPassword" type="password" autocomplete="new-password">
+                        </label>
+
+                        <p class="dashboard-password-hint">
+                            הסיסמה חייבת לכלול אות גדולה, אות קטנה ומספר.
+                        </p>
+
+                        <div class="dashboard-settings-actions">
+                            <button type="submit" class="dashboard-secondary-button">
+                                שמירת שינויים
+                            </button>
+
+                            <button type="button" class="danger-button" disabled>
+                                מחיקת משתמש - בקרוב
+                            </button>
+                        </div>
+                    </form>
+
+                    <p id="studentSettingsFeedback" class="dashboard-modal__feedback" hidden></p>
                 </section>
             </div>
 
@@ -324,7 +443,7 @@
     <!-- Front API connection -->
     <script src="js/dls-api.js"></script>
     <!-- ADDED Generic Core for Dashboard -->
-     <script src="js/dashboard-core.js"></script>
+    <script src="js/dashboard-core.js"></script>
 
     <script src="js/student-dashboard.js"></script>
 </body>

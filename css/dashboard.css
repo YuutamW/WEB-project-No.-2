@@ -1956,3 +1956,139 @@ body {
 .dashboard-sidebar__link.is-active .dashboard-nav-icon img {
     opacity: 1;
 }
+
+/* =========================================================
+   STUDENT SESSIONS PANEL — FILL FULL HEIGHT
+========================================================= */
+
+.dashboard-page--student .dashboard-panel--student-stack {
+    min-height: 520px;
+    display: flex;
+    flex-direction: column;
+}
+
+.dashboard-page--student .student-stack-section--sessions {
+    flex: 1;
+    min-height: 0;
+
+    display: flex;
+    flex-direction: column;
+}
+
+.dashboard-page--student #studentRecentSessionsList {
+    flex: 1;
+    min-height: 0;
+    max-height: none !important;
+
+    overflow-y: auto;
+
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* =========================================================
+   STUDENT MOBILE ORDER
+   ---------------------------------------------------------
+   Mobile visual order:
+   1. Header
+   2. Join Session
+   3. Calendar
+   4. My Sessions
+   5. My Questions
+   6. Recent sessions panel
+========================================================= */
+
+@media (max-width: 850px) {
+    .dashboard-page--student .dashboard-main {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .dashboard-page--student .dashboard-actions--student,
+    .dashboard-page--student .dashboard-grid--student {
+        display: contents;
+    }
+
+    .dashboard-page--student [data-student-action="open-join-session"] {
+        order: 10;
+    }
+
+    .dashboard-page--student .dashboard-panel--student-calendar {
+        order: 11;
+    }
+
+    .dashboard-page--student [data-student-action="open-notes-demo"] {
+        order: 12;
+    }
+
+    .dashboard-page--student [data-student-action="open-questions-demo"] {
+        order: 13;
+    }
+
+    .dashboard-page--student .dashboard-panel--student-stack {
+        order: 14;
+    }
+}
+
+/* =========================================================
+   STUDENT MOBILE FINAL POLISH
+   ---------------------------------------------------------
+   Fix:
+   - top padding
+   - spacing between reordered tiles
+   - calendar after join session
+========================================================= */
+
+@media (max-width: 850px) {
+    .dashboard-page--student .dashboard-main {
+        padding: 0px 18px 96px;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    .dashboard-page--student .dashboard-header {
+        margin-bottom: 0;
+        padding-top: 64px;
+    }
+
+    .dashboard-page--student .dashboard-mobile-menu-button {
+        top: 22px;
+        right: 22px;
+    }
+
+    .dashboard-page--student .dashboard-actions--student,
+    .dashboard-page--student .dashboard-grid--student {
+        display: contents;
+    }
+
+    .dashboard-page--student [data-student-action="open-join-session"] {
+        order: 10;
+        margin-top: 0;
+    }
+
+    .dashboard-page--student .dashboard-panel--student-calendar {
+        order: 11;
+        margin-top: 14px;
+    }
+
+    .dashboard-page--student [data-student-action="open-notes-demo"] {
+        order: 12;
+        margin-top: 14px;
+    }
+
+    .dashboard-page--student [data-student-action="open-questions-demo"] {
+        order: 13;
+        margin-top: 14px;
+    }
+
+    .dashboard-page--student .dashboard-panel--student-stack {
+        order: 14;
+        margin-top: 14px;
+    }
+
+    .dashboard-page--student .dashboard-action-card {
+        min-height: 112px;
+    }
+}

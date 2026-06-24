@@ -73,6 +73,10 @@ const STUDENT_DASHBOARD_CONFIG = {
         stopQrButton: "[data-student-action='stop-qr']",
 
         settingsOverlay: "#studentSettingsOverlay",
+
+        sessionsOverlay: "#studentSessionsOverlay",
+        sessionSearchInput: "#studentSessionSearchInput",
+        sessionsOverlayList: "#studentSessionsOverlayList",
     }
 };
 
@@ -213,10 +217,24 @@ function setupStudentOverlays() {
         });
     });
 
+    // notesButtons.forEach(function (button) {
+    //     button.addEventListener("click", function () {
+    //         renderStudentSessionsOverlay(studentRecentSessionsCache);
+    //         openStudentOverlay(STUDENT_DASHBOARD_CONFIG.SELECTORS.sessionsOverlay);
+    //     });
+    // });
+
     notesButtons.forEach(function (button) {
         button.addEventListener("click", function () {
-            setText("#studentStudyOverlayTitle", "הסשנים שלי");
-            openStudentOverlay(STUDENT_DASHBOARD_CONFIG.SELECTORS.studyOverlay);
+            renderStudentSessionsOverlay(studentRecentSessionsCache);
+            openStudentOverlay("#studentSessionsOverlay");
+
+            const input = document.querySelector("#studentSessionSearchInput");
+
+            if (input) {
+                input.value = "";
+                input.focus();
+            }
         });
     });
 
@@ -384,6 +402,79 @@ function getCurrentStudentSession() {
         return null;
     }
 }
+
+/* RENDER OF SESSIONS SEARCH OVERLAY FUNCS */
+function renderStudentSessionsOverlay(sessions) {
+    const list = document.querySelector(
+        STUDENT_DASHBOARD_CONFIG.SELECTORS.sessionsOverlayList
+    );
+
+    if (!list) {
+        return;
+    }
+
+    if (!sessions || sessions.length === 0) {
+        list.innerHTML = `
+            <p class="dashboard-empty-state">
+                אין סשנים להצגה.
+            </p>
+        `;
+        return;
+    }
+
+    renderStudentSessionCards(list, sessions);
+}
+
+function filterStudentSessions(searchText) {
+    const query = String(searchText || "").trim().toLowerCase();
+
+    if (!query) {
+        return studentRecentSessionsCache;
+    }
+
+    return studentRecentSessionsCache.filter(function (session) {
+        const title = normalizeStudentSessionTitle(session).toLowerCase();
+        const code = getStudentSessionCode(session).toLowerCase();
+        const date = formatStudentSessionDate(session).toLowerCase();
+
+        return (
+            title.includes(query) ||
+            code.includes(query) ||
+            date.includes(query)
+        );
+    });
+}
+
+function debounce(callback, delay = 160) {
+    let timerId = null;
+
+    return function (...args) {
+        clearTimeout(timerId);
+
+        timerId = setTimeout(function () {
+            callback(...args);
+        }, delay);
+    };
+}
+
+function setupStudentSessionSearch() {
+    const input = document.querySelector(
+        STUDENT_DASHBOARD_CONFIG.SELECTORS.sessionSearchInput
+    );
+
+    if (!input) {
+        return;
+    }
+
+    input.addEventListener(
+        "input",
+        debounce(function () {
+            const filteredSessions = filterStudentSessions(input.value);
+            renderStudentSessionsOverlay(filteredSessions);
+        }, 160)
+    );
+}
+/* END OF SESSIONS SEARCH OVERLAY FUNCS */
 
 function renderActiveSession() {
     const session = getCurrentStudentSession();
@@ -622,6 +713,142 @@ function setupJoinSessionForm() {
             );
         }
     });
+
+}
+
+function isStrongStudentPassword(password) {
+    const hasUppercase = /[A-Z]/.test(password);
+    const hasLowercase = /[a-z]/.test(password);
+    const hasNumber = /[0-9]/.test(password);
+
+    return hasUppercase && hasLowercase && hasNumber;
+}
+
+function showStudentSettingsFeedback(type, text) {
+    const feedback = document.querySelector("#studentSettingsFeedback");
+
+    if (!feedback) {
+        return;
+    }
+
+    feedback.hidden = false;
+    feedback.className = `dashboard-modal__feedback ${type}`;
+    feedback.textContent = text;
+}
+
+function fillStudentSettingsForm() {
+    const user = getCurrentDlsUser();
+
+    if (!user) {
+        return;
+    }
+
+    const firstName = document.querySelector("#studentSettingsFirstName");
+    const lastName = document.querySelector("#studentSettingsLastName");
+    const email = document.querySelector("#studentSettingsEmail");
+
+    if (firstName) {
+        firstName.value = user.firstName || "";
+    }
+
+    if (lastName) {
+        lastName.value = user.lastName || "";
+    }
+
+    if (email) {
+        email.value = user.email || "";
+    }
+}
+
+async function handleStudentSettingsSubmit(event) {
+    event.preventDefault();
+
+    const user = getCurrentDlsUser();
+
+    if (!user) {
+        window.location.href = STUDENT_DASHBOARD_CONFIG.ROUTES.LOGIN;
+        return;
+    }
+
+    const firstNameInput = document.querySelector("#studentSettingsFirstName");
+    const lastNameInput = document.querySelector("#studentSettingsLastName");
+    const emailInput = document.querySelector("#studentSettingsEmail");
+    const passwordInput = document.querySelector("#studentSettingsPassword");
+    const confirmPasswordInput = document.querySelector("#studentSettingsConfirmPassword");
+
+    const password = passwordInput ? passwordInput.value : "";
+    const confirmPassword = confirmPasswordInput ? confirmPasswordInput.value : "";
+
+    const updatedFields = {
+        id: user.id || user._id,
+        _id: user._id || user.id,
+        firstName: firstNameInput ? firstNameInput.value.trim() : "",
+        lastName: lastNameInput ? lastNameInput.value.trim() : "",
+        email: emailInput ? emailInput.value.trim() : "",
+        role: user.role || "student"
+    };
+
+    if (password || confirmPassword) {
+        if (password !== confirmPassword) {
+            showStudentSettingsFeedback("error", "הסיסמאות אינן תואמות.");
+            return;
+        }
+
+        if (!isStrongStudentPassword(password)) {
+            showStudentSettingsFeedback(
+                "error",
+                "הסיסמה חייבת לכלול אות גדולה, אות קטנה ומספר."
+            );
+            return;
+        }
+
+        updatedFields.password = password;
+    }
+
+    try {
+        if (typeof DLS_API.updateUser !== "function") {
+            showStudentSettingsFeedback(
+                "error",
+                "DLS_API.updateUser עדיין לא מוגדר בפרונט."
+            );
+            return;
+        }
+
+        const updatedUser = await DLS_API.updateUser(updatedFields);
+
+        localStorage.setItem(
+            DLS_CONFIG.STORAGE_KEYS.CURRENT_USER,
+            JSON.stringify(updatedUser.data || updatedUser)
+        );
+
+        renderStudentInfo(updatedUser.data || updatedUser);
+
+        if (passwordInput) {
+            passwordInput.value = "";
+        }
+
+        if (confirmPasswordInput) {
+            confirmPasswordInput.value = "";
+        }
+
+        showStudentSettingsFeedback("success", "המשתמש עודכן בהצלחה.");
+    } catch (error) {
+        showStudentSettingsFeedback(
+            "error",
+            error.message || "עדכון משתמש נכשל."
+        );
+    }
+}
+/* settings fill + validation */
+function setupStudentSettingsForm() {
+    const form = document.querySelector("#studentSettingsEditForm");
+
+    if (!form) {
+        return;
+    }
+
+    fillStudentSettingsForm();
+    form.addEventListener("submit", handleStudentSettingsSubmit);
 }
 
 /* 
@@ -888,80 +1115,275 @@ function setupStudentLogout() {
     });
 }
 
+function formatStudentSessionDate(session) {
+    const rawDate =
+        session?.date ||
+        session?.createdAt ||
+        session?.joinedAt ||
+        session?.updatedAt ||
+        "";
+
+    const date = new Date(rawDate);
+
+    if (!rawDate || Number.isNaN(date.getTime())) {
+        return "תאריך לא ידוע";
+    }
+
+    return date.toLocaleString("he-IL", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit"
+    });
+}
+
+/* Last Sessions NAme FIx UNDEFINED NAMING */
+function normalizeStudentSessionTitle(session) {
+    const rawTitle = String(session?.title || session?.name || "").trim();
+
+    const cleanedTitle = rawTitle
+        .replace(/^\((.*)\)$/, "$1")
+        .replace(/^Session:\((.*)\)$/i, "$1")
+        .trim();
+
+    const invalidTitles = [
+        "",
+        "undefined",
+        "(undefined)",
+        "null",
+        "(null)"
+    ];
+
+    if (!invalidTitles.includes(cleanedTitle)) {
+        return cleanedTitle;
+    }
+
+    const code = session?.code || session?.id || "";
+
+    if (code) {
+        return `סשן ${code}`;
+    }
+
+    return "סשן ללא שם";
+}
+
+function getStudentSessionCode(session) {
+    return session?.code || session?.id || "";
+}
+
 /* ==========================================================
    STUDENT RECENT SESSIONS
    
    Backend needs : GET /api/sessions/recent?userId=...&limit=...
 ========================================================== */
+let studentRecentSessionsCache = [];
+
+function formatStudentSessionDate(session) {
+    const rawDate =
+        session?.date ||
+        session?.createdAt ||
+        session?.joinedAt ||
+        session?.updatedAt ||
+        "";
+
+    const date = new Date(rawDate);
+
+    if (!rawDate || Number.isNaN(date.getTime())) {
+        return "תאריך לא ידוע";
+    }
+
+    return date.toLocaleString("he-IL", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit"
+    });
+}
+
+function getStudentSessionCode(session) {
+    return session?.code || session?.id || "";
+}
+
+function normalizeStudentSessionTitle(session) {
+    const rawTitle = String(session?.title || session?.name || "").trim();
+
+    const cleanedTitle = rawTitle
+        .replace(/^\((.*)\)$/, "$1")
+        .replace(/^Session:\((.*)\)$/i, "$1")
+        .trim();
+
+    const invalidTitles = [
+        "",
+        "undefined",
+        "(undefined)",
+        "null",
+        "(null)"
+    ];
+
+    if (!invalidTitles.includes(cleanedTitle)) {
+        return cleanedTitle;
+    }
+
+    const code = getStudentSessionCode(session);
+
+    if (code) {
+        return `סשן ${code}`;
+    }
+
+    return "סשן ללא שם";
+}
+
+function renderStudentSessionCards(container, sessions) {
+    container.innerHTML = "";
+
+    const fragment = document.createDocumentFragment();
+
+    sessions.forEach(function (session) {
+        const sessionCode = getStudentSessionCode(session);
+        const sessionTitle = normalizeStudentSessionTitle(session);
+        const sessionDate = formatStudentSessionDate(session);
+
+        const card = document.createElement("a");
+
+        card.href =
+            "session.html?code=" +
+            encodeURIComponent(sessionCode);
+
+        card.className = "session-card";
+
+        card.innerHTML = `
+            <div class="session-card__info">
+                <h4 class="session-card__title"></h4>
+                <span class="session-card__date"></span>
+            </div>
+
+            <div class="session-card__action">▶</div>
+        `;
+
+        card.querySelector(".session-card__title").textContent = sessionTitle;
+        card.querySelector(".session-card__date").textContent = sessionDate;
+
+        fragment.appendChild(card);
+    });
+
+    container.appendChild(fragment);
+}
+
 async function renderRecentStudentSessions() {
     const container = document.querySelector("#studentRecentSessionsList");
-    if(!container) return;
+
+    if (!container) {
+        return;
+    }
 
     try {
         const sessions = await DLS_API.getRecentSessions(8);
-         if (!sessions || sessions.length === 0) {
-            container.innerHTML = '<p class="dashboard-empty-state">אין סשנים קודמים להצגה.</p>';
+
+        studentRecentSessionsCache = Array.isArray(sessions)
+            ? sessions
+            : [];
+
+        if (studentRecentSessionsCache.length === 0) {
+            container.innerHTML = `
+                <p class="dashboard-empty-state">
+                    אין סשנים קודמים להצגה.
+                </p>
+            `;
             return;
         }
 
-        container.innerHTML = "";
-
-        sessions.forEach(session => {
-            const sessionDate = new Date(session.date).toLocaleDateString("he-IL", {
-                day: "2-digit",
-                month: "2-digit",
-                year: "numeric",
-                hour: "2-digit",
-                minute: "2-digit"
-            });
-
-            const card = document.createElement("a");
-
-            // Placeholder link - update when session view is ready
-            card.href = `session.html?code=${encodeURIComponent(session.id)}`;
-            card.className = "session-card";
-            card.innerHTML = `
-                <div class="session-card__info">
-                    <h4 class="session-card__title"></h4>
-                    <span class="session-card__date">${sessionDate}</span>
-                </div>
-                <div class="session-card__action">▶</div>
-            `;
-            card.querySelector('.session-card__title').textContent = session.title || `סשן (${session.id})`;
-            container.appendChild(card);
-        });
-    } catch(error) {
+        renderStudentSessionCards(container, studentRecentSessionsCache);
+    } catch (error) {
         console.error("Failed to Load recent Sessions:", error);
-        container.innerHTML = '<p class="dashboard-empty-state" style="color: #ff637d;">שגיאה בטעינת סשנים.</p>';
+
+        container.innerHTML = `
+            <p class="dashboard-empty-state" style="color: #ff637d;">
+                שגיאה בטעינת סשנים.
+            </p>
+        `;
     }
-    
+}
+
+
+function renderStudentSessionsOverlay(sessions) {
+    const list = document.querySelector("#studentSessionsOverlayList");
+
+    if (!list) {
+        return;
+    }
+
+    if (!sessions || sessions.length === 0) {
+        list.innerHTML = `
+            <p class="dashboard-empty-state">
+                אין סשנים להצגה.
+            </p>
+        `;
+        return;
+    }
+
+    renderStudentSessionCards(list, sessions);
+}
+
+function filterStudentSessions(searchText) {
+    const query = String(searchText || "").trim().toLowerCase();
+
+    if (!query) {
+        return studentRecentSessionsCache;
+    }
+
+    return studentRecentSessionsCache.filter(function (session) {
+        const title = normalizeStudentSessionTitle(session).toLowerCase();
+        const code = getStudentSessionCode(session).toLowerCase();
+        const date = formatStudentSessionDate(session).toLowerCase();
+
+        return (
+            title.includes(query) ||
+            code.includes(query) ||
+            date.includes(query)
+        );
+    });
+}
+
+function debounce(callback, delay = 160) {
+    let timerId = null;
+
+    return function (...args) {
+        clearTimeout(timerId);
+
+        timerId = setTimeout(function () {
+            callback(...args);
+        }, delay);
+    };
+}
+
+function setupStudentSessionSearch() {
+    const input = document.querySelector("#studentSessionSearchInput");
+
+    if (!input) {
+        return;
+    }
+
+    input.addEventListener(
+        "input",
+        debounce(function () {
+            const filteredSessions = filterStudentSessions(input.value);
+            renderStudentSessionsOverlay(filteredSessions);
+        }, 160)
+    );
 }
 
 /* 
    PAGE INIT
  */
-
-// document.addEventListener("DOMContentLoaded", function () {
-//     updateStudentClock();
-//     setInterval(updateStudentClock, 1000);
-
-//     setupStudentOverlays();
-//     setupJoinSessionForm();
-//     setupStudentMobileMenu();
-//     setupStudentLogout();
-
-//     loadStudentDashboard();
-//     prefillJoinCodeFromUrl();
-//     renderActiveSession();
-
-//     setupStudentQrScanner();
-// });
-
 document.addEventListener("DOMContentLoaded", function () {
     setupDashboardCore();
 
     setupStudentOverlays();
     setupJoinSessionForm();
+    setupStudentSettingsForm();
+    setupStudentSessionSearch();
 
     loadStudentDashboard();
     prefillJoinCodeFromUrl();
