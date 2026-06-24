@@ -1790,3 +1790,169 @@ body {
         color: #ffffff;
     }
 }
+
+/* =========================================================
+   DLS CUSTOM SCROLLBARS
+   ---------------------------------------------------------
+   Chrome / Edge / Safari + Firefox fallback.
+========================================================= */
+
+/* Firefox */
+.dashboard-main,
+.dashboard-sidebar,
+.dashboard-recent-sessions,
+.dashboard-mobile-nav {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.34) rgba(255, 255, 255, 0.06);
+}
+
+/* Chrome / Edge / Safari */
+.dashboard-main::-webkit-scrollbar,
+.dashboard-sidebar::-webkit-scrollbar,
+.dashboard-recent-sessions::-webkit-scrollbar,
+.dashboard-mobile-nav::-webkit-scrollbar {
+    width: 10px;
+}
+
+.dashboard-main::-webkit-scrollbar-track,
+.dashboard-sidebar::-webkit-scrollbar-track,
+.dashboard-recent-sessions::-webkit-scrollbar-track,
+.dashboard-mobile-nav::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.045);
+    border-radius: 999px;
+}
+
+.dashboard-main::-webkit-scrollbar-thumb,
+.dashboard-sidebar::-webkit-scrollbar-thumb,
+.dashboard-recent-sessions::-webkit-scrollbar-thumb,
+.dashboard-mobile-nav::-webkit-scrollbar-thumb {
+    border: 2px solid rgba(20, 11, 34, 0.82);
+    border-radius: 999px;
+
+    background:
+        linear-gradient(180deg,
+            rgba(199, 167, 255, 0.72),
+            rgba(255, 99, 125, 0.58));
+}
+
+.dashboard-main::-webkit-scrollbar-thumb:hover,
+.dashboard-sidebar::-webkit-scrollbar-thumb:hover,
+.dashboard-recent-sessions::-webkit-scrollbar-thumb:hover,
+.dashboard-mobile-nav::-webkit-scrollbar-thumb:hover {
+    background:
+        linear-gradient(180deg,
+            rgba(215, 190, 255, 0.9),
+            rgba(255, 122, 144, 0.8));
+}
+
+.dashboard-main {
+    scrollbar-gutter: stable;
+}
+
+/* =========================================================
+   DLS CUSTOM SCROLLBARS
+========================================================= */
+
+.dashboard-main,
+.dashboard-sidebar,
+.dashboard-recent-sessions,
+.dashboard-mobile-nav {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(199, 167, 255, 0.55) rgba(255, 255, 255, 0.06);
+}
+
+.dashboard-main::-webkit-scrollbar,
+.dashboard-sidebar::-webkit-scrollbar,
+.dashboard-recent-sessions::-webkit-scrollbar,
+.dashboard-mobile-nav::-webkit-scrollbar {
+    width: 10px;
+}
+
+.dashboard-main::-webkit-scrollbar-track,
+.dashboard-sidebar::-webkit-scrollbar-track,
+.dashboard-recent-sessions::-webkit-scrollbar-track,
+.dashboard-mobile-nav::-webkit-scrollbar-track {
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.045);
+}
+
+.dashboard-main::-webkit-scrollbar-thumb,
+.dashboard-sidebar::-webkit-scrollbar-thumb,
+.dashboard-recent-sessions::-webkit-scrollbar-thumb,
+.dashboard-mobile-nav::-webkit-scrollbar-thumb {
+    border: 2px solid rgba(20, 11, 34, 0.86);
+    border-radius: 999px;
+
+    background:
+        linear-gradient(180deg,
+            rgba(199, 167, 255, 0.78),
+            rgba(255, 99, 125, 0.62));
+}
+
+.dashboard-main::-webkit-scrollbar-thumb:hover,
+.dashboard-sidebar::-webkit-scrollbar-thumb:hover,
+.dashboard-recent-sessions::-webkit-scrollbar-thumb:hover,
+.dashboard-mobile-nav::-webkit-scrollbar-thumb:hover {
+    background:
+        linear-gradient(180deg,
+            rgba(219, 200, 255, 0.95),
+            rgba(255, 122, 144, 0.82));
+}
+
+/* =========================================================
+   DESKTOP SIDEBAR - CLEAN RTL ICON ALIGNMENT
+   ---------------------------------------------------------
+   Icon on the right, text beside it.
+========================================================= */
+
+.dashboard-sidebar__link {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+
+    direction: rtl;
+    gap: 12px;
+
+    width: 100%;
+    padding: 14px 16px;
+
+    border-radius: 18px;
+}
+
+.dashboard-nav-icon {
+    width: 22px;
+    height: 22px;
+
+    display: grid;
+    place-items: center;
+
+    flex: 0 0 22px;
+
+    border: none !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+.dashboard-nav-icon img {
+    width: 20px;
+    height: 20px;
+
+    display: block;
+
+    filter: brightness(0) invert(1);
+    opacity: 0.92;
+}
+
+.dashboard-nav-text {
+    display: inline-block;
+
+    font-weight: 700;
+    line-height: 1.3;
+    color: inherit;
+}
+
+.dashboard-sidebar__link:hover .dashboard-nav-icon img,
+.dashboard-sidebar__link.is-active .dashboard-nav-icon img {
+    opacity: 1;
+}

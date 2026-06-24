@@ -42,40 +42,36 @@
                 </div>
             </div>
 
-            <nav class="dashboard-sidebar__nav">
-                <a class="dashboard-sidebar__link is-active" href="dashboard.html">
-                    <span class="dashboard-action-card__icon1">
-                        <img src="assets/icons/dashboard/home.svg" alt="">
-                    </span>
+            <a class="dashboard-sidebar__link is-active" href="dashboard.html">
+                <span class="dashboard-nav-icon">
+                    <img src="assets/icons/dashboard/home.svg" alt="">
+                </span>
+
+                <span class="dashboard-nav-text">
                     דף הבית
-                </a>
+                </span>
+            </a>
 
-                <!-- <a class="dashboard-sidebar__link" href="presentetion.html">
-                     מצגות
-                </a> -->
+            <a class="dashboard-sidebar__link" href="#" data-dashboard-action="open-settings">
+                <span class="dashboard-nav-icon">
+                    <img src="assets/icons/dashboard/settings.svg" alt="">
+                </span>
 
-                <!-- <a class="dashboard-sidebar__link" href="#">
-                     שאלות סטודנטים
-                </a> -->
-
-                <!-- <a class="dashboard-sidebar__link" href="#">
-                     Heatmap
-                </a> -->
-
-                <a class="dashboard-sidebar__link" href="#" data-dashboard-action="open-settings">
-                    <span class="dashboard-action-card__icon1">
-                        <img src="assets/icons/dashboard/settings.svg" alt="">
-                    </span>
+                <span class="dashboard-nav-text">
                     הגדרות
-                </a>
+                </span>
+            </a>
 
-                <a id="logoutButton" class="dashboard-sidebar__link" href="login.html" data-auth-action="logout">
-                    <span class="dashboard-action-card__icon1">
-                        <img src="assets/icons/dashboard/logout.svg" alt="">
-                    </span>
+            <a id="logoutButton" class="dashboard-sidebar__link" href="login.html" data-auth-action="logout">
+                <span class="dashboard-nav-icon">
+                    <img src="assets/icons/dashboard/logout.svg" alt="">
+                </span>
+
+                <span class="dashboard-nav-text">
                     התנתק/י
-                </a>
-                <!-- TODO: Restore next lecture after calendar/API integration -->
+                </span>
+            </a>
+            <!-- TODO: Restore next lecture after calendar/API integration -->
             </nav>
 
         </aside>
