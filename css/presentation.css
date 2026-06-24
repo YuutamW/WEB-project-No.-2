@@ -2078,3 +2078,703 @@ body {
     font-size: 12px;
     font-weight: 700;
 }
+
+/* =========================================================
+   UPLOAD SCREEN — NEUTRAL PAGE + CENTER GLASS MODAL
+   ---------------------------------------------------------
+   Goal:
+   - no purple full background
+   - neutral page-like background
+   - centered glass upload launcher
+   - PDF area later will be visually different from background
+========================================================= */
+
+html,
+body {
+    min-height: 100%;
+}
+
+body:has(.presentation-page.is-waiting-upload) {
+    margin: 0;
+    background: #e9e9ee;
+}
+
+.presentation-page.is-waiting-upload {
+    min-height: 100dvh;
+
+    display: grid;
+    place-items: center;
+
+    padding: 32px;
+
+    background:
+        linear-gradient(135deg, #f2f2f5 0%, #dedee6 100%);
+}
+
+/* Big outer glass shell */
+.presentation-page.is-waiting-upload .upload-panel {
+    position: relative;
+
+    width: min(860px, calc(100vw - 40px));
+    min-height: 520px;
+
+    display: grid;
+    place-items: center;
+
+    padding: 42px;
+
+    border-radius: 38px;
+    border: 1px solid rgba(255, 255, 255, 0.58);
+
+    background:
+        linear-gradient(135deg,
+            rgba(255, 255, 255, 0.56),
+            rgba(255, 255, 255, 0.24));
+
+    box-shadow:
+        0 32px 90px rgba(40, 35, 55, 0.24),
+        inset 0 1px 0 rgba(255, 255, 255, 0.70);
+
+    backdrop-filter: blur(22px);
+    overflow: hidden;
+}
+
+/* Soft inner color only inside the glass shell */
+.presentation-page.is-waiting-upload .upload-panel::before {
+    content: "";
+
+    position: absolute;
+    inset: 22px;
+
+    border-radius: 30px;
+
+    background:
+        radial-gradient(circle at 20% 25%, rgba(255, 122, 144, 0.20), transparent 34%),
+        radial-gradient(circle at 80% 75%, rgba(151, 111, 255, 0.16), transparent 38%),
+        rgba(45, 36, 58, 0.12);
+
+    border: 1px solid rgba(255, 255, 255, 0.28);
+
+    pointer-events: none;
+}
+
+/* Actual upload card */
+.presentation-page.is-waiting-upload .upload-panel__content {
+    position: relative;
+    z-index: 1;
+
+    width: min(520px, 100%);
+
+    display: grid;
+    justify-items: center;
+    gap: 14px;
+
+    padding: 34px 32px;
+
+    border-radius: 30px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+
+    background:
+        linear-gradient(135deg,
+            rgba(72, 64, 86, 0.92),
+            rgba(52, 45, 66, 0.88));
+
+    color: #ffffff;
+
+    box-shadow:
+        0 24px 60px rgba(36, 26, 50, 0.32),
+        inset 0 1px 0 rgba(255, 255, 255, 0.16);
+}
+
+.presentation-page.is-waiting-upload .upload-panel__title {
+    margin: 0;
+
+    font-size: clamp(1.8rem, 4vw, 2.65rem);
+    font-weight: 900;
+    letter-spacing: -0.03em;
+}
+
+.presentation-page.is-waiting-upload .upload-panel__subtitle {
+    max-width: 420px;
+    margin: 0 0 4px;
+
+    color: rgba(255, 255, 255, 0.72);
+    text-align: center;
+    line-height: 1.55;
+}
+
+.presentation-page.is-waiting-upload .upload-panel__label {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    min-width: 220px;
+    padding: 12px 18px;
+
+    border-radius: 999px;
+
+    background: linear-gradient(135deg, #c6a1ff, #ff8293);
+    color: #16071f;
+
+    font-weight: 900;
+    cursor: pointer;
+}
+
+.presentation-page.is-waiting-upload .upload-panel__input {
+    width: min(420px, 100%);
+    padding: 12px;
+
+    border-radius: 18px;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+
+    background: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.78);
+}
+
+.presentation-page.is-waiting-upload .upload-panel__status {
+    margin: 2px 0 0;
+
+    color: rgba(255, 255, 255, 0.66);
+    font-size: 0.88rem;
+}
+
+/* Session title input */
+.upload-panel__field {
+    width: min(420px, 100%);
+
+    display: grid;
+    gap: 8px;
+
+    margin-top: 2px;
+    text-align: right;
+}
+
+.upload-panel__field-label {
+    font-size: 0.88rem;
+    font-weight: 800;
+    color: rgba(255, 255, 255, 0.84);
+}
+
+.upload-panel__text-input {
+    width: 100%;
+    box-sizing: border-box;
+
+    padding: 13px 16px;
+
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+
+    background: rgba(255, 255, 255, 0.10);
+    color: #ffffff;
+
+    outline: none;
+}
+
+.upload-panel__text-input::placeholder {
+    color: rgba(255, 255, 255, 0.42);
+}
+
+.upload-panel__text-input:focus {
+    border-color: rgba(255, 122, 144, 0.72);
+    box-shadow: 0 0 0 4px rgba(255, 122, 144, 0.12);
+}
+
+.upload-panel__hint {
+    width: min(420px, 100%);
+    margin: -2px 0 0;
+
+    font-size: 0.78rem;
+    color: rgba(255, 255, 255, 0.56);
+    text-align: right;
+}
+
+/* Mobile */
+@media (max-width: 700px) {
+    .presentation-page.is-waiting-upload {
+        padding: 16px;
+    }
+
+    .presentation-page.is-waiting-upload .upload-panel {
+        width: 100%;
+        min-height: calc(100dvh - 32px);
+        padding: 22px;
+        border-radius: 30px;
+    }
+
+    .presentation-page.is-waiting-upload .upload-panel::before {
+        inset: 12px;
+        border-radius: 24px;
+    }
+
+    .presentation-page.is-waiting-upload .upload-panel__content {
+        padding: 26px 18px;
+        border-radius: 24px;
+    }
+}
+
+/* =========================================================
+   SESSION TITLE INPUT INSIDE UPLOAD CARD
+========================================================= */
+
+.upload-panel__field {
+    width: min(420px, 100%);
+
+    display: grid;
+    gap: 8px;
+
+    margin-top: 2px;
+    text-align: right;
+}
+
+.upload-panel__field-label {
+    font-size: 0.88rem;
+    font-weight: 800;
+    color: rgba(255, 255, 255, 0.84);
+}
+
+.upload-panel__text-input {
+    width: 100%;
+    box-sizing: border-box;
+
+    padding: 13px 16px;
+
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+
+    background: rgba(255, 255, 255, 0.10);
+    color: #ffffff;
+
+    outline: none;
+}
+
+.upload-panel__text-input::placeholder {
+    color: rgba(255, 255, 255, 0.42);
+}
+
+.upload-panel__text-input:focus {
+    border-color: rgba(255, 122, 144, 0.72);
+    box-shadow: 0 0 0 4px rgba(255, 122, 144, 0.12);
+}
+
+.upload-panel__hint {
+    width: min(420px, 100%);
+    margin: -2px 0 0;
+
+    font-size: 0.78rem;
+    color: rgba(255, 255, 255, 0.56);
+    text-align: right;
+}
+
+/* Mobile */
+@media (max-width: 700px) {
+    .presentation-page.is-waiting-upload {
+        padding: 16px;
+    }
+
+    .presentation-page.is-waiting-upload .upload-panel {
+        width: 100%;
+        min-height: calc(100dvh - 32px);
+        padding: 22px;
+        border-radius: 30px;
+    }
+
+    .presentation-page.is-waiting-upload .upload-panel::before {
+        inset: 12px;
+        border-radius: 24px;
+    }
+
+    .presentation-page.is-waiting-upload .upload-panel__content {
+        padding: 26px 18px;
+        border-radius: 24px;
+    }
+}
+
+/* =========================================================
+   PRESENTATION WAITING MODE FIX
+   ---------------------------------------------------------
+   Hide slide area while upload launcher is visible.
+   This prevents the white slideWrapper block from showing
+   behind the upload modal.
+========================================================= */
+
+.presentation-page.is-waiting-upload .presentation-stage,
+.presentation-page.is-waiting-upload .slide-wrapper,
+.presentation-page.is-waiting-upload .pdf-navigation-controls {
+    display: none;
+}
+
+.presentation-page.is-presentation-active .presentation-stage {
+    display: grid;
+}
+
+/* =========================================================
+   UPLOAD FORM TYPOGRAPHY FIX
+========================================================= */
+
+.upload-panel__field,
+.upload-panel__field-label,
+.upload-panel__text-input,
+.upload-panel__hint,
+.upload-panel__start-button {
+    font-family: "Heebo", "Rubik", Arial, sans-serif;
+}
+
+.upload-panel__field {
+    width: min(420px, 100%);
+
+    display: grid;
+    gap: 8px;
+
+    margin-top: 8px;
+    text-align: right;
+    direction: rtl;
+}
+
+.upload-panel__field-label {
+    font-size: 0.9rem;
+    font-weight: 800;
+    line-height: 1.35;
+    color: rgba(255, 255, 255, 0.86);
+}
+
+.upload-panel__text-input {
+    width: 100%;
+    box-sizing: border-box;
+
+    padding: 13px 16px;
+
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+
+    background: rgba(255, 255, 255, 0.10);
+    color: #ffffff;
+
+    text-align: right;
+    direction: rtl;
+
+    outline: none;
+}
+
+.upload-panel__text-input::placeholder {
+    color: rgba(255, 255, 255, 0.42);
+}
+
+.upload-panel__hint {
+    width: min(420px, 100%);
+    margin: -2px 0 0;
+
+    font-size: 0.78rem;
+    line-height: 1.5;
+
+    color: rgba(255, 255, 255, 0.56);
+    text-align: right;
+    direction: rtl;
+}
+
+/* =========================================================
+   START LECTURE BUTTON
+========================================================= */
+
+.upload-panel__start-button {
+    width: min(420px, 100%);
+
+    margin-top: 8px;
+    padding: 13px 18px;
+
+    border: none;
+    border-radius: 18px;
+
+    background: linear-gradient(135deg, #c6a1ff, #ff8293);
+    color: #16071f;
+
+    font-weight: 900;
+    cursor: pointer;
+
+    transition:
+        opacity 180ms ease,
+        transform 180ms ease,
+        filter 180ms ease;
+}
+
+.upload-panel__start-button:hover:not(:disabled) {
+    transform: translateY(-1px);
+    filter: brightness(1.04);
+}
+
+.upload-panel__start-button:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+/* =========================================================
+   FINAL UPLOAD LAUNCHER FIX
+   ---------------------------------------------------------
+   Fix:
+   - center upload launcher correctly
+   - hide slideWrapper while waiting for upload
+   - prevent white PDF block from showing behind launcher
+   - keep responsive layout stable under ~700px
+========================================================= */
+
+.presentation-page.is-waiting-upload {
+    position: fixed;
+    inset: 0;
+
+    width: 100vw;
+    height: 100dvh;
+    min-height: 100dvh;
+
+    overflow: hidden;
+
+    display: grid;
+    place-items: center;
+
+    padding: clamp(16px, 4vw, 36px);
+
+    background:
+        radial-gradient(circle at 22% 24%, rgba(255, 122, 144, 0.14), transparent 32%),
+        radial-gradient(circle at 78% 70%, rgba(151, 111, 255, 0.12), transparent 36%),
+        linear-gradient(135deg, #f2f2f5 0%, #dedee6 100%);
+}
+
+/* Critical: hide the future PDF area while upload screen is active */
+.presentation-page.is-waiting-upload .presentation-stage,
+.presentation-page.is-waiting-upload .slide-wrapper,
+.presentation-page.is-waiting-upload .pdf-navigation-controls,
+.presentation-page.is-waiting-upload .teacher-controls,
+.presentation-page.is-waiting-upload .tool-options-panel,
+.presentation-page.is-waiting-upload .questions-drawer {
+    display: none;
+}
+
+/* Outer glass shell */
+.presentation-page.is-waiting-upload .upload-panel {
+    position: static;
+
+    width: min(860px, 100%);
+    min-height: 0;
+    height: auto;
+    max-height: calc(100dvh - 32px);
+
+    display: grid;
+    place-items: center;
+
+    padding: clamp(18px, 4vw, 42px);
+
+    border-radius: clamp(24px, 4vw, 38px);
+    border: 1px solid rgba(255, 255, 255, 0.58);
+
+    background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.58), rgba(255, 255, 255, 0.26));
+
+    box-shadow:
+        0 28px 80px rgba(40, 35, 55, 0.22),
+        inset 0 1px 0 rgba(255, 255, 255, 0.72);
+
+    backdrop-filter: blur(22px);
+
+    overflow: hidden;
+    cursor: default;
+}
+
+/* Soft inner panel inside glass shell */
+.presentation-page.is-waiting-upload .upload-panel::before {
+    content: "";
+
+    position: absolute;
+    inset: clamp(10px, 2vw, 22px);
+
+    border-radius: clamp(18px, 3vw, 30px);
+
+    background:
+        radial-gradient(circle at 20% 25%, rgba(255, 122, 144, 0.18), transparent 34%),
+        radial-gradient(circle at 80% 75%, rgba(151, 111, 255, 0.14), transparent 38%),
+        rgba(45, 36, 58, 0.10);
+
+    border: 1px solid rgba(255, 255, 255, 0.28);
+
+    pointer-events: none;
+}
+
+/* Actual launcher card */
+.presentation-page.is-waiting-upload .upload-panel__content {
+    position: relative;
+    z-index: 1;
+
+    width: min(520px, 100%);
+
+    display: grid;
+    justify-items: center;
+    gap: 14px;
+
+    padding: clamp(24px, 4vw, 34px) clamp(18px, 4vw, 32px);
+
+    border-radius: 28px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+
+    background:
+        linear-gradient(135deg, rgba(72, 64, 86, 0.94), rgba(52, 45, 66, 0.90));
+
+    color: #ffffff;
+
+    box-shadow:
+        0 24px 60px rgba(36, 26, 50, 0.30),
+        inset 0 1px 0 rgba(255, 255, 255, 0.16);
+}
+
+.presentation-page.is-waiting-upload .upload-panel__title {
+    margin: 0;
+
+    font-size: clamp(1.7rem, 4vw, 2.55rem);
+    font-weight: 900;
+    letter-spacing: -0.03em;
+    text-align: center;
+}
+
+.presentation-page.is-waiting-upload .upload-panel__subtitle {
+    margin: 0;
+
+    color: rgba(255, 255, 255, 0.72);
+    text-align: center;
+    line-height: 1.55;
+}
+
+/* Native file input */
+.presentation-page.is-waiting-upload .upload-panel__input {
+    width: min(420px, 100%);
+    padding: 12px;
+
+    border-radius: 18px;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+
+    background: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.78);
+
+    cursor: pointer;
+}
+
+/* Hebrew title field font fix */
+.upload-panel__field,
+.upload-panel__field-label,
+.upload-panel__text-input,
+.upload-panel__hint,
+.upload-panel__start-button {
+    font-family: "Heebo", "Rubik", Arial, sans-serif;
+}
+
+.upload-panel__field {
+    width: min(420px, 100%);
+
+    display: grid;
+    gap: 8px;
+
+    margin-top: 8px;
+
+    text-align: right;
+    direction: rtl;
+}
+
+.upload-panel__field-label {
+    font-size: 0.9rem;
+    font-weight: 800;
+    line-height: 1.35;
+
+    color: rgba(255, 255, 255, 0.86);
+}
+
+.upload-panel__text-input {
+    width: 100%;
+
+    padding: 13px 16px;
+
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+
+    background: rgba(255, 255, 255, 0.10);
+    color: #ffffff;
+
+    text-align: right;
+    direction: rtl;
+
+    outline: none;
+}
+
+.upload-panel__text-input::placeholder {
+    color: rgba(255, 255, 255, 0.42);
+}
+
+.upload-panel__text-input:focus {
+    border-color: rgba(255, 122, 144, 0.72);
+    box-shadow: 0 0 0 4px rgba(255, 122, 144, 0.12);
+}
+
+.upload-panel__hint {
+    width: min(420px, 100%);
+    margin: -2px 0 0;
+
+    font-size: 0.78rem;
+    line-height: 1.5;
+
+    color: rgba(255, 255, 255, 0.56);
+    text-align: right;
+    direction: rtl;
+}
+
+/* Start button */
+.upload-panel__start-button {
+    width: min(420px, 100%);
+
+    margin-top: 8px;
+    padding: 13px 18px;
+
+    border: none;
+    border-radius: 18px;
+
+    background: linear-gradient(135deg, #c6a1ff, #ff8293);
+    color: #16071f;
+
+    font-weight: 900;
+    cursor: pointer;
+
+    transition:
+        opacity 180ms ease,
+        transform 180ms ease,
+        filter 180ms ease;
+}
+
+.upload-panel__start-button:hover:not(:disabled) {
+    transform: translateY(-1px);
+    filter: brightness(1.04);
+}
+
+.upload-panel__start-button:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.presentation-page.is-waiting-upload .upload-panel__status {
+    margin: 0;
+
+    color: rgba(255, 255, 255, 0.66);
+    font-size: 0.88rem;
+    text-align: center;
+}
+
+/* Small screens */
+@media (max-width: 700px) {
+    .presentation-page.is-waiting-upload {
+        padding: 14px;
+    }
+
+    .presentation-page.is-waiting-upload .upload-panel {
+        width: 100%;
+        max-height: calc(100dvh - 28px);
+        padding: 18px;
+        border-radius: 26px;
+    }
+
+    .presentation-page.is-waiting-upload .upload-panel__content {
+        border-radius: 22px;
+    }
+}

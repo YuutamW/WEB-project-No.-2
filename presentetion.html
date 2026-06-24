@@ -34,7 +34,7 @@
     <!-- dls-api.js uses io()                 -->
     <script src="js/dls-api.js" defer></script>
     <!-- question-manager.js uses DLS_API and DLS_SOCKET -->
-    <script src="js/question-manager.js" defer></script>
+    <!-- <script src="js/question-manager.js" defer></script> // Currently unexpecrted token export-->
 </head>
 
 
@@ -73,14 +73,32 @@
                 </h1>
 
                 <p class="upload-panel__subtitle">
-                    Upload a PDF or PowerPoint file to start the lecture demo.
+                    העלה/י קובץ PDF בכדי שנוכל להתחיל :
                 </p>
-
+                <!-- 
                 <label class="upload-panel__label" for="presentationFileInput">
-                    📄 Upload PDF / PowerPoint
-                </label>
+                    Upload PDF
+                </label> 
+                -->
 
                 <input id="presentationFileInput" class="upload-panel__input" type="file" accept=".pdf,.ppt,.pptx">
+
+                <label class="upload-panel__field" for="presentationSessionTitleInput">
+                    <span class="upload-panel__field-label">
+                        שם ההרצאה / הסשן
+                    </span>
+
+                    <input id="presentationSessionTitleInput" class="upload-panel__text-input" type="text"
+                        maxlength="80" placeholder="לדוגמה: Web & Cloud - Lecture 12">
+                </label>
+
+                <p class="upload-panel__hint">
+                    אם השם יישאר ריק, ניצור שם אוטומטי לפי שם הקובץ והתאריך.
+                </p>
+
+                <button id="startLectureButton" class="upload-panel__start-button" type="button" disabled>
+                    Start Lecture
+                </button>
 
                 <p id="presentationStatusText" class="upload-panel__status">
                     Waiting for presentation upload...

@@ -81,6 +81,9 @@ const uploadPanel = document.getElementById("uploadPanel");
 const presentationFileInput = document.getElementById("presentationFileInput");
 const presentationStatusText = document.getElementById("presentationStatusText");
 
+const presentationSessionTitleInput = document.getElementById("presentationSessionTitleInput");
+const startLectureButton = document.getElementById("startLectureButton");
+
 /* Main slide elements */
 const slideWrapper = document.getElementById("slideWrapper");
 const pdfCanvas = document.getElementById("pdfCanvas");
@@ -169,7 +172,12 @@ const presentationState = {
     laserColor: "#ff3b3b",
 
     questionMarkersVisible: false,
-    questionMarkerColor: "#ff3b6b"
+    questionMarkerColor: "#ff3b6b",
+
+    pendingFile: null,
+    session: null,
+    sessionTitle: "",
+    sessionJoinUrl: "",
 };
 
 /* --Added Helper Vars-- */
@@ -241,7 +249,11 @@ initPresentationPage();
 
 function connectEvents() {
     /* File upload */
-    presentationFileInput.addEventListener("change", handlePresentationFileUpload);
+    presentationFileInput.addEventListener("change", handlePresentationFilePicked);
+
+    if (startLectureButton) {
+        startLectureButton.addEventListener("click", startLectureFromPendingFile);
+    }
 
     /* PDF page navigation */
     if (previousPdfPageButton && nextPdfPageButton) {
@@ -342,7 +354,7 @@ function connectEvents() {
    Detect selected file type and update the mockup state.
    await = async func - not to stuck the flow
 ========================================================== */
-
+// OLD
 async function handlePresentationFileUpload(event) {
     const file = event.target.files[0];
 
@@ -377,6 +389,107 @@ async function handlePresentationFileUpload(event) {
     }
 
     updateStatus("Unsupported file type.");
+}
+
+function handlePresentationFilePicked(event) {
+    const file = event.target.files[0];
+
+    if (!file) {
+        presentationState.pendingFile = null;
+
+        if (startLectureButton) {
+            startLectureButton.disabled = true;
+        }
+
+        updateStatus("No file selected.");
+        return;
+    }
+
+    const fileName = file.name.toLowerCase();
+
+    if (
+        !fileName.endsWith(".pdf") &&
+        !fileName.endsWith(".ppt") &&
+        !fileName.endsWith(".pptx")
+    ) {
+        presentationState.pendingFile = null;
+
+        if (startLectureButton) {
+            startLectureButton.disabled = true;
+        }
+
+        updateStatus("Unsupported file type.");
+        return;
+    }
+
+    presentationState.pendingFile = file;
+
+    if (startLectureButton) {
+        startLectureButton.disabled = false;
+    }
+
+    updateStatus(`File ready: ${file.name}. Press Start Lecture.`);
+}
+
+async function startLectureFromPendingFile() {
+    const file = presentationState.pendingFile;
+
+    if (!file) {
+        updateStatus("Choose a PDF first.");
+        return;
+    }
+
+    const sessionTitle = getSessionTitleForFile(file);
+
+    presentationState.currentFile = file;
+    presentationState.sessionTitle = sessionTitle;
+
+    if (presentationSessionTitleInput && !presentationSessionTitleInput.value.trim()) {
+        presentationSessionTitleInput.value = sessionTitle;
+    }
+
+    if (startLectureButton) {
+        startLectureButton.disabled = true;
+    }
+
+    updateStatus("Starting lecture...");
+
+    await handlePresentationFileUpload({
+        target: {
+            files: [file]
+        }
+    });
+}
+
+function buildDefaultSessionTitle(file) {
+    const fileBaseName = file.name.replace(/\.[^/.]+$/, "");
+
+    const now = new Date();
+
+    const dateText = now.toLocaleDateString("he-IL", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric"
+    });
+
+    const timeText = now.toLocaleTimeString("he-IL", {
+        hour: "2-digit",
+        minute: "2-digit"
+    });
+
+    return `${fileBaseName} · ${dateText} ${timeText}`;
+}
+
+function getSessionTitleForFile(file) {
+    const typedTitle = presentationSessionTitleInput
+        ? presentationSessionTitleInput.value.trim()
+        : "";
+
+    if (typedTitle) {
+        return typedTitle;
+    }
+
+    return buildDefaultSessionTitle(file);
 }
 
 
