@@ -27,8 +27,15 @@
 const USERS_JSON_PATH = "data/sample-users.json";
 const REGISTERED_USERS_STORAGE_KEY = "dlsRegisteredUsers";
 const CURRENT_USER_STORAGE_KEY = "dlsCurrentUser";
-/* when front + back together - put "https://your-backend-url.com" */
-const API_BASE_URL = "https://dls-backend-uelx.onrender.com";
+const API_BASE_URL = (function () {
+  // Detect environment automatically 
+  if (location.hostname === "localhost" || location.hostname === "127.0.0.1") {
+    return "http://localhost:3000";
+  }
+  // Production URL
+  return "https://dls-backend-uelx.onrender.com";
+})();
+
 const USERS_PATH = "/api/users";
 
 
