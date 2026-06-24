@@ -59,7 +59,7 @@ const DLS_CONFIG = {
     },
 
     FEATURE_FLAGS: {
-        RECENT_SESSIONS_API: false
+        RECENT_SESSIONS_API: true
     },
 };
 

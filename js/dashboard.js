@@ -936,7 +936,7 @@ async function renderRecentSessions() {
 
             const card = document.createElement("a");
             // Placeholder link - update when session view is ready
-            card.href = `session.html?code=${encodeURIComponent(session.id)}`;
+            card.href = `session.html?code=${encodeURIComponent(session.code || session.id)}`;
             card.className = "session-card";
 
             card.innerHTML = `
@@ -946,7 +946,8 @@ async function renderRecentSessions() {
                 </div>
                 <div class="session-card__action">▶</div>
             `;
-            card.querySelector('.session-card__title').textContent = session.title;
+            card.querySelector(".session-card__title").textContent =
+    session.title || `הרצאה ${new Date().toLocaleDateString("he-IL")}`;
             container.appendChild(card);
         });
     } catch (error) {
