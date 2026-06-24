@@ -760,6 +760,43 @@ function setupSettingsOverlay() {
     });
 }
 
+function openDashboardOverlay(selectorOrOverlay) {
+    const overlay =
+        typeof selectorOrOverlay === "string"
+            ? document.querySelector(selectorOrOverlay)
+            : selectorOrOverlay;
+
+    if (!overlay) {
+        return;
+    }
+
+    overlay.hidden = false;
+
+    requestAnimationFrame(function () {
+        overlay.classList.add("is-open");
+    });
+}
+
+function closeDashboardOverlay(selectorOrOverlay) {
+    const overlay =
+        typeof selectorOrOverlay === "string"
+            ? document.querySelector(selectorOrOverlay)
+            : selectorOrOverlay;
+
+    if (!overlay) {
+        return;
+    }
+
+    overlay.classList.remove("is-open");
+
+    setTimeout(function () {
+        if (!overlay.classList.contains("is-open")) {
+            overlay.hidden = true;
+        }
+    }, 220);
+}
+
+/* Wayaround - since opendashboardoverlay() use dashboard-core */
 function setupLecturerDashboardPolishActions() {
     const nextLessonsButtons = document.querySelectorAll(
         "[data-dashboard-action='open-next-lessons']"
@@ -790,6 +827,29 @@ function setupLecturerDashboardPolishActions() {
             const overlay = button.closest(".dashboard-modal");
             closeDashboardOverlay(overlay);
         });
+    });
+
+    /* Settings Guard from breaking Popup behaviour */
+    document.addEventListener("click", function (event) {
+        const clickedBackdrop = event.target.classList.contains(
+            "dashboard-modal__backdrop"
+        );
+
+        if (!clickedBackdrop) {
+            return;
+        }
+
+        const overlay = event.target.closest(".dashboard-modal");
+
+        if (!overlay) {
+            return;
+        }
+
+        if (overlay.id === "settingsOverlay") {
+            return;
+        }
+
+        closeDashboardOverlay(overlay);
     });
 
     //setupDashboardOverlayBackdropClose(".dashboard-modal");
@@ -985,7 +1045,7 @@ async function renderRecentSessions() {
                 <div class="session-card__action">▶</div>
             `;
             card.querySelector(".session-card__title").textContent = sessionTitle;
-                // session.title || `הרצאה ${new Date().toLocaleDateString("he-IL")}`;
+            // session.title || `הרצאה ${new Date().toLocaleDateString("he-IL")}`;
             container.appendChild(card);
         });
     } catch (error) {

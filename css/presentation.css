@@ -2783,7 +2783,7 @@ body:has(.presentation-page.is-waiting-upload) {
    SESSION ROOM BADGE + INFO OVERLAY
 ========================================================= */
 
-.session-room-badge {
+.session-room-badge [hidden]{
     position: fixed;
     top: 18px;
     left: 18px;
@@ -2986,4 +2986,5 @@ body:has(.presentation-page.is-waiting-upload) {
 .session-participant-card span {
     color: rgba(255, 255, 255, 0.62);
     font-size: 0.82rem;
-}s
+}
+
