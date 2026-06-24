@@ -2092,3 +2092,82 @@ body {
         min-height: 112px;
     }
 }
+
+/* =========================================================
+   STUDENT CALENDAR + MOBILE SPACING FINAL FIX
+   ---------------------------------------------------------
+   Fix:
+   - remove large empty bottom space under Google Calendar
+   - reduce mobile spacing between header and Join Session
+   - keep calendar directly after Join Session on mobile
+========================================================= */
+
+/* Desktop/tablet student calendar compact height */
+.dashboard-page--student .dashboard-panel--student-calendar {
+    min-height: 0 !important;
+    padding-bottom: 18px !important;
+}
+
+.dashboard-page--student .dashboard-panel--student-calendar .dashboard-panel__header {
+    margin-bottom: 12px !important;
+}
+
+.dashboard-page--student .dashboard-panel--student-calendar .dashboard-calendar-frame {
+    line-height: 0;
+}
+
+.dashboard-page--student .dashboard-panel--student-calendar .dashboard-calendar-frame iframe {
+    height: 370px !important;
+    display: block;
+}
+
+/* Mobile student dashboard spacing */
+@media (max-width: 850px) {
+    .dashboard-page--student .dashboard-main {
+        padding: 16px 18px 96px !important;
+        gap: 10px !important;
+    }
+
+    .dashboard-page--student .dashboard-header {
+        margin-bottom: 0 !important;
+        padding-top: 64px !important;
+        padding-bottom: 22px !important;
+    }
+
+    .dashboard-page--student .dashboard-actions--student {
+        margin-top: 0 !important;
+    }
+
+    .dashboard-page--student [data-student-action="open-join-session"] {
+        margin-top: 0 !important;
+        order: 10;
+    }
+
+    .dashboard-page--student .dashboard-panel--student-calendar {
+        order: 11;
+        margin-top: 8px !important;
+        padding: 16px !important;
+        min-height: 0 !important;
+    }
+
+    .dashboard-page--student .dashboard-panel--student-calendar .dashboard-calendar-frame iframe {
+        height: 330px !important;
+    }
+
+    .dashboard-page--student [data-student-action="open-notes-demo"] {
+        order: 12;
+        margin-top: 8px !important;
+    }
+
+    .dashboard-page--student [data-student-action="open-questions-demo"] {
+        order: 13;
+        margin-top: 8px !important;
+    }
+
+    .dashboard-page--student .dashboard-panel--student-stack {
+        order: 14;
+        margin-top: 8px !important;
+    }
+}
+
+
