@@ -242,21 +242,118 @@ const pdfViewerManager = createPdfViewerManager({
 /* ==========================================================
    3. Init
    Purpose:
-   Starts the page logic after the file is loaded.
+   Starts the presentation page logic after the file is loaded.
 ========================================================== */
-
-function initPresentationPage() {
+async function initPresentationPage() {
     connectEvents();
-
-    /* no tool selected when selected PDF */
     clearActiveTool();
 
-    updateStatus("Presentation page ready.");
+    const urlParams = new URLSearchParams(window.location.search);
+    const sessionCode = urlParams.get("sessionCode");
+
+    if(sessionCode) {
+        //  JOIN an existing session
+        updateStatus("Joining live session...");
+        await initializeLiveSession(sessionCode);
+    } else {
+        // --- CREATING A NEW SESSION (Default Lecturer Flow) ---
+        updateStatus("Presentation page ready. Waiting for upload.");
+    }
+}
+
+/*==========================================================
+    3.5 init helper
+    Purpose: get session metadata, adjust ui based on ROLE , load the pdf into the viewer and join the socket room
+*/
+async function initializeLiveSession(sessionCode) {
+    try {
+        const currentUser = getCurrentDlsUser();
+        const currentUserId = currentUser?.id || currentUser?._id;
+
+        // 1. Get session metadata
+        const sessionInfo = await window.DLS_API.getSessionByCode(sessionCode);
+        presentationState.session = sessionInfo;
+
+        const isLecturer = sessionInfo.ownerId === currentUserId;
+
+        // 2. Adjust UI based on Role
+        if (!isLecturer) {
+            // Student Setup: Hide teacher controls permanently
+            const teacherControls = document.getElementById("teacherControls");
+            if(teacherControls) teacherControls.style.display = "none";
+            const navControls = document.getElementById("pdfNavigationControls");
+            if (navControls) navControls.style.display = "flex";
+            updateStatus("Downloading lecture materials...");
+        } else {
+            updateStatus("Reconnecting to your session...");
+        }
+
+        // 3. Download the PDF Blob from the backend
+        const pdfBlob = await window.DLS_API.fetchSessionPdfAsBlob(sessionCode);
+        
+        // 4. Convert Blob to a File-like object so pdfViewerManager accepts it
+        const pdfFile = new File([pdfBlob], sessionInfo.title + ".pdf", { type: "application/pdf" });
+        presentationState.currentFile = pdfFile;
+
+        // 5. Hide the upload panel and show the canvas
+        activatePresentationMode();
+
+        // 6. Load the PDF into the viewer
+        await pdfViewerManager.loadPdfFile(pdfFile);
+
+        // 7. Join the Socket.IO room for real-time updates
+        if (window.DLS_SOCKET) {
+            window.DLS_SOCKET.joinPresentation(`session_${sessionCode}`);
+            setupLiveSocketListeners();
+        }
+        updateStatus(`Connected to room: ${sessionCode}`);
+    
+    }catch (error) {
+        console.error("Failed to join live session:", error);
+        updateStatus("Error joining session. Please check the code and try again.");
+    }
+}
+
+
+/*==========================================================
+    3.75 setup live socket listener
+    Purpose: 
+*/
+function setupLiveSocketListeners() {
+    if (!window.DLS_SOCKET) {
+        console.warn("Socket module not found.");
+        return;
+    }
+
+    // Listen for new questions arriving from the server
+    window.DLS_SOCKET.onQuestionCreated(function (newQuestion) {
+        // 1. Inject the incoming question into our local page data
+        const pageData = ensurePageData(newQuestion.page);
+        
+        // Prevent duplicates just in case the sender also receives their own broadcast
+        const exists = pageData.questions.some(q => q.id === newQuestion.id);
+        if (!exists) {
+            pageData.questions.push(newQuestion);
+        }
+
+        // 2. Check if the user is currently looking at the page where the question was dropped
+        if (getActivePageNumber() === newQuestion.page) {
+            // If yes, re-render the dots so the new one pops up instantly!
+            renderQuestionsForCurrentPage();
+        }
+
+        // 3. Always update the Q&A side drawer count and list
+        renderQaDrawer();
+        
+        // Optional: Show a subtle toast/status update
+        updateStatus(`New question added on page ${newQuestion.page}`);
+    });
+
+    // add listeners for updates/deletes here later!
+    // window.DLS_SOCKET.onQuestionDeleted(function(deletedQuestionId) { ... });
 }
 
 initPresentationPage();
-
-
 /* ==========================================================
    4. Event Connections
    Purpose:
