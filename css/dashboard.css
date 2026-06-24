@@ -995,7 +995,7 @@ body {
         z-index: 1000;
 
         width: 100%;
-        padding-top: 16px;
+        padding-top: 10px;
 
         overflow: hidden;
 
@@ -1739,4 +1739,54 @@ body {
     background-color: #fff;
     mask: url("../assets/icons/dashboard/home.svg") center / 22px 22px no-repeat;
     -webkit-mask: url("../assets/icons/dashboard/home.svg") center / 22px 22px no-repeat;
+}
+
+/* =========================================================
+   MOBILE NAV ICON + TEXT ALIGNMENT
+========================================================= */
+
+@media (max-width: 850px) {
+    .dashboard-mobile-nav a,
+    .dashboard-mobile-nav button {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 14px;
+
+        direction: rtl;
+        text-align: right;
+
+        padding: 18px 72px 18px 28px;
+    }
+
+    .dashboard-mobile-nav__icon {
+        width: 44px;
+        height: 44px;
+
+        display: grid;
+        place-items: center;
+
+        flex: 0 0 auto;
+
+        /* border-radius: 14px;
+        border: 1px solid rgba(255, 255, 255, 0.16);
+
+        background: rgba(255, 255, 255, 0.12); */
+    }
+
+    .dashboard-mobile-nav__icon img {
+        width: 20px;
+        height: 20px;
+        display: block;
+
+        filter: brightness(0) invert(1);
+        opacity: 0.95;
+    }
+
+    .dashboard-mobile-nav__text {
+        display: inline-block;
+
+        font-weight: 700;
+        color: #ffffff;
+    }
 }

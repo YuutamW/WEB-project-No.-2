@@ -44,6 +44,9 @@
 
             <nav class="dashboard-sidebar__nav">
                 <a class="dashboard-sidebar__link is-active" href="dashboard.html">
+                    <span class="dashboard-action-card__icon1">
+                        <img src="assets/icons/dashboard/home.svg" alt="">
+                    </span>
                     דף הבית
                 </a>
 
@@ -60,10 +63,16 @@
                 </a> -->
 
                 <a class="dashboard-sidebar__link" href="#" data-dashboard-action="open-settings">
+                    <span class="dashboard-action-card__icon1">
+                        <img src="assets/icons/dashboard/settings.svg" alt="">
+                    </span>
                     הגדרות
                 </a>
 
                 <a id="logoutButton" class="dashboard-sidebar__link" href="login.html" data-auth-action="logout">
+                    <span class="dashboard-action-card__icon1">
+                        <img src="assets/icons/dashboard/logout.svg" alt="">
+                    </span>
                     התנתק/י
                 </a>
                 <!-- TODO: Restore next lecture after calendar/API integration -->
@@ -85,15 +94,37 @@
             </button>
 
             <nav id="dashboardMobileNav" class="dashboard-mobile-nav" hidden>
-                <a href="dashboard.html"> דף הבית</a>
+
+                <a href="dashboard.html">
+                    <span class="dashboard-mobile-nav__icon">
+                        <img src="assets/icons/dashboard/home.svg" alt="">
+                    </span>
+
+                    <span class="dashboard-mobile-nav__text">
+                        דף הבית
+                    </span>
+                </a>
 
                 <button type="button" data-dashboard-action="open-settings">
-                    הגדרות
+                    <span class="dashboard-mobile-nav__icon">
+                        <img src="assets/icons/dashboard/settings.svg" alt="">
+                    </span>
+
+                    <span class="dashboard-mobile-nav__text">
+                        הגדרות
+                    </span>
                 </button>
 
                 <a href="login.html" data-auth-action="logout">
-                    התנתק/י
+                    <span class="dashboard-mobile-nav__icon">
+                        <img src="assets/icons/dashboard/logout.svg" alt="">
+                    </span>
+
+                    <span class="dashboard-mobile-nav__text">
+                        התנתק/י
+                    </span>
                 </a>
+
             </nav>
 
             <!-- Header -->
@@ -132,10 +163,12 @@
 
                 <a class="dashboard-action-card dashboard-action-card--primary" href="presentetion.html">
                     <span class="dashboard-action-card__icon">
-                        ▶
+                        <img src="assets/icons/dashboard/presentation-play.svg" alt="">
+                        <!-- ▶ -->
                     </span>
 
                     <h3 class="dashboard-action-card__title">
+                        <!-- <img src="assets/icons/dashboard/presentation-play.svg" alt=""> -->
                         התחל מצגת
                     </h3>
 
@@ -145,7 +178,10 @@
                 </a>
 
                 <button class="dashboard-action-card" type="button" data-dashboard-action="open-next-lessons">
-                    <span class="dashboard-tile-icon dashboard-tile-icon--calendar"></span>
+                    <span class="dashboard-tile-icon dashboard-action-card__icon">
+                        <img src="assets/icons/dashboard/calendar.svg" alt="">
+                    </span>
+
 
                     <h3 class="dashboard-action-card__title">
                         השיעורים הבאים
@@ -190,7 +226,9 @@
                 </div>
 
                 <button class="dashboard-action-card" type="button" data-dashboard-action="open-jump-session">
-                    <span class="dashboard-tile-icon dashboard-tile-icon--session"></span>
+                    <span class="dashboard-tile-icon dashboard-action-card__icon">
+                        <img src="assets/icons/dashboard/sessions.svg" alt="">
+                    </span>
 
                     <h3 class="dashboard-action-card__title">
                         הסשנים שלי
@@ -271,7 +309,7 @@
 
                     <div class="dashboard-calendar-frame">
                         <iframe
-                            src="https://calendar.google.com/calendar/embed?src=YOUR_CALENDAR_ID&ctz=Asia%2FJerusalem"
+                            src="https://calendar.google.com/calendar/embed?src=dls.sys.demo%40gmail.com&ctz=Asia%2FJerusalem"
                             style="border:0" width="100%" height="420" frameborder="0" scrolling="no">
                         </iframe>
                     </div>
