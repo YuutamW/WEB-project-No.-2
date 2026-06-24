@@ -40,7 +40,7 @@ const DASHBOARD_CONFIG = {
         SETTINGS_USER_ID: "#settingsUserId",
         SETTINGS_USER_EMAIL: "#settingsUserEmail"
     }
-    
+
 };
 
 /* ==========================================================
@@ -907,6 +907,40 @@ function openSettingsFromUrlIfNeeded() {
     });
 }
 
+/* Treat Wierd Naming Helper in Sessions names */
+function normalizeSessionTitle(session) {
+    const rawTitle = String(session?.title || "").trim();
+
+    const cleanedTitle = rawTitle
+        .replace(/^\((.*)\)$/, "$1")
+        .trim();
+
+    const invalidTitles = [
+        "",
+        "undefined",
+        "(undefined)",
+        "null",
+        "(null)",
+        "Session:(undefined)"
+    ];
+
+    if (!invalidTitles.includes(cleanedTitle)) {
+        return cleanedTitle;
+    }
+
+    const code = session?.code || session?.id || "";
+
+    if (code) {
+        return `סשן ${code}`;
+    }
+
+    return "סשן ללא שם";
+}
+
+function getSessionCode(session) {
+    return session?.code || session?.id || "";
+}
+
 /* ==========================================================
    RECENT SESSIONS
    
@@ -933,6 +967,8 @@ async function renderRecentSessions() {
                 hour: "2-digit",
                 minute: "2-digit"
             });
+            const sessionCode = getSessionCode(session);
+            const sessionTitle = normalizeSessionTitle(session);
 
             const card = document.createElement("a");
             // Placeholder link - update when session view is ready
@@ -946,8 +982,8 @@ async function renderRecentSessions() {
                 </div>
                 <div class="session-card__action">▶</div>
             `;
-            card.querySelector(".session-card__title").textContent =
-    session.title || `הרצאה ${new Date().toLocaleDateString("he-IL")}`;
+            card.querySelector(".session-card__title").textContent = sessionTitle;
+                // session.title || `הרצאה ${new Date().toLocaleDateString("he-IL")}`;
             container.appendChild(card);
         });
     } catch (error) {
