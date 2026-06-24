@@ -94,7 +94,7 @@ function getDlsBackendUrl() {
         ? DLS_ENV.LOCAL_BACKEND_URL
         : DLS_ENV.PROD_BACKEND_URL;
     */
-   // Force production backend for now
+    // Force production backend for now
     return DLS_ENV.PROD_BACKEND_URL;
 }
 
@@ -260,6 +260,57 @@ const DLS_API = {
             method: "DELETE"
         });
         return responseData.data;
+    },
+
+     /* UPDATE CURRENT USER
+        Route: PUT /api/users/edit
+        Required body: { _id, firstName, lastName, email, role?, password? }
+     */
+    async updateUser(updatedFields) {
+        const currentUser = getCurrentDlsUser();
+
+        if (!currentUser) {
+            throw new Error("No logged-in user found.");
+        }
+
+        const userId =
+            updatedFields._id ||
+            updatedFields.id ||
+            currentUser._id ||
+            currentUser.id;
+
+        if (!userId) {
+            throw new Error("Missing user id.");
+        }
+
+        const responseData = await sendJsonRequest(
+            "/api/users/edit",
+            {
+                method: "PUT",
+                body: JSON.stringify({
+                    ...updatedFields,
+                    _id: userId
+                })
+            }
+        );
+
+        return responseData.data || responseData.user || responseData;
+    },
+
+    /* DELETE CURRENT USER
+       Route: DELETE /api/users/:id
+    */
+    async deleteUser(userId) {
+        if (!userId) {
+            throw new Error("Missing user id.");
+        }
+
+        return sendJsonRequest(
+            "/api/users/" + encodeURIComponent(userId),
+            {
+                method: "DELETE"
+            }
+        );
     },
 
     /* GET RECENT SESSIONS 
