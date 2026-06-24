@@ -2778,3 +2778,212 @@ body:has(.presentation-page.is-waiting-upload) {
         border-radius: 22px;
     }
 }
+
+/* =========================================================
+   SESSION ROOM BADGE + INFO OVERLAY
+========================================================= */
+
+.session-room-badge {
+    position: fixed;
+    top: 18px;
+    left: 18px;
+    z-index: 60;
+
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+
+    padding: 10px 14px;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 999px;
+
+    background: rgba(22, 12, 34, 0.76);
+    color: #ffffff;
+    font-family: "Heebo", Arial, sans-serif;
+
+    backdrop-filter: blur(18px);
+    cursor: pointer;
+}
+
+.session-room-badge strong {
+    letter-spacing: 0.08em;
+}
+
+.session-info-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 120;
+
+    display: grid;
+    place-items: center;
+
+    opacity: 0;
+    pointer-events: none;
+
+    transition: opacity 180ms ease;
+}
+
+.session-info-overlay.is-visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.session-info-overlay__backdrop {
+    position: absolute;
+    inset: 0;
+
+    background: rgba(7, 3, 16, 0.72);
+    backdrop-filter: blur(16px);
+}
+
+.session-info-overlay__panel {
+    position: relative;
+
+    width: min(620px, calc(100vw - 32px));
+    max-height: calc(100dvh - 32px);
+    overflow-y: auto;
+
+    padding: 28px;
+
+    border-radius: 28px;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+
+    background:
+        radial-gradient(circle at top left, rgba(255, 122, 144, 0.18), transparent 34%),
+        rgba(31, 18, 48, 0.94);
+
+    color: #ffffff;
+    font-family: "Heebo", Arial, sans-serif;
+
+    box-shadow: 0 28px 90px rgba(0, 0, 0, 0.46);
+}
+
+.session-info-overlay__close {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+
+    width: 36px;
+    height: 36px;
+
+    border: none;
+    border-radius: 999px;
+
+    background: rgba(255, 255, 255, 0.12);
+    color: #ffffff;
+
+    cursor: pointer;
+}
+
+.session-info-overlay__eyebrow {
+    margin: 0 0 8px;
+    color: rgba(199, 167, 255, 0.95);
+    font-weight: 800;
+}
+
+.session-info-overlay__title {
+    margin: 0 0 10px;
+    font-size: clamp(1.5rem, 4vw, 2.2rem);
+}
+
+.session-info-overlay__text {
+    color: rgba(255, 255, 255, 0.72);
+}
+
+.session-info-overlay__code-box {
+    margin: 20px 0;
+    padding: 18px;
+
+    display: grid;
+    gap: 6px;
+
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.09);
+}
+
+.session-info-overlay__code-box strong {
+    font-size: 2.4rem;
+    letter-spacing: 0.14em;
+}
+
+.session-info-overlay__qr-box {
+    margin: 16px auto;
+
+    width: 204px;
+    min-height: 204px;
+
+    display: grid;
+    place-items: center;
+
+    padding: 12px;
+    border-radius: 22px;
+
+    background: #ffffff;
+    color: #111111;
+}
+
+.session-info-overlay__field {
+    display: grid;
+    gap: 8px;
+    margin-top: 16px;
+}
+
+.session-info-overlay__field input {
+    padding: 12px 14px;
+
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+}
+
+.session-info-overlay__actions {
+    margin-top: 18px;
+
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.session-info-overlay__actions button {
+    padding: 11px 14px;
+
+    border: none;
+    border-radius: 14px;
+
+    background: rgba(255, 255, 255, 0.12);
+    color: #ffffff;
+
+    cursor: pointer;
+}
+
+.session-info-overlay__participants {
+    margin-top: 22px;
+}
+
+.session-info-overlay__participants header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.session-info-overlay__participants-list {
+    display: grid;
+    gap: 10px;
+}
+
+.session-participant-card {
+    padding: 12px 14px;
+
+    display: grid;
+    gap: 4px;
+
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.09);
+}
+
+.session-participant-card span {
+    color: rgba(255, 255, 255, 0.62);
+    font-size: 0.82rem;
+}s

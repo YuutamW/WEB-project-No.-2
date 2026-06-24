@@ -262,10 +262,10 @@ const DLS_API = {
         return responseData.data;
     },
 
-     /* UPDATE CURRENT USER
-        Route: PUT /api/users/edit
-        Required body: { _id, firstName, lastName, email, role?, password? }
-     */
+    /* UPDATE CURRENT USER
+       Route: PUT /api/users/edit
+       Required body: { _id, firstName, lastName, email, role?, password? }
+    */
     async updateUser(updatedFields) {
         const currentUser = getCurrentDlsUser();
 
@@ -343,6 +343,57 @@ const DLS_API = {
         );
 
         return responseData.data || [];
+    },
+
+    /* CREATE SESSION
+   Route: POST /api/sessions
+*/
+    async createSession(sessionData = {}) {
+        const currentUser = getCurrentDlsUser();
+
+        if (!currentUser) {
+            throw new Error("No logged-in user found.");
+        }
+
+        const ownerId = currentUser.id || currentUser._id;
+
+        if (!ownerId) {
+            throw new Error("Missing lecturer user id.");
+        }
+
+        const responseData = await sendJsonRequest(
+            DLS_CONFIG.ROUTES.SESSIONS,
+            {
+                method: "POST",
+                body: JSON.stringify({
+                    ...sessionData,
+                    ownerId: ownerId,
+                    lecturerId: ownerId
+                })
+            }
+        );
+
+        return responseData.data || responseData.session || responseData;
+    },
+
+    /* GET SESSION BY CODE
+       Route: GET /api/sessions/:code
+    */
+    async getSessionByCode(code) {
+        const cleanCode = String(code || "").trim();
+
+        if (!cleanCode) {
+            throw new Error("Missing session code.");
+        }
+
+        const responseData = await sendJsonRequest(
+            `${DLS_CONFIG.ROUTES.SESSIONS}/${encodeURIComponent(cleanCode)}`,
+            {
+                method: "GET"
+            }
+        );
+
+        return responseData.data || responseData.session || responseData;
     },
 
     /* JOIN SESSION

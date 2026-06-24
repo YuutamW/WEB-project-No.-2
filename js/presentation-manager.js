@@ -84,6 +84,22 @@ const presentationStatusText = document.getElementById("presentationStatusText")
 const presentationSessionTitleInput = document.getElementById("presentationSessionTitleInput");
 const startLectureButton = document.getElementById("startLectureButton");
 
+/* Live session elements */
+const sessionRoomBadge = document.getElementById("sessionRoomBadge");
+const sessionRoomCodeText = document.getElementById("sessionRoomCodeText");
+
+const sessionInfoOverlay = document.getElementById("sessionInfoOverlay");
+const closeSessionInfoOverlayButton = document.getElementById("closeSessionInfoOverlayButton");
+const sessionInfoTitle = document.getElementById("sessionInfoTitle");
+const sessionInfoCode = document.getElementById("sessionInfoCode");
+const sessionQrCodeBox = document.getElementById("sessionQrCodeBox");
+const sessionJoinLinkInput = document.getElementById("sessionJoinLinkInput");
+const copySessionJoinLinkButton = document.getElementById("copySessionJoinLinkButton");
+const refreshSessionParticipantsButton = document.getElementById("refreshSessionParticipantsButton");
+const sessionQuestionsVisibilityButton = document.getElementById("sessionQuestionsVisibilityButton");
+const sessionParticipantsCount = document.getElementById("sessionParticipantsCount");
+const sessionParticipantsList = document.getElementById("sessionParticipantsList");
+
 /* Main slide elements */
 const slideWrapper = document.getElementById("slideWrapper");
 const pdfCanvas = document.getElementById("pdfCanvas");
@@ -345,6 +361,27 @@ function connectEvents() {
     if (summaryOverlayRefreshButton) {
         summaryOverlayRefreshButton.addEventListener("click", renderSummaryOverlay);
     }
+
+    /* Live session overlay */
+    if (closeSessionInfoOverlayButton) {
+        closeSessionInfoOverlayButton.addEventListener("click", closeSessionInfoOverlay);
+    }
+
+    if (sessionRoomBadge) {
+        sessionRoomBadge.addEventListener("click", openSessionInfoOverlay);
+    }
+
+    if (copySessionJoinLinkButton) {
+        copySessionJoinLinkButton.addEventListener("click", copySessionJoinLink);
+    }
+
+    if (refreshSessionParticipantsButton) {
+        refreshSessionParticipantsButton.addEventListener("click", refreshSessionParticipants);
+    }
+
+    if (sessionQuestionsVisibilityButton) {
+        sessionQuestionsVisibilityButton.addEventListener("click", toggleQuestionMarkerVisibility);
+    }
 }
 
 
@@ -450,6 +487,22 @@ async function startLectureFromPendingFile() {
 
     if (startLectureButton) {
         startLectureButton.disabled = true;
+    }
+
+    updateStatus("Starting lecture... [creating live session]");
+
+    try {
+        const session = await createLiveSessionForPresentation(file, sessionTitle);
+
+        presentationState.session = session;
+        presentationState.sessionJoinUrl = buildStudentJoinUrl(session.code);
+
+        saveCurrentSessionToLocalStorage(session);
+        renderSessionInfo(session);
+        openSessionInfoOverlay();
+    } catch (error) {
+        console.error("Session creation failed:", error);
+        updateStatus("Session creation failed. Starting presentation without room.");
     }
 
     updateStatus("Starting lecture...");
@@ -598,6 +651,12 @@ function updateActiveToolButton(toolName) {
 
 /* Handles tools that need immediate action */
 function handleSpecialToolAction(toolName) {
+    if (toolName === "settings") {
+        openSessionInfoOverlay();
+        clearActiveTool();
+        return;
+    }
+
     if (toolName === "image") {
         imageUploadInput.click();
     }
@@ -860,6 +919,240 @@ async function goToPreviousPdfPage() {
    Purpose:
    Small reusable utility functions.
 ========================================================== */
+
+/* ==========================================================
+   LIVE SESSION HELPERS
+========================================================== */
+
+async function createLiveSessionForPresentation(file, title) {
+    const presentationId = createPresentationId(file.name);
+
+    if (!window.DLS_API || typeof window.DLS_API.createSession !== "function") {
+        throw new Error("DLS_API.createSession is not available.");
+    }
+
+    const session = await window.DLS_API.createSession({
+        title: title,
+        fileName: file.name,
+        presentationId: presentationId,
+        startedAt: new Date().toISOString()
+    });
+
+    const code = session.code || session.sessionCode || session.id;
+
+    if (!code) {
+        throw new Error("Backend did not return a session code.");
+    }
+
+    return {
+        ...session,
+        code: code,
+        title: session.title || title,
+        fileName: file.name,
+        presentationId: presentationId
+    };
+}
+
+function buildStudentJoinUrl(code) {
+    const baseUrl =
+        window.location.hostname === "localhost" ||
+            window.location.hostname === "127.0.0.1"
+            ? window.location.origin + "/"
+            : "https://dynamic-lecture-system.netlify.app/";
+
+    return (
+        baseUrl +
+        "student-dashboard.html?joinCode=" +
+        encodeURIComponent(code)
+    );
+}
+
+function saveCurrentSessionToLocalStorage(session) {
+    const storageKey =
+        window.DLS_CONFIG?.STORAGE_KEYS?.CURRENT_SESSION ||
+        "dlsCurrentSession";
+
+    localStorage.setItem(storageKey, JSON.stringify(session, null, 2));
+}
+
+function openSessionInfoOverlay() {
+    if (!sessionInfoOverlay || !presentationState.session) {
+        return;
+    }
+
+    renderSessionInfo(presentationState.session);
+
+    sessionInfoOverlay.classList.add("is-visible");
+    sessionInfoOverlay.setAttribute("aria-hidden", "false");
+}
+
+function closeSessionInfoOverlay() {
+    if (!sessionInfoOverlay) {
+        return;
+    }
+
+    sessionInfoOverlay.classList.remove("is-visible");
+    sessionInfoOverlay.setAttribute("aria-hidden", "true");
+}
+
+function renderSessionInfo(session) {
+    if (!session) {
+        return;
+    }
+
+    const code = session.code || "------";
+    const title = session.title || presentationState.sessionTitle || "Live Session";
+    const joinUrl = buildStudentJoinUrl(code);
+
+    presentationState.sessionJoinUrl = joinUrl;
+
+    if (sessionRoomBadge) {
+        sessionRoomBadge.hidden = false;
+    }
+
+    if (sessionRoomCodeText) {
+        sessionRoomCodeText.textContent = code;
+    }
+
+    if (sessionInfoTitle) {
+        sessionInfoTitle.textContent = title;
+    }
+
+    if (sessionInfoCode) {
+        sessionInfoCode.textContent = code;
+    }
+
+    if (sessionJoinLinkInput) {
+        sessionJoinLinkInput.value = joinUrl;
+    }
+
+    renderSessionQr(joinUrl);
+    renderSessionParticipants(session);
+}
+
+function renderSessionQr(joinUrl) {
+    if (!sessionQrCodeBox) {
+        return;
+    }
+
+    sessionQrCodeBox.innerHTML = "";
+
+    if (window.QRCode) {
+        new window.QRCode(sessionQrCodeBox, {
+            text: joinUrl,
+            width: 180,
+            height: 180,
+            correctLevel: window.QRCode.CorrectLevel.M
+        });
+
+        return;
+    }
+
+    const fallbackText = document.createElement("p");
+    fallbackText.textContent = joinUrl;
+    sessionQrCodeBox.appendChild(fallbackText);
+}
+
+async function copySessionJoinLink() {
+    const link = presentationState.sessionJoinUrl;
+
+    if (!link) {
+        updateStatus("No session link to copy.");
+        return;
+    }
+
+    try {
+        await navigator.clipboard.writeText(link);
+        updateStatus("Session link copied.");
+    } catch (error) {
+        console.warn("Clipboard failed:", error);
+
+        if (sessionJoinLinkInput) {
+            sessionJoinLinkInput.select();
+        }
+
+        updateStatus("Could not copy automatically. Link selected.");
+    }
+}
+
+function normalizeSessionParticipants(session) {
+    const participants =
+        session.participants ||
+        session.connectedParticipants ||
+        session.students ||
+        [];
+
+    return Array.isArray(participants) ? participants : [];
+}
+
+function renderSessionParticipants(session) {
+    const participants = normalizeSessionParticipants(session);
+
+    if (sessionParticipantsCount) {
+        sessionParticipantsCount.textContent = String(participants.length);
+    }
+
+    if (!sessionParticipantsList) {
+        return;
+    }
+
+    if (participants.length === 0) {
+        sessionParticipantsList.innerHTML = "<p>אין משתתפים עדיין.</p>";
+        return;
+    }
+
+    sessionParticipantsList.innerHTML = "";
+
+    participants.forEach(function (participant) {
+        const item = document.createElement("article");
+
+        item.className = "session-participant-card";
+
+        const name =
+            participant.name ||
+            participant.fullName ||
+            `${participant.firstName || ""} ${participant.lastName || ""}`.trim() ||
+            participant.email ||
+            participant.userId ||
+            "Student";
+
+        item.innerHTML = `
+            <strong>${name}</strong>
+            <span>${participant.email || participant.userId || ""}</span>
+        `;
+
+        sessionParticipantsList.appendChild(item);
+    });
+}
+
+async function refreshSessionParticipants() {
+    const session = presentationState.session;
+
+    if (!session || !session.code) {
+        updateStatus("No active session to refresh.");
+        return;
+    }
+
+    if (!window.DLS_API || typeof window.DLS_API.getSessionByCode !== "function") {
+        updateStatus("Session refresh API is not available.");
+        return;
+    }
+
+    try {
+        const updatedSession = await window.DLS_API.getSessionByCode(session.code);
+
+        presentationState.session = {
+            ...session,
+            ...updatedSession
+        };
+
+        renderSessionInfo(presentationState.session);
+        updateStatus("Participants refreshed.");
+    } catch (error) {
+        console.error("Failed to refresh participants:", error);
+        updateStatus("Could not refresh participants.");
+    }
+}
 
 /* Updates the upload/status text */
 function updateStatus(message) {

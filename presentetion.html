@@ -26,15 +26,20 @@
     <!-- Page CSS -->
     <link rel="stylesheet" href="css/presentation.css">
 
+    <!-- API first: exposes window.DLS_API / window.DLS_CONFIG -- dls-api.js uses io()                 -->
+    <script src="js/dls-api.js" defer></script>
+
+    <!-- QR library -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js" defer></script>
+
     <!-- Page JavaScript -->
     <script src="js/presentation-manager.js" type="module" defer></script>
 
     <!-- Socket.IO client script creates io() // added defer will work on order after load -->
     <script src="http://localhost:3000/socket.io/socket.io.js" defer></script>
-    <!-- dls-api.js uses io()                 -->
-    <script src="js/dls-api.js" defer></script>
+
     <!-- question-manager.js uses DLS_API and DLS_SOCKET -->
-    <!-- <script src="js/question-manager.js" defer></script> // Currently unexpecrted token export-->
+    <!-- <script src="js/question-manager.js" defer></script> // Currently unexpecrted token-->
 </head>
 
 
@@ -193,6 +198,12 @@
         ====================================================== -->
 
         <div id="laserPointer" class="laser-pointer"></div>
+
+        <!-- Room Number by SessionNumber -->
+        <button id="sessionRoomBadge" class="session-room-badge" type="button" hidden>
+            <span>Room</span>
+            <strong id="sessionRoomCodeText">------</strong>
+        </button>
 
         <!-- =====================================================
          Q&A DRAWER
@@ -475,6 +486,66 @@
 
         </div>
 
+    </section>
+
+    <section id="sessionInfoOverlay" class="session-info-overlay" aria-hidden="true">
+        <div class="session-info-overlay__backdrop"></div>
+
+        <div class="session-info-overlay__panel" role="dialog" aria-modal="true">
+            <button id="closeSessionInfoOverlayButton" class="session-info-overlay__close" type="button"
+                aria-label="Close session info">
+                ✕
+            </button>
+
+            <p class="session-info-overlay__eyebrow">DLS Live Session</p>
+
+            <h2 id="sessionInfoTitle" class="session-info-overlay__title">
+                Session Created
+            </h2>
+
+            <p class="session-info-overlay__text">
+                שתף את הקוד או ה־QR עם הסטודנטים כדי להצטרף להרצאה.
+            </p>
+
+            <div class="session-info-overlay__code-box">
+                <span>קוד סשן</span>
+                <strong id="sessionInfoCode">------</strong>
+            </div>
+
+            <div id="sessionQrCodeBox" class="session-info-overlay__qr-box">
+                <p>QR</p>
+            </div>
+
+            <label class="session-info-overlay__field">
+                <span>קישור הצטרפות</span>
+                <input id="sessionJoinLinkInput" type="text" readonly>
+            </label>
+
+            <div class="session-info-overlay__actions">
+                <button id="copySessionJoinLinkButton" type="button">
+                    העתק קישור
+                </button>
+
+                <button id="refreshSessionParticipantsButton" type="button">
+                    רענון משתתפים
+                </button>
+
+                <button id="sessionQuestionsVisibilityButton" type="button">
+                    הצג / הסתר שאלות
+                </button>
+            </div>
+
+            <section class="session-info-overlay__participants">
+                <header>
+                    <h3>משתתפים מחוברים</h3>
+                    <span id="sessionParticipantsCount">0</span>
+                </header>
+
+                <div id="sessionParticipantsList" class="session-info-overlay__participants-list">
+                    <p>אין משתתפים עדיין.</p>
+                </div>
+            </section>
+        </div>
     </section>
 
 </body>
