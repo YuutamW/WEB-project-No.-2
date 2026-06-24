@@ -946,7 +946,7 @@ async function renderRecentSessions() {
                 </div>
                 <div class="session-card__action">▶</div>
             `;
-            card.querySelector('.session-card__title').textContent = `${session.title}`;
+            card.querySelector('.session-card__title').textContent = session.title;
             container.appendChild(card);
         });
     } catch (error) {
@@ -967,10 +967,10 @@ document.addEventListener("DOMContentLoaded", function () {
     renderDashboardUser();
     setupDashboardLogout();
     setupSettingsOverlay();
-    renderRecentSessions();
     setupSettingsActions();
     setupMobileMenu();
     setupLecturerDashboardPolishActions();
+    renderRecentSessions();
 
     //openSettingsFromUrlIfNeeded();// for debug purposes only
 });
