@@ -1050,7 +1050,7 @@ function buildStudentJoinUrl(code) {
         window.location.hostname === "localhost" ||
             window.location.hostname === "127.0.0.1"
             ? window.location.origin + "/"
-            : "https://dynamic-lecture-system.netlify.app/";
+            : "https://yuutamw.github.io/WEB-project-No.-2/";
 
     return (
         baseUrl +
