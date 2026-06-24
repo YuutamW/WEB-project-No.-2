@@ -261,6 +261,15 @@ function setupStudentOverlays() {
 
         const overlay = event.target.closest(".dashboard-modal");
 
+        if (!overlay) {
+            return;
+        }
+
+        if (overlay.id === "studentSettingsOverlay") {
+            requestCloseStudentSettingsOverlay(event);
+            return;
+        }
+
         closeStudentOverlay(overlay);
     });
 
@@ -718,6 +727,17 @@ function setupJoinSessionForm() {
 
 }
 
+/* ==========================================================
+   STUDENT SETTINGS
+   ----------------------------------------------------------
+   Same behavior as lecturer settings:
+   - Summary rows
+   - Edit form
+   - Password validation
+   - Delete confirm
+   - Abort confirm when closing active action
+========================================================== */
+
 function isStrongStudentPassword(password) {
     const hasUppercase = /[A-Z]/.test(password);
     const hasLowercase = /[a-z]/.test(password);
@@ -738,211 +758,6 @@ function showStudentSettingsFeedback(type, text) {
     feedback.textContent = text;
 }
 
-function fillStudentSettingsForm() {
-    const user = getCurrentDlsUser();
-
-    if (!user) {
-        return;
-    }
-
-    const firstName = document.querySelector("#studentSettingsFirstName");
-    const lastName = document.querySelector("#studentSettingsLastName");
-    const email = document.querySelector("#studentSettingsEmail");
-
-    if (firstName) {
-        firstName.value = user.firstName || "";
-    }
-
-    if (lastName) {
-        lastName.value = user.lastName || "";
-    }
-
-    if (email) {
-        email.value = user.email || "";
-    }
-}
-
-async function handleStudentSettingsSubmit(event) {
-    event.preventDefault();
-
-    const user = getCurrentDlsUser();
-
-    if (!user) {
-        window.location.href = STUDENT_DASHBOARD_CONFIG.ROUTES.LOGIN;
-        return;
-    }
-
-    const firstNameInput = document.querySelector("#studentSettingsFirstName");
-    const lastNameInput = document.querySelector("#studentSettingsLastName");
-    const emailInput = document.querySelector("#studentSettingsEmail");
-    const passwordInput = document.querySelector("#studentSettingsPassword");
-    const confirmPasswordInput = document.querySelector("#studentSettingsConfirmPassword");
-
-    const password = passwordInput ? passwordInput.value : "";
-    const confirmPassword = confirmPasswordInput ? confirmPasswordInput.value : "";
-
-    const updatedFields = {
-        id: user.id || user._id,
-        _id: user._id || user.id,
-        firstName: firstNameInput ? firstNameInput.value.trim() : "",
-        lastName: lastNameInput ? lastNameInput.value.trim() : "",
-        email: emailInput ? emailInput.value.trim() : "",
-        role: user.role || "student"
-    };
-
-    if (password || confirmPassword) {
-        if (password !== confirmPassword) {
-            showStudentSettingsFeedback("error", "הסיסמאות אינן תואמות.");
-            return;
-        }
-
-        if (!isStrongStudentPassword(password)) {
-            showStudentSettingsFeedback(
-                "error",
-                "הסיסמה חייבת לכלול אות גדולה, אות קטנה ומספר."
-            );
-            return;
-        }
-
-        updatedFields.password = password;
-    }
-
-    try {
-        if (typeof DLS_API.updateUser !== "function") {
-            showStudentSettingsFeedback(
-                "error",
-                "DLS_API.updateUser עדיין לא מוגדר בפרונט."
-            );
-            return;
-        }
-
-        const updatedUser = await DLS_API.updateUser(updatedFields);
-
-        const savedUser = {
-            ...user,
-            ...(updatedUser.data || updatedUser),
-            id: (updatedUser.data || updatedUser).id || (updatedUser.data || updatedUser)._id || user.id || user._id,
-            _id: (updatedUser.data || updatedUser)._id || (updatedUser.data || updatedUser).id || user._id || user.id
-        };
-
-        localStorage.setItem(
-            DLS_CONFIG.STORAGE_KEYS.CURRENT_USER,
-            JSON.stringify(savedUser, null, 2)
-        );
-
-        renderStudentInfo(savedUser);
-        fillStudentSettingsForm();
-
-        if (passwordInput) {
-            passwordInput.value = "";
-        }
-
-        if (confirmPasswordInput) {
-            confirmPasswordInput.value = "";
-        }
-
-        showStudentSettingsFeedback("success", "המשתמש עודכן בהצלחה.");
-    } catch (error) {
-        showStudentSettingsFeedback(
-            "error",
-            error.message || "עדכון משתמש נכשל."
-        );
-    }
-}
-
-async function handleStudentDeleteSubmit() {
-    const user = getCurrentDlsUser();
-
-    if (!user) {
-        window.location.href = STUDENT_DASHBOARD_CONFIG.ROUTES.LOGIN;
-        return;
-    }
-
-    const userId = user.id || user._id;
-
-    if (!userId) {
-        showStudentSettingsFeedback("error", "לא נמצא מזהה משתמש למחיקה.");
-        return;
-    }
-
-    try {
-        if (typeof DLS_API.deleteUser !== "function") {
-            showStudentSettingsFeedback(
-                "error",
-                "DLS_API.deleteUser עדיין לא מוגדר בפרונט."
-            );
-            return;
-        }
-
-        await DLS_API.deleteUser(userId);
-
-        localStorage.removeItem(DLS_CONFIG.STORAGE_KEYS.CURRENT_USER);
-        localStorage.removeItem(DLS_CONFIG.STORAGE_KEYS.CURRENT_SESSION);
-
-        window.location.href = STUDENT_DASHBOARD_CONFIG.ROUTES.LOGIN;
-    } catch (error) {
-        showStudentSettingsFeedback(
-            "error",
-            error.message || "מחיקת משתמש נכשלה."
-        );
-    }
-}
-
-/* settings fill + validation */
-function setupStudentSettingsForm() {
-    const form = document.querySelector("#studentSettingsEditForm");
-
-    const cancelEditButton = document.querySelector(
-        "[data-student-action='cancel-settings-edit']"
-    );
-
-    const openDeleteButton = document.querySelector(
-        "[data-student-action='open-delete-student']"
-    );
-
-    const cancelDeleteButton = document.querySelector(
-        "[data-student-action='cancel-delete-student']"
-    );
-
-    const confirmDeleteButton = document.querySelector(
-        "[data-student-action='confirm-delete-student']"
-    );
-
-    if (form) {
-        fillStudentSettingsForm();
-        form.addEventListener("submit", handleStudentSettingsSubmit);
-    }
-
-    if (cancelEditButton) {
-        cancelEditButton.addEventListener("click", function () {
-            resetStudentSettingsView();
-            closeStudentOverlay(
-                document.querySelector(
-                    STUDENT_DASHBOARD_CONFIG.SELECTORS.settingsOverlay
-                )
-            );
-        });
-    }
-
-    if (openDeleteButton) {
-        openDeleteButton.addEventListener("click", function () {
-            clearStudentSettingsFeedback();
-            showStudentDeleteConfirmBox();
-        });
-    }
-
-    if (cancelDeleteButton) {
-        cancelDeleteButton.addEventListener("click", function () {
-            hideStudentDeleteConfirmBox();
-            clearStudentSettingsFeedback();
-        });
-    }
-
-    if (confirmDeleteButton) {
-        confirmDeleteButton.addEventListener("click", handleStudentDeleteSubmit);
-    }
-}
-
 function clearStudentSettingsFeedback() {
     const feedback = document.querySelector("#studentSettingsFeedback");
 
@@ -953,6 +768,89 @@ function clearStudentSettingsFeedback() {
     feedback.hidden = true;
     feedback.textContent = "";
     feedback.className = "dashboard-modal__feedback";
+}
+
+function fillStudentSettingsSummary(user) {
+    const userIdElement = document.querySelector("#studentSettingsUserId");
+    const userEmailElement = document.querySelector("#studentSettingsUserEmail");
+
+    if (userIdElement) {
+        userIdElement.textContent = user?.id || user?._id || "לא נמצא";
+    }
+
+    if (userEmailElement) {
+        userEmailElement.textContent = user?.email || "לא נמצא";
+    }
+}
+
+function fillStudentSettingsForm() {
+    const user = getCurrentDlsUser();
+
+    if (!user) {
+        return;
+    }
+
+    const firstNameInput = document.querySelector("#studentSettingsFirstName");
+    const lastNameInput = document.querySelector("#studentSettingsLastName");
+    const emailInput = document.querySelector("#studentSettingsEmail");
+
+    if (firstNameInput) {
+        firstNameInput.value = user.firstName || "";
+    }
+
+    if (lastNameInput) {
+        lastNameInput.value = user.lastName || "";
+    }
+
+    if (emailInput) {
+        emailInput.value = user.email || "";
+    }
+}
+
+function clearStudentPasswordFields() {
+    const passwordInput = document.querySelector("#studentSettingsPassword");
+    const confirmPasswordInput = document.querySelector("#studentSettingsConfirmPassword");
+
+    if (passwordInput) {
+        passwordInput.value = "";
+    }
+
+    if (confirmPasswordInput) {
+        confirmPasswordInput.value = "";
+    }
+}
+
+function getStudentSettingsFormValues() {
+    const firstNameInput = document.querySelector("#studentSettingsFirstName");
+    const lastNameInput = document.querySelector("#studentSettingsLastName");
+    const emailInput = document.querySelector("#studentSettingsEmail");
+    const passwordInput = document.querySelector("#studentSettingsPassword");
+    const confirmPasswordInput = document.querySelector("#studentSettingsConfirmPassword");
+
+    return {
+        firstName: firstNameInput ? firstNameInput.value.trim() : "",
+        lastName: lastNameInput ? lastNameInput.value.trim() : "",
+        email: emailInput ? emailInput.value.trim() : "",
+        password: passwordInput ? passwordInput.value : "",
+        confirmPassword: confirmPasswordInput ? confirmPasswordInput.value : ""
+    };
+}
+
+function isStudentSettingsFormDirty() {
+    const user = getCurrentDlsUser();
+    const values = getStudentSettingsFormValues();
+
+    if (!user) {
+        return false;
+    }
+
+    return (
+        values.firstName !== (user.firstName || "") ||
+        values.lastName !== (user.lastName || "") ||
+        values.email !== (user.email || "") ||
+        values.password !== "" ||
+        values.confirmPassword !== ""
+    );
 }
 
 function hideStudentDeleteConfirmBox() {
@@ -971,24 +869,356 @@ function showStudentDeleteConfirmBox() {
     }
 }
 
-function clearStudentPasswordFields() {
-    const passwordInput = document.querySelector("#studentSettingsPassword");
-    const confirmPasswordInput = document.querySelector("#studentSettingsConfirmPassword");
+function hideStudentAbortSettingsConfirmBox() {
+    const abortBox = document.querySelector("#studentAbortSettingsConfirmBox");
 
-    if (passwordInput) {
-        passwordInput.value = "";
-    }
-
-    if (confirmPasswordInput) {
-        confirmPasswordInput.value = "";
+    if (abortBox) {
+        abortBox.hidden = true;
     }
 }
 
-function resetStudentSettingsView() {
-    fillStudentSettingsForm();
+function showStudentAbortSettingsConfirmBox(actionType) {
+    const abortBox = document.querySelector("#studentAbortSettingsConfirmBox");
+    const message = document.querySelector("#studentAbortSettingsMessage");
+
+    if (!abortBox) {
+        return;
+    }
+
+    if (message) {
+        if (actionType === "edit") {
+            message.textContent = "יש שינויים שלא נשמרו. האם לבטל אותם ולסגור את ההגדרות?";
+        } else if (actionType === "delete") {
+            message.textContent = "מחיקת משתמש פתוחה. האם לבטל את הפעולה ולסגור את ההגדרות?";
+        } else {
+            message.textContent = "יש פעולה פתוחה. האם לבטל אותה ולסגור את ההגדרות?";
+        }
+    }
+
+    abortBox.hidden = false;
+}
+
+function getActiveStudentSettingsAction() {
+    const editForm = document.querySelector("#studentSettingsEditForm");
+    const deleteBox = document.querySelector("#studentDeleteUserConfirmBox");
+
+    if (editForm && !editForm.hidden) {
+        return "edit";
+    }
+
+    if (deleteBox && !deleteBox.hidden) {
+        return "delete";
+    }
+
+    return null;
+}
+
+function resetStudentSettingsActionPanels() {
+    const editForm = document.querySelector("#studentSettingsEditForm");
+    const deleteBox = document.querySelector("#studentDeleteUserConfirmBox");
+
+    if (editForm) {
+        editForm.hidden = true;
+    }
+
+    if (deleteBox) {
+        deleteBox.hidden = true;
+    }
+
+    hideStudentAbortSettingsConfirmBox();
+    clearStudentSettingsFeedback();
     clearStudentPasswordFields();
+}
+
+function resetStudentSettingsView() {
+    const user = getCurrentDlsUser();
+
+    fillStudentSettingsSummary(user);
+    fillStudentSettingsForm();
+    resetStudentSettingsActionPanels();
+}
+
+function forceCloseStudentSettingsOverlay() {
+    const overlay = document.querySelector(
+        STUDENT_DASHBOARD_CONFIG.SELECTORS.settingsOverlay
+    );
+
+    if (!overlay) {
+        return;
+    }
+
+    overlay.classList.remove("is-open");
+
+    setTimeout(function () {
+        overlay.hidden = true;
+        resetStudentSettingsView();
+    }, 220);
+}
+
+function requestCloseStudentSettingsOverlay(event) {
+    if (event) {
+        event.preventDefault();
+    }
+
+    const activeAction = getActiveStudentSettingsAction();
+
+    if (activeAction === "edit") {
+        if (isStudentSettingsFormDirty()) {
+            showStudentAbortSettingsConfirmBox("edit");
+            return;
+        }
+
+        forceCloseStudentSettingsOverlay();
+        return;
+    }
+
+    if (activeAction === "delete") {
+        showStudentAbortSettingsConfirmBox("delete");
+        return;
+    }
+
+    forceCloseStudentSettingsOverlay();
+}
+
+function handleStudentEditUserClick() {
+    const user = getCurrentDlsUser();
+
+    if (!user) {
+        showStudentSettingsFeedback("error", "לא נמצא משתמש מחובר.");
+        return;
+    }
+
+    const editForm = document.querySelector("#studentSettingsEditForm");
+
     clearStudentSettingsFeedback();
     hideStudentDeleteConfirmBox();
+    hideStudentAbortSettingsConfirmBox();
+    fillStudentSettingsForm();
+
+    if (editForm) {
+        editForm.hidden = false;
+    }
+}
+
+function handleStudentCancelEditUserClick() {
+    if (isStudentSettingsFormDirty()) {
+        showStudentAbortSettingsConfirmBox("edit");
+        return;
+    }
+
+    const editForm = document.querySelector("#studentSettingsEditForm");
+
+    if (editForm) {
+        editForm.hidden = true;
+    }
+
+    clearStudentPasswordFields();
+    clearStudentSettingsFeedback();
+}
+
+async function handleStudentSettingsSubmit(event) {
+    event.preventDefault();
+
+    const user = getCurrentDlsUser();
+
+    if (!user) {
+        window.location.href = STUDENT_DASHBOARD_CONFIG.ROUTES.LOGIN;
+        return;
+    }
+
+    const values = getStudentSettingsFormValues();
+
+    const updatedFields = {
+        id: user.id || user._id,
+        _id: user._id || user.id,
+        firstName: values.firstName,
+        lastName: values.lastName,
+        email: values.email,
+        role: user.role || "student"
+    };
+
+    if (values.password || values.confirmPassword) {
+        if (values.password !== values.confirmPassword) {
+            showStudentSettingsFeedback("error", "הסיסמאות אינן תואמות.");
+            return;
+        }
+
+        if (!isStrongStudentPassword(values.password)) {
+            showStudentSettingsFeedback(
+                "error",
+                "הסיסמה חייבת לכלול אות גדולה, אות קטנה ומספר."
+            );
+            return;
+        }
+
+        updatedFields.password = values.password;
+    }
+
+    try {
+        const updatedUser = await DLS_API.updateUser(updatedFields);
+        const serverUser = updatedUser.data || updatedUser.user || updatedUser;
+
+        const savedUser = {
+            ...user,
+            ...serverUser,
+            id: serverUser.id || serverUser._id || user.id || user._id,
+            _id: serverUser._id || serverUser.id || user._id || user.id
+        };
+
+        localStorage.setItem(
+            DLS_CONFIG.STORAGE_KEYS.CURRENT_USER,
+            JSON.stringify(savedUser, null, 2)
+        );
+
+        renderStudentInfo(savedUser);
+        fillStudentSettingsSummary(savedUser);
+        fillStudentSettingsForm();
+
+        const editForm = document.querySelector("#studentSettingsEditForm");
+
+        if (editForm) {
+            editForm.hidden = true;
+        }
+
+        clearStudentPasswordFields();
+        showStudentSettingsFeedback("success", "המשתמש עודכן בהצלחה.");
+    } catch (error) {
+        showStudentSettingsFeedback(
+            "error",
+            error.message || "עדכון משתמש נכשל."
+        );
+    }
+}
+
+function handleStudentDeleteUserClick() {
+    const editForm = document.querySelector("#studentSettingsEditForm");
+
+    clearStudentSettingsFeedback();
+    hideStudentAbortSettingsConfirmBox();
+
+    if (editForm) {
+        editForm.hidden = true;
+    }
+
+    showStudentDeleteConfirmBox();
+}
+
+function handleStudentCancelDeleteUserClick() {
+    hideStudentDeleteConfirmBox();
+    clearStudentSettingsFeedback();
+}
+
+async function handleStudentConfirmDeleteUserClick() {
+    const user = getCurrentDlsUser();
+
+    if (!user) {
+        window.location.href = STUDENT_DASHBOARD_CONFIG.ROUTES.LOGIN;
+        return;
+    }
+
+    const userId = user.id || user._id;
+
+    if (!userId) {
+        showStudentSettingsFeedback("error", "לא נמצא מזהה משתמש למחיקה.");
+        return;
+    }
+
+    try {
+        await DLS_API.deleteUser(userId);
+
+        localStorage.removeItem(DLS_CONFIG.STORAGE_KEYS.CURRENT_USER);
+        localStorage.removeItem(DLS_CONFIG.STORAGE_KEYS.CURRENT_SESSION);
+
+        window.location.href = STUDENT_DASHBOARD_CONFIG.ROUTES.LOGIN;
+    } catch (error) {
+        showStudentSettingsFeedback(
+            "error",
+            error.message || "מחיקת משתמש נכשלה."
+        );
+    }
+}
+
+function handleStudentConfirmAbortSettingsClick() {
+    resetStudentSettingsActionPanels();
+    forceCloseStudentSettingsOverlay();
+}
+
+function handleStudentCancelAbortSettingsClick() {
+    hideStudentAbortSettingsConfirmBox();
+}
+
+function setupStudentSettingsForm() {
+    const form = document.querySelector("#studentSettingsEditForm");
+
+    const editButton = document.querySelector(
+        "[data-student-action='edit-student-user']"
+    );
+
+    const deleteButton = document.querySelector(
+        "[data-student-action='delete-student-user']"
+    );
+
+    const cancelEditButton = document.querySelector(
+        "[data-student-action='cancel-settings-edit']"
+    );
+
+    const cancelDeleteButton = document.querySelector(
+        "[data-student-action='cancel-delete-student']"
+    );
+
+    const confirmDeleteButton = document.querySelector(
+        "[data-student-action='confirm-delete-student']"
+    );
+
+    const requestCloseButtons = document.querySelectorAll(
+        "[data-student-action='request-close-student-settings']"
+    );
+
+    const confirmAbortButton = document.querySelector(
+        "[data-student-action='confirm-abort-student-settings']"
+    );
+
+    const cancelAbortButton = document.querySelector(
+        "[data-student-action='cancel-abort-student-settings']"
+    );
+
+    if (form) {
+        form.addEventListener("submit", handleStudentSettingsSubmit);
+    }
+
+    if (editButton) {
+        editButton.addEventListener("click", handleStudentEditUserClick);
+    }
+
+    if (deleteButton) {
+        deleteButton.addEventListener("click", handleStudentDeleteUserClick);
+    }
+
+    if (cancelEditButton) {
+        cancelEditButton.addEventListener("click", handleStudentCancelEditUserClick);
+    }
+
+    if (cancelDeleteButton) {
+        cancelDeleteButton.addEventListener("click", handleStudentCancelDeleteUserClick);
+    }
+
+    if (confirmDeleteButton) {
+        confirmDeleteButton.addEventListener("click", handleStudentConfirmDeleteUserClick);
+    }
+
+    requestCloseButtons.forEach(function (button) {
+        button.addEventListener("click", requestCloseStudentSettingsOverlay);
+    });
+
+    if (confirmAbortButton) {
+        confirmAbortButton.addEventListener("click", handleStudentConfirmAbortSettingsClick);
+    }
+
+    if (cancelAbortButton) {
+        cancelAbortButton.addEventListener("click", handleStudentCancelAbortSettingsClick);
+    }
+
+    resetStudentSettingsView();
 }
 
 /* 
