@@ -40,6 +40,7 @@ const DASHBOARD_CONFIG = {
         SETTINGS_USER_ID: "#settingsUserId",
         SETTINGS_USER_EMAIL: "#settingsUserEmail"
     }
+    
 };
 
 /* ==========================================================
@@ -251,6 +252,15 @@ function handleCancelEditUserClick() {
     clearSettingsFeedback();
 }
 
+/* Password Checker */
+function isStrongPassword(password) {
+    const hasUppercase = /[A-Z]/.test(password);
+    const hasLowercase = /[a-z]/.test(password);
+    const hasNumber = /[0-9]/.test(password);
+
+    return hasUppercase && hasLowercase && hasNumber;
+}
+
 async function handleEditUserSubmit(event) {
     event.preventDefault();
 
@@ -270,6 +280,24 @@ async function handleEditUserSubmit(event) {
         email: emailInput ? emailInput.value.trim() : "",
         password: passwordInput ? passwordInput.value : ""
     };
+
+    /* Check Password Valid */
+    if (password || confirmPassword) {
+        if (password !== confirmPassword) {
+            showSettingsFeedback("error", "הסיסמאות אינן תואמות.");
+            return;
+        }
+
+        if (!isStrongPassword(password)) {
+            showSettingsFeedback(
+                "error",
+                "הסיסמה חייבת לכלול אות גדולה, אות קטנה ומספר."
+            );
+            return;
+        }
+
+        updatedFields.password = password;
+    }
 
     try {
         const updatedUser = await editCurrentUser(updatedFields);
@@ -298,6 +326,15 @@ async function handleEditUserSubmit(event) {
             }
 
             updatedFields.password = password;
+        }
+
+        /* Empty Input Text of Password */
+        if (passwordInput) {
+            passwordInput.value = "";
+        }
+
+        if (confirmPasswordInput) {
+            confirmPasswordInput.value = "";
         }
 
         showSettingsFeedback("success", "המשתמש עודכן בהצלחה.");
@@ -755,7 +792,29 @@ function setupLecturerDashboardPolishActions() {
         });
     });
 
-    setupDashboardOverlayBackdropClose(".dashboard-modal");
+    //setupDashboardOverlayBackdropClose(".dashboard-modal");
+    // switched for local listener since we dont use Dashboard-core;
+    document.addEventListener("click", function (event) {
+        const clickedBackdrop = event.target.classList.contains(
+            "dashboard-modal__backdrop"
+        );
+
+        if (!clickedBackdrop) {
+            return;
+        }
+
+        const overlay = event.target.closest(".dashboard-modal");
+
+        if (!overlay) {
+            return;
+        }
+
+        overlay.classList.remove("is-open");
+
+        setTimeout(function () {
+            overlay.hidden = true;
+        }, 220);
+    });
 }
 
 // setup Mobile Menu:

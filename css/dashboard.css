@@ -1453,6 +1453,7 @@ body {
 ========================================================= */
 
 @media (max-width: 850px) {
+
     html,
     body {
         height: auto;
@@ -1638,4 +1639,104 @@ body {
 
     border: none;
     background: rgba(255, 255, 255, 0.12);
+}
+
+/* =========================================================
+   LECTURER MOBILE TOP SPACE FIX
+   ---------------------------------------------------------
+   Remove deadspace above header while keeping burger usable.
+========================================================= */
+
+@media (max-width: 850px) {
+    .dashboard-page:not(.dashboard-page--student) .dashboard-main {
+        padding-top: 16px;
+    }
+
+    .dashboard-page:not(.dashboard-page--student) .dashboard-header {
+        padding-top: 68px;
+        border-radius: 28px;
+    }
+
+    .dashboard-page:not(.dashboard-page--student) .dashboard-mobile-menu-button {
+        top: 26px;
+        right: 26px;
+    }
+}
+
+/* =========================================================
+   DASHBOARD DEMO LIST
+========================================================= */
+
+.dashboard-demo-list {
+    margin-top: 16px;
+
+    display: grid;
+    gap: 10px;
+}
+
+.dashboard-demo-list__item {
+    width: 100%;
+    padding: 14px 16px;
+
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+
+    background: rgba(255, 255, 255, 0.08);
+    color: #ffffff;
+
+    text-align: right;
+    font: inherit;
+
+    cursor: pointer;
+
+    transition: 180ms ease;
+}
+
+.dashboard-demo-list__item:hover {
+    background: rgba(255, 255, 255, 0.14);
+    transform: translateY(-2px);
+}
+
+/* =========================================================
+   LECTURER GRID HEIGHT ALIGNMENT
+   ---------------------------------------------------------
+   Keep Sessions panel visually aligned with Calendar.
+========================================================= */
+
+.dashboard-grid {
+    align-items: stretch;
+}
+
+.dashboard-panel--calendar,
+.dashboard-panel--sessions-list {
+    min-height: 520px;
+}
+
+.dashboard-panel--sessions-list {
+    height: 100%;
+}
+
+.dashboard-panel--sessions-list .dashboard-recent-sessions {
+    max-height: none;
+    flex: 1;
+}
+
+/* =========================================================
+   SVG COLOR + WHITE
+========================================================= */
+.dashboard-icon img,
+.dashboard-action-card__icon img {
+    width: 22px;
+    height: 22px;
+    display: block;
+
+    filter: brightness(0) invert(1);
+    opacity: 0.92;
+}
+
+/* CSS MASK */
+.dashboard-icon--home {
+    background-color: #fff;
+    mask: url("../assets/icons/dashboard/home.svg") center / 22px 22px no-repeat;
+    -webkit-mask: url("../assets/icons/dashboard/home.svg") center / 22px 22px no-repeat;
 }

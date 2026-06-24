@@ -57,6 +57,10 @@ const DLS_CONFIG = {
         CURRENT_SESSION: "dlsCurrentSession",
         PENDING_QUESTIONS: "dlsPendingQuestions"
     },
+
+    FEATURE_FLAGS: {
+        RECENT_SESSIONS_API: false
+    },
 };
 
 /* URL DEV MODE ENV - BACKEND_URL: getDlsBackendUrl() in console */
@@ -261,6 +265,11 @@ const DLS_API = {
     /* GET RECENT SESSIONS 
      Route: GET /api/sessions/recent (Planned) */
     async getRecentSessions(limit = 5) {
+        // added flag control:
+        if (!DLS_CONFIG.FEATURE_FLAGS?.RECENT_SESSIONS_API) {
+            return [];
+        }
+
         if (!window.DLS_API) {
             console.error("DLS_API not loaded – recent sessions will not render.");
             return;
