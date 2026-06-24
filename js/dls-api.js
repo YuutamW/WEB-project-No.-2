@@ -348,7 +348,7 @@ const DLS_API = {
     /* CREATE SESSION
    Route: POST /api/sessions
 */
-    async createSession(sessionData = {}) {
+    async createSession(file, title) {
         const currentUser = getCurrentDlsUser();
 
         if (!currentUser) {
@@ -361,19 +361,28 @@ const DLS_API = {
             throw new Error("Missing lecturer user id.");
         }
 
-        const responseData = await sendJsonRequest(
-            DLS_CONFIG.ROUTES.SESSIONS,
-            {
-                method: "POST",
-                body: JSON.stringify({
-                    ...sessionData,
-                    ownerId: ownerId,
-                    lecturerId: ownerId
-                })
-            }
-        );
+        const formData = new FormData();
+        formData.append("pdf", file); // Must match backend multer: upload.single('pdf')
+        formData.append("title", title || "Untitled Session");
+        formData.append("ownerId", ownerId);
 
-        return responseData.data || responseData.session || responseData;
+        const response = await fetch(buildApiUrl(DLS_CONFIG.ROUTES.SESSIONS) , {
+            method: "POST",
+            body: formData,
+            headers: {
+                "x-user-id": ownerId // Required by backend requireAuth middleware
+            }
+        });
+
+        const responseData = await response.json().catch(function () {
+            return {};
+        });
+
+        if(!response.ok)
+            throw new Error(responseData.message || "Failed to create session on backend");
+
+        // Returns backend payload: { code, pdfUrl, title }
+        return responseData.data;
     },
 
     /* GET SESSION BY CODE

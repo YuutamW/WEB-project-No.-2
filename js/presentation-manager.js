@@ -493,7 +493,7 @@ async function startLectureFromPendingFile() {
 
     try {
         const session = await createLiveSessionForPresentation(file, sessionTitle);
-
+        
         presentationState.session = session;
         presentationState.sessionJoinUrl = buildStudentJoinUrl(session.code);
 
@@ -925,20 +925,14 @@ async function goToPreviousPdfPage() {
 ========================================================== */
 
 async function createLiveSessionForPresentation(file, title) {
-    const presentationId = createPresentationId(file.name);
-
     if (!window.DLS_API || typeof window.DLS_API.createSession !== "function") {
         throw new Error("DLS_API.createSession is not available.");
     }
 
-    const session = await window.DLS_API.createSession({
-        title: title,
-        fileName: file.name,
-        presentationId: presentationId,
-        startedAt: new Date().toISOString()
-    });
+    // Pass the actual File object and title directly to the updated API method
+    const session = await window.DLS_API.createSession(file, title);
 
-    const code = session.code || session.sessionCode || session.id;
+    const code = session.code;
 
     if (!code) {
         throw new Error("Backend did not return a session code.");
@@ -949,7 +943,8 @@ async function createLiveSessionForPresentation(file, title) {
         code: code,
         title: session.title || title,
         fileName: file.name,
-        presentationId: presentationId
+        ownerId: session.ownerId,
+        presentationId: `session_${code}`
     };
 }
 

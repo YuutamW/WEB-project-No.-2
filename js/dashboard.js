@@ -927,14 +927,16 @@ function normalizeSessionTitle(session) {
     if (!invalidTitles.includes(cleanedTitle)) {
         return cleanedTitle;
     }
-
-    const code = session?.code || session?.id || "";
-
-    if (code) {
+    else 
         return `סשן ${code}`;
-    }
 
-    return "סשן ללא שם";
+    // const code = session?.code || session?.id || "";
+
+    // if (code) {
+    //     return `סשן ${code}`;
+    // }
+
+    // return "סשן ללא שם";
 }
 
 function getSessionCode(session) {
