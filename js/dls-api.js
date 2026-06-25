@@ -77,25 +77,6 @@ function isLocalFrontend() {
     );
 }
 
-// function getDlsBackendUrl() {
-//     const params = new URLSearchParams(window.location.search);
-
-//     if (params.get("api") === "local") {
-//         return DLS_ENV.LOCAL_BACKEND_URL;
-//     }
-
-//     if (params.get("api") === "prod") {
-//         return DLS_ENV.PROD_BACKEND_URL;
-//     }
-
-//     // Force production backend for now
-//     // return DLS_ENV.PROD_BACKEND_URL;
-
-//     return isLocalFrontend()
-//         ? DLS_ENV.LOCAL_BACKEND_URL
-//         : DLS_ENV.PROD_BACKEND_URL;
-// }
-
 function getDlsBackendUrl() {
     const params = new URLSearchParams(window.location.search);
     const queryMode = params.get("api");
