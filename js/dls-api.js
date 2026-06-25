@@ -117,7 +117,15 @@ function getDlsBackendUrl() {
 DLS_CONFIG.BACKEND_URL = getDlsBackendUrl();
 
 /* REST API HELPER - create full backend API URL */
-function buildApiUrl(path) { return `${DLS_CONFIG.BACKEND_URL}${path}`; }
+// function buildApiUrl(path) { return `${DLS_CONFIG.BACKEND_URL}${path}`; }
+function buildApiUrl(path) {
+    const baseUrl = getDlsBackendUrl();
+
+    DLS_CONFIG.BACKEND_URL = baseUrl;
+    window.DLS_BACKEND_URL = baseUrl;
+
+    return `${baseUrl}${path}`;
+}
 
 /* SEND JSON[momoa/derulo] REQUEST - for small fetch req WRAPPER
 Used by: - GET - POST - PUT - DELETE Returns: server JSON response 

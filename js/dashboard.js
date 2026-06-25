@@ -599,15 +599,20 @@ function isSettingsActionActive() {
     );
 }
 
+/* Checks Changed Values in settings edit - checks also password */
 function getEditFormValues() {
     const firstNameInput = document.querySelector("#settingsEditFirstName");
     const lastNameInput = document.querySelector("#settingsEditLastName");
     const emailInput = document.querySelector("#settingsEditEmail");
+    const passwordInput = document.querySelector("#settingsEditPassword");
+    const confirmPasswordInput = document.querySelector("#settingsEditConfirmPassword");
 
     return {
         firstName: firstNameInput ? firstNameInput.value.trim() : "",
         lastName: lastNameInput ? lastNameInput.value.trim() : "",
-        email: emailInput ? emailInput.value.trim() : ""
+        email: emailInput ? emailInput.value.trim() : "",
+        password: passwordInput ? passwordInput.value : "",
+        confirmPassword: confirmPasswordInput ? confirmPasswordInput.value : ""
     };
 }
 
@@ -622,7 +627,9 @@ function isEditFormDirty() {
     return (
         values.firstName !== (currentUser.firstName || "") ||
         values.lastName !== (currentUser.lastName || "") ||
-        values.email !== (currentUser.email || "")
+        values.email !== (currentUser.email || "") ||
+        values.password !== "" ||
+        values.confirmPassword !== ""
     );
 }
 
@@ -797,6 +804,121 @@ function closeDashboardOverlay(selectorOrOverlay) {
 }
 
 /* Wayaround - since opendashboardoverlay() use dashboard-core */
+// function setupLecturerDashboardPolishActions() {
+//     const nextLessonsButtons = document.querySelectorAll(
+//         "[data-dashboard-action='open-next-lessons']"
+//     );
+
+//     const jumpSessionButtons = document.querySelectorAll(
+//         "[data-dashboard-action='open-jump-session']"
+//     );
+
+//     const closeOverlayButtons = document.querySelectorAll(
+//         "[data-dashboard-action='close-dashboard-overlay']"
+//     );
+
+//     nextLessonsButtons.forEach(function (button) {
+//         button.addEventListener("click", function () {
+//             openDashboardOverlay("#nextLessonsOverlay");
+//         });
+//     });
+
+//     jumpSessionButtons.forEach(function (button) {
+//         button.addEventListener("click", function () {
+//             openDashboardOverlay("#jumpSessionOverlay");
+//         });
+//     });
+
+//     closeOverlayButtons.forEach(function (button) {
+//         button.addEventListener("click", function () {
+//             const overlay = button.closest(".dashboard-modal");
+//             closeDashboardOverlay(overlay);
+//         });
+//     });
+
+//     /* Settings Guard from breaking Popup behaviour */
+//     document.addEventListener("click", function (event) {
+//         const clickedBackdrop = event.target.classList.contains(
+//             "dashboard-modal__backdrop"
+//         );
+
+//         if (!clickedBackdrop) {
+//             return;
+//         }
+
+//         const overlay = event.target.closest(".dashboard-modal");
+
+//         if (!overlay) {
+//             return;
+//         }
+
+//         if (overlay.id === "settingsOverlay") {
+//             return;
+//         }
+
+//         closeDashboardOverlay(overlay);
+//     });
+
+//     //setupDashboardOverlayBackdropClose(".dashboard-modal");
+//     // switched for local listener since we dont use Dashboard-core;
+//     document.addEventListener("click", function (event) {
+//         const clickedBackdrop = event.target.classList.contains(
+//             "dashboard-modal__backdrop"
+//         );
+
+//         if (!clickedBackdrop) {
+//             return;
+//         }
+
+//         const overlay = event.target.closest(".dashboard-modal");
+
+//         if (!overlay) {
+//             return;
+//         }
+
+//         overlay.classList.remove("is-open");
+
+//         setTimeout(function () {
+//             overlay.hidden = true;
+//         }, 220);
+//     });
+// }
+
+
+
+// setup Mobile Menu:
+
+let dashboardBackdropListenerReady = false;
+
+function setupDashboardOverlayBackdropClose() {
+    if (dashboardBackdropListenerReady) {
+        return;
+    }
+
+    dashboardBackdropListenerReady = true;
+
+    document.addEventListener("click", function (event) {
+        const backdrop = event.target.closest(".dashboard-modal__backdrop");
+
+        if (!backdrop || event.target !== backdrop) {
+            return;
+        }
+
+        const overlay = backdrop.closest(".dashboard-modal");
+
+        if (!overlay) {
+            return;
+        }
+
+        if (overlay.id === "settingsOverlay") {
+            requestCloseSettingsOverlay(event);
+            return;
+        }
+
+        closeDashboardOverlay(overlay);
+    });
+}
+
 function setupLecturerDashboardPolishActions() {
     const nextLessonsButtons = document.querySelectorAll(
         "[data-dashboard-action='open-next-lessons']"
@@ -818,6 +940,7 @@ function setupLecturerDashboardPolishActions() {
 
     jumpSessionButtons.forEach(function (button) {
         button.addEventListener("click", function () {
+            renderLecturerSessionsOverlay(lecturerRecentSessionsCache);
             openDashboardOverlay("#jumpSessionOverlay");
         });
     });
@@ -829,55 +952,9 @@ function setupLecturerDashboardPolishActions() {
         });
     });
 
-    /* Settings Guard from breaking Popup behaviour */
-    document.addEventListener("click", function (event) {
-        const clickedBackdrop = event.target.classList.contains(
-            "dashboard-modal__backdrop"
-        );
-
-        if (!clickedBackdrop) {
-            return;
-        }
-
-        const overlay = event.target.closest(".dashboard-modal");
-
-        if (!overlay) {
-            return;
-        }
-
-        if (overlay.id === "settingsOverlay") {
-            return;
-        }
-
-        closeDashboardOverlay(overlay);
-    });
-
-    //setupDashboardOverlayBackdropClose(".dashboard-modal");
-    // switched for local listener since we dont use Dashboard-core;
-    document.addEventListener("click", function (event) {
-        const clickedBackdrop = event.target.classList.contains(
-            "dashboard-modal__backdrop"
-        );
-
-        if (!clickedBackdrop) {
-            return;
-        }
-
-        const overlay = event.target.closest(".dashboard-modal");
-
-        if (!overlay) {
-            return;
-        }
-
-        overlay.classList.remove("is-open");
-
-        setTimeout(function () {
-            overlay.hidden = true;
-        }, 220);
-    });
+    setupDashboardOverlayBackdropClose();
 }
 
-// setup Mobile Menu:
 function dashboardOpenMobileMenu(mobileNav, toggleButton) {
     mobileNav.hidden = false;
     toggleButton.classList.add("is-open");
@@ -987,7 +1064,7 @@ function normalizeSessionTitle(session) {
     if (!invalidTitles.includes(cleanedTitle)) {
         return cleanedTitle;
     }
-    else 
+    else
         return `סשן ${code}`;
 
     // const code = session?.code || session?.id || "";

@@ -31,55 +31,11 @@ const CURRENT_USER_STORAGE_KEY = "dlsCurrentUser";
    Determine if we're running on localhost or production.
    This is used to switch between local and prod API URLs.
  */
-// const API_BASE_URL = (function () {
-//     const params = new URLSearchParams(window.location.search);
-
-//     if (params.get("api") === "local") {
-//         return "http://127.0.0.1:3000";
-//     }
-
-//     if (params.get("api") === "prod") {
-//         return "https://dls-backend-uelx.onrender.com";
-//     }
-
-//     if (
-//         location.hostname === "localhost" ||
-//         location.hostname === "127.0.0.1"
-//     ) {
-//         return "http://127.0.0.1:3000";
-//     }
-
-//     return "https://dls-backend-uelx.onrender.com";
-// })();
-
 const AUTH_ENV = {
     LOCAL_BACKEND_URL: "http://127.0.0.1:3000",
     PROD_BACKEND_URL: "https://dls-backend-uelx.onrender.com"
 };
 
-// function getAuthBackendUrl() {
-//     const params = new URLSearchParams(window.location.search);
-//     const apiMode = params.get("api") || localStorage.getItem("dlsApiMode");
-
-//     if (apiMode === "local") {
-//         localStorage.setItem("dlsApiMode", "local");
-//         return AUTH_ENV.LOCAL_BACKEND_URL;
-//     }
-
-//     if (apiMode === "prod") {
-//         localStorage.setItem("dlsApiMode", "prod");
-//         return AUTH_ENV.PROD_BACKEND_URL;
-//     }
-
-//     if (
-//         location.hostname === "localhost" ||
-//         location.hostname === "127.0.0.1"
-//     ) {
-//         return AUTH_ENV.LOCAL_BACKEND_URL;
-//     }
-
-//     return AUTH_ENV.PROD_BACKEND_URL;
-// }
 
 function getAuthBackendUrl() {
     const params = new URLSearchParams(window.location.search);
