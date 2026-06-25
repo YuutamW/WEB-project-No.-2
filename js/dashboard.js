@@ -213,6 +213,38 @@ function fillEditUserForm(user) {
     }
 }
 
+function resetEditUserForm() {
+    const currentUser = getCurrentDashboardUser();
+
+    const firstNameInput = document.querySelector("#settingsEditFirstName");
+    const lastNameInput = document.querySelector("#settingsEditLastName");
+    const emailInput = document.querySelector("#settingsEditEmail");
+    const passwordInput = document.querySelector("#settingsEditPassword");
+    const confirmPasswordInput = document.querySelector("#settingsEditConfirmPassword");
+
+    if (currentUser) {
+        if (firstNameInput) {
+            firstNameInput.value = currentUser.firstName || "";
+        }
+
+        if (lastNameInput) {
+            lastNameInput.value = currentUser.lastName || "";
+        }
+
+        if (emailInput) {
+            emailInput.value = currentUser.email || "";
+        }
+    }
+
+    if (passwordInput) {
+        passwordInput.value = "";
+    }
+
+    if (confirmPasswordInput) {
+        confirmPasswordInput.value = "";
+    }
+}
+
 function handleEditUserClick() {
     const currentUser = getCurrentDashboardUser();
 
@@ -225,7 +257,10 @@ function handleEditUserClick() {
     const deleteBox = document.querySelector("#deleteUserConfirmBox");
 
     clearSettingsFeedback();
-    fillEditUserForm(currentUser);
+    // fillEditUserForm(currentUser);
+
+    // clear PW on settings edit section always:
+    resetEditUserForm();
 
     if (deleteBox) {
         deleteBox.hidden = true;
@@ -297,6 +332,23 @@ async function handleEditUserSubmit(event) {
 
     //     updatedFields.password = password;
     // }
+    // check password in settings 
+    if (password || confirmPassword) {
+        if (password !== confirmPassword) {
+            showSettingsFeedback("error", "הסיסמאות אינן תואמות.");
+            return;
+        }
+
+        if (!isStrongPassword(password)) {
+            showSettingsFeedback(
+                "error",
+                "הסיסמה חייבת לכלול אות גדולה, אות קטנה ומספר."
+            );
+            return;
+        }
+
+        updatedFields.password = password;
+    }
 
     try {
         const updatedUser = await editCurrentUser(updatedFields);
@@ -318,14 +370,14 @@ async function handleEditUserSubmit(event) {
             userEmailElement.textContent = updatedUser.email || "לא נמצא";
         }
 
-        if (password || confirmPassword) {
-            if (password !== confirmPassword) {
-                showSettingsFeedback("error", "הסיסמאות אינן תואמות.");
-                return;
-            }
+        // if (password || confirmPassword) {
+        //     if (password !== confirmPassword) {
+        //         showSettingsFeedback("error", "הסיסמאות אינן תואמות.");
+        //         return;
+        //     }
 
-            updatedFields.password = password;
-        }
+        //     updatedFields.password = password;
+        // }
 
         /* Empty Input Text of Password */
         if (passwordInput) {
@@ -679,6 +731,8 @@ function hideAbortSettingsConfirmBox() {
 function resetSettingsActionPanels() {
     const editForm = document.querySelector("#settingsEditForm");
     const deleteBox = document.querySelector("#deleteUserConfirmBox");
+
+    resetEditUserForm();
 
     if (editForm) {
         editForm.hidden = true;
@@ -1361,7 +1415,7 @@ document.addEventListener("DOMContentLoaded", function () {
     setupMobileMenu();
     setupLecturerDashboardPolishActions();
     renderRecentSessions();
-    
+
     setupLecturerSessionsSearch();
 
     //openSettingsFromUrlIfNeeded();// for debug purposes only
