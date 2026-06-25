@@ -188,8 +188,8 @@ function updateEmailIndicator(input, statusElement, hintElement) {
    Purpose:
    Combine fixed demo users and locally registered users.
 ========================================================= */
-
-async function loadDemoUsersFromJson() {
+/* ============ LOCAL STORAGE! ============== */
+async function loadDemoUsersFromJson() { // ---DELETE !!!---
     try {
         const response = await fetch(USERS_JSON_PATH);
 
@@ -207,7 +207,7 @@ async function loadDemoUsersFromJson() {
     }
 }
 
-
+/* ============ LOCAL STORAGE! ============== */
 function loadRegisteredUsersFromStorage() {
     const savedUsersJson = localStorage.getItem(REGISTERED_USERS_STORAGE_KEY);
 
@@ -226,7 +226,7 @@ function loadRegisteredUsersFromStorage() {
     }
 }
 
-
+/* ============ LOCAL STORAGE! ============== */
 function saveRegisteredUsersToStorage(users) {
     localStorage.setItem(
         REGISTERED_USERS_STORAGE_KEY,
@@ -234,7 +234,7 @@ function saveRegisteredUsersToStorage(users) {
     );
 }
 
-
+/* ============ LOCAL STORAGE! ============== */
 async function loadAllUsers() {
     const demoUsers = await loadDemoUsersFromJson();
     const localUsers = loadRegisteredUsersFromStorage();
@@ -248,7 +248,7 @@ async function loadAllUsers() {
    Purpose:
    Login only by email + password.
 ========================================================= */
-
+/* ============ LOCAL STORAGE! ============== */
 async function findMatchingUserByEmail(email, password) {
     const users = await loadAllUsers();
 
@@ -296,7 +296,7 @@ function saveCurrentUser(user) {
     );
 }
 
-
+/* ============== WRONG WAY TO DO IT !============ */
 function getRedirectByUser(user) {
     const role = (user.role || "student").toLowerCase();
 

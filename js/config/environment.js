@@ -1,7 +1,8 @@
 //src/js/config/environment.js
 
 const ENVIRONMENT = {
-    MODE: "development",
+    // Check localStorage first, otherwise default to production
+    MODE: localStorage.getItem("dlsApiMode") || "production",
 
     URLS: {
         development: "http://localhost:3000", 
@@ -10,10 +11,18 @@ const ENVIRONMENT = {
 };
 
 export const getApiBaseUrl = () => {
-    // DEBUGGING: URL override for quick testing without changing code
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get("env") === "prod") return ENV.URLS.production;
-    if (urlParams.get("env") === "dev") return ENV.URLS.development;
+    return ENV.URLS[ENV.MODE] || ENV.URLS.production;
+};
 
-    return ENV.URLS[ENV.MODE];
+// devFeature: A helper to switch environments from the browser console
+export const setApiMode = (mode) => {
+    if (mode === "local" || mode === "production") {
+        localStorage.setItem("dlsApiMode", mode);
+        location.reload();
+    } else if (mode === "reset") {
+        localStorage.removeItem("dlsApiMode");
+        location.reload();
+    } else {
+        console.warn("Use: setApiMode('local'), setApiMode('production'), or setApiMode('reset')");
+    }
 };
