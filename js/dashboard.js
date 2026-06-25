@@ -277,27 +277,26 @@ async function handleEditUserSubmit(event) {
     const updatedFields = {
         firstName: firstNameInput ? firstNameInput.value.trim() : "",
         lastName: lastNameInput ? lastNameInput.value.trim() : "",
-        email: emailInput ? emailInput.value.trim() : "",
-        password: passwordInput ? passwordInput.value : ""
+        email: emailInput ? emailInput.value.trim() : ""
     };
 
     /* Check Password Valid */
-    if (password || confirmPassword) {
-        if (password !== confirmPassword) {
-            showSettingsFeedback("error", "הסיסמאות אינן תואמות.");
-            return;
-        }
+    // if (password || confirmPassword) {
+    //     if (password !== confirmPassword) {
+    //         showSettingsFeedback("error", "הסיסמאות אינן תואמות.");
+    //         return;
+    //     }
 
-        if (!isStrongPassword(password)) {
-            showSettingsFeedback(
-                "error",
-                "הסיסמה חייבת לכלול אות גדולה, אות קטנה ומספר."
-            );
-            return;
-        }
+    //     if (!isStrongPassword(password)) {
+    //         showSettingsFeedback(
+    //             "error",
+    //             "הסיסמה חייבת לכלול אות גדולה, אות קטנה ומספר."
+    //         );
+    //         return;
+    //     }
 
-        updatedFields.password = password;
-    }
+    //     updatedFields.password = password;
+    // }
 
     try {
         const updatedUser = await editCurrentUser(updatedFields);
@@ -1080,38 +1079,240 @@ function getSessionCode(session) {
     return session?.code || session?.id || "";
 }
 
+/* CURRENTLY HTML HAS STATIC SESIONS : will pull from Real SESSIONS */
+let lecturerRecentSessionsCache = [];
+
+function getSessionCode(session) {
+    return session?.code || session?.sessionCode || session?.id || session?._id || "";
+}
+
+function getSessionDateValue(session) {
+    return (
+        session?.startedAt ||
+        session?.createdAt ||
+        session?.date ||
+        session?.updatedAt ||
+        null
+    );
+}
+
+function formatSessionDate(session) {
+    const rawDate = getSessionDateValue(session);
+
+    if (!rawDate) {
+        return "ללא תאריך";
+    }
+
+    const date = new Date(rawDate);
+
+    if (Number.isNaN(date.getTime())) {
+        return "ללא תאריך";
+    }
+
+    return date.toLocaleDateString("he-IL", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit"
+    });
+}
+
+function normalizeSessionTitle(session) {
+    const code = getSessionCode(session);
+
+    const rawTitle = String(
+        session?.title ||
+        session?.name ||
+        session?.sessionTitle ||
+        session?.presentationTitle ||
+        session?.fileName ||
+        ""
+    ).trim();
+
+    const cleanedTitle = rawTitle
+        .replace(/^\((.*)\)$/, "$1")
+        .trim();
+
+    const invalidTitles = [
+        "",
+        "undefined",
+        "(undefined)",
+        "null",
+        "(null)",
+        "Session:(undefined)"
+    ];
+
+    if (!invalidTitles.includes(cleanedTitle)) {
+        return cleanedTitle;
+    }
+
+    if (code) {
+        return `סשן ${code}`;
+    }
+
+    return "סשן ללא שם";
+}
+
+function getSessionSearchText(session) {
+    return [
+        normalizeSessionTitle(session),
+        getSessionCode(session),
+        formatSessionDate(session)
+    ]
+        .join(" ")
+        .toLowerCase();
+}
+
+function renderLecturerSessionsOverlay(sessions) {
+    const list = document.querySelector("#lecturerSessionsOverlayList");
+
+    if (!list) {
+        return;
+    }
+
+    if (!sessions || sessions.length === 0) {
+        list.innerHTML = `
+            <p class="dashboard-empty-state">
+                אין סשנים להצגה.
+            </p>
+        `;
+        return;
+    }
+
+    list.innerHTML = "";
+
+    sessions.forEach(function (session) {
+        const code = getSessionCode(session);
+        const title = normalizeSessionTitle(session);
+        const dateText = formatSessionDate(session);
+
+        const link = document.createElement("a");
+
+        link.className = "dashboard-demo-list__item";
+        link.href = code
+            ? `session-landing.html?code=${encodeURIComponent(code)}`
+            : "session-landing.html";
+
+        link.innerHTML = `
+            <strong>${title}</strong>
+            <span>${code ? code + " · " : ""}${dateText}</span>
+        `;
+
+        list.appendChild(link);
+    });
+}
+
+function setupLecturerSessionsSearch() {
+    const input = document.querySelector("#lecturerSessionSearchInput");
+
+    if (!input) {
+        return;
+    }
+
+    input.addEventListener("input", function () {
+        const query = input.value.trim().toLowerCase();
+
+        if (!query) {
+            renderLecturerSessionsOverlay(lecturerRecentSessionsCache);
+            return;
+        }
+
+        const filteredSessions = lecturerRecentSessionsCache.filter(function (session) {
+            return getSessionSearchText(session).includes(query);
+        });
+
+        renderLecturerSessionsOverlay(filteredSessions);
+    });
+}
+
 /* ==========================================================
    RECENT SESSIONS
    
    Backend needs : GET /api/sessions/recent?userId=...&limit=...
 ========================================================== */
+// async function renderRecentSessions() {
+//     const container = document.querySelector("#dashboardRecentSessionsPanel");
+//     if (!container) return;
+
+//     try {
+//         const sessions = await DLS_API.getRecentSessions(5);
+//         if (!sessions || sessions.length === 0) {
+//             container.innerHTML = '<p class="dashboard-empty-state">אין סשנים קודמים להצגה.</p>';
+//             return;
+//         }
+
+//         container.innerHTML = "";
+
+//         sessions.forEach(session => {
+//             const sessionDate = new Date(session.date).toLocaleDateString("he-IL", {
+//                 day: "2-digit",
+//                 month: "2-digit",
+//                 year: "numeric",
+//                 hour: "2-digit",
+//                 minute: "2-digit"
+//             });
+//             const sessionCode = getSessionCode(session);
+//             const sessionTitle = normalizeSessionTitle(session);
+
+//             const card = document.createElement("a");
+//             // Placeholder link - update when session view is ready
+//             card.href = `session.html?code=${encodeURIComponent(session.code || session.id)}`;
+//             card.className = "session-card";
+
+//             card.innerHTML = `
+//                 <div class="session-card__info">
+//                     <h4 class="session-card__title"></h4>
+//                     <span class="session-card__date">${sessionDate}</span>
+//                 </div>
+//                 <div class="session-card__action">▶</div>
+//             `;
+//             card.querySelector(".session-card__title").textContent = sessionTitle;
+//             // session.title || `הרצאה ${new Date().toLocaleDateString("he-IL")}`;
+//             container.appendChild(card);
+//         });
+//     } catch (error) {
+//         console.error("Failed to Load recent Sessions:", error);
+//         container.innerHTML = '<p class="dashboard-empty-state" style="color: #ff637d;">שגיאה בטעינת סשנים.</p>';
+//     }
+// }
+
 async function renderRecentSessions() {
     const container = document.querySelector("#dashboardRecentSessionsPanel");
-    if (!container) return;
+
+    if (!container) {
+        return;
+    }
 
     try {
-        const sessions = await DLS_API.getRecentSessions(5);
-        if (!sessions || sessions.length === 0) {
-            container.innerHTML = '<p class="dashboard-empty-state">אין סשנים קודמים להצגה.</p>';
+        const sessions = await DLS_API.getRecentSessions(20);
+
+        lecturerRecentSessionsCache = sessions || [];
+
+        if (!lecturerRecentSessionsCache.length) {
+            container.innerHTML = `
+                <p class="dashboard-empty-state">
+                    אין סשנים קודמים להצגה.
+                </p>
+            `;
+
+            renderLecturerSessionsOverlay([]);
             return;
         }
 
         container.innerHTML = "";
 
-        sessions.forEach(session => {
-            const sessionDate = new Date(session.date).toLocaleDateString("he-IL", {
-                day: "2-digit",
-                month: "2-digit",
-                year: "numeric",
-                hour: "2-digit",
-                minute: "2-digit"
-            });
+        lecturerRecentSessionsCache.slice(0, 5).forEach(function (session) {
             const sessionCode = getSessionCode(session);
             const sessionTitle = normalizeSessionTitle(session);
+            const sessionDate = formatSessionDate(session);
 
             const card = document.createElement("a");
-            // Placeholder link - update when session view is ready
-            card.href = `session.html?code=${encodeURIComponent(session.code || session.id)}`;
+
+            card.href = sessionCode
+                ? `session-landing.html?code=${encodeURIComponent(sessionCode)}`
+                : "session-landing.html";
+
             card.className = "session-card";
 
             card.innerHTML = `
@@ -1119,15 +1320,28 @@ async function renderRecentSessions() {
                     <h4 class="session-card__title"></h4>
                     <span class="session-card__date">${sessionDate}</span>
                 </div>
+
                 <div class="session-card__action">▶</div>
             `;
+
             card.querySelector(".session-card__title").textContent = sessionTitle;
-            // session.title || `הרצאה ${new Date().toLocaleDateString("he-IL")}`;
+
             container.appendChild(card);
         });
+
+        renderLecturerSessionsOverlay(lecturerRecentSessionsCache);
     } catch (error) {
         console.error("Failed to Load recent Sessions:", error);
-        container.innerHTML = '<p class="dashboard-empty-state" style="color: #ff637d;">שגיאה בטעינת סשנים.</p>';
+
+        lecturerRecentSessionsCache = [];
+
+        container.innerHTML = `
+            <p class="dashboard-empty-state" style="color: #ff637d;">
+                שגיאה בטעינת סשנים.
+            </p>
+        `;
+
+        renderLecturerSessionsOverlay([]);
     }
 }
 
@@ -1147,6 +1361,8 @@ document.addEventListener("DOMContentLoaded", function () {
     setupMobileMenu();
     setupLecturerDashboardPolishActions();
     renderRecentSessions();
+    
+    setupLecturerSessionsSearch();
 
     //openSettingsFromUrlIfNeeded();// for debug purposes only
 });

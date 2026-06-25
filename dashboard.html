@@ -259,21 +259,14 @@
                         <label class="dashboard-edit-field">
                             <span>חיפוש סשן</span>
 
-                            <input type="text" placeholder="חפש לפי שם שיעור, קוד סשן או תאריך">
+                            <input id="lecturerSessionSearchInput" type="search"
+                                placeholder="חפש לפי שם שיעור, קוד סשן או תאריך">
                         </label>
 
-                        <div class="dashboard-demo-list">
-                            <button class="dashboard-demo-list__item" type="button">
-                                Web & Cloud · D7E2B5 · היום
-                            </button>
-
-                            <button class="dashboard-demo-list__item" type="button">
-                                OOAD · Project Review · מחר
-                            </button>
-
-                            <button class="dashboard-demo-list__item" type="button">
-                                Networks · TCP Practice · שבוע שעבר
-                            </button>
+                        <div id="lecturerSessionsOverlayList" class="dashboard-demo-list">
+                            <p class="dashboard-empty-state">
+                                טוען סשנים...
+                            </p>
                         </div>
 
                         <div class="dashboard-settings-actions">
@@ -332,7 +325,7 @@
 
                         <div id="dashboardRecentSessionsPanel" class="dashboard-recent-sessions">
                             <p class="dashboard-empty-state">
-                               טוען סשנים...
+                                טוען סשנים...
                             </p>
                         </div>
                     </section>
