@@ -486,18 +486,3 @@ window.dlsAuthDebug = {
     loadAllUsers,
     saveRegisteredUsersToStorage
 };
-
-module.exports = {
-    isValidEmail,
-    isValidPassword,
-    showMessage,
-    updateEmailIndicator,
-    saveCurrentUser,
-    getRedirectByUser,
-    registerUserOnServer,
-    handleRegisterSubmit,
-    loginUserOnServer,
-    loginUserInDevMode,
-    updateTopDateTime,
-    restoreRememberEmail
-};
