@@ -82,11 +82,11 @@ async function sendJsonRequest(path, options = {}) {
 }
 
 /* BUILD QUERY STRING - convert filters obj -> URL query string 
-Ex.: { presentationId: "demo", page: 2 } -> ?presentationId=demo&page=2 */
+Ex.: { sessionId: "demo", page: 2 } -> ?sessionId=demo&page=2 */
 function buildQueryString(filters = {}) {
     const params = new URLSearchParams();
-    if (filters.presentationId) {
-        params.set("presentationId", filters.presentationId);
+    if (filters.sessionId) {
+        params.set("sessionId", filters.sessionId);
     }
     if (filters.page !== undefined && filters.page !== null) {
         params.set("page", filters.page);
@@ -141,7 +141,7 @@ const DLS_API = {
      Route:
      GET /api/questions
      Optional filters:
-     { presentationId, page, status, search } */
+     { sessionId, page, status, search } */
     async getQuestions(filters = {}) {
         const queryString = buildQueryString(filters);
 
@@ -154,7 +154,7 @@ const DLS_API = {
      Route:
      GET /api/questions
      Optional filters:
-     { presentationId, page, status, search } 
+     { sessionId, page, status, search } 
      This function adds studentId and studentEmail to the filter params. */
     async getMyQuestions(filters = {}) {
         const currentUser = getCurrentDlsUser();
@@ -174,7 +174,7 @@ const DLS_API = {
 
     /* CREATE QUESTION
      Route: POST /api/questions 
-     Required: { presentationId, page, x, y, text } */
+     Required: { sessionId, page, x, y, text } */
     async createQuestion(questionData) {
 
         const currentUser = getCurrentDlsUser();
@@ -448,17 +448,17 @@ const DLS_SOCKET = {
         return dlsSocketInstance;
     },
 
-    /* JOIN PRESENTATION Purpose: Join backend room by presentationId.
+    /* JOIN PRESENTATION Purpose: Join backend room by sessionId.
      Ex.: presentation:demo-presentation */
-    joinPresentation(presentationId) {
+    joinPresentation(sessionId) {
         const socket = this.connect();
         if (!socket) { return; }
-        if (!presentationId) {
-            console.warn("Cannot join presentation - missing presentationId");
+        if (!sessionId) {
+            console.warn("Cannot join presentation - missing sessionId");
             socket.disconnect(); // <-- added this!
             return;
         }
-        socket.emit("presentation:join", { presentationId });
+        socket.emit("presentation:join", { sessionId });
     },
 
     /* ON SESSION PARTICIPANTS UPDATED

@@ -1065,7 +1065,7 @@ async function createLiveSessionForPresentation(file, title) {
         title: session.title || title,
         fileName: file.name,
         ownerId: session.ownerId,
-        sessionId: `session_${code}`
+        sessionId: code
     };
 }
 
