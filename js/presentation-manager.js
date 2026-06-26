@@ -1294,7 +1294,7 @@ function ensurePageData(pageNumber) {
 function saveQuestionPoint(relativePoint, pageNumber, questionText) {
     const pageData = ensurePageData(pageNumber);
 
-    const presentationId = createPresentationId(presentationData.fileName);
+    const presentationId = createPresentationId(presentationData.fileName); // adapt this to the current session id in database
 
     const savedQuestion = createAndSaveQuestion({
         presentationId: presentationId,
