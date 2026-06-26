@@ -1,41 +1,3 @@
-/*
-   DLS API CONFIG
-   ---------------------------------------------------------
-   One place to change/update backend URL, API routes, and local keys.
-   ---
-Stage 3A:
-    Create frontend API helper file
-
-Stage 3B:
-    Load existing questions from backend
-
-Stage 3C:
-    Save new questions to backend instead of only localStorage
-
-Stage 3D:
-    Listen to Socket.IO events and update drawer/dots live
-
-Stage 3E:
-    Keep localStorage fallback only if backend is unavailable
----
-CONTAIN:
-// DLS_API = REST / fetch functions
-// Save / load / update / delete data from backend.
-DLS_API.getQuestions()      - GET /api/questions
-DLS_API.createQuestion()    - POST /api/questions
-DLS_API.updateQuestion()    - PUT /api/questions/:id
-DLS_API.deleteQuestion()    - DELETE /api/questions/:id
-
-// DLS_SOCKET = Socket.IO realtime functions
-// Receive live updates without refresh.
-DLS_SOCKET.connect()            - connect frontend to backend socket server
-DLS_SOCKET.joinPresentation()   - join room: presentation:demo-presentation 
-DLS_SOCKET.onQuestionCreated()  - listen to question:created
-DLS_SOCKET.onQuestionUpdated()  - listen to question:updated
-DLS_SOCKET.onQuestionDeleted()  - listen to question:deleted
-
-to keep question-manager clean from fetch + socket details
-*/
 
 const DLS_CONFIG = {
     BACKEND_URL: "https://dls-backend-uelx.onrender.com",
@@ -63,13 +25,6 @@ const DLS_CONFIG = {
     },
 };
 
-/* URL DEV MODE ENV - BACKEND_URL: getDlsBackendUrl() in console */
-/* switched from localhost to 127.0.0.1:3000 for consistency */
-const DLS_ENV = {
-    LOCAL_BACKEND_URL: "http://127.0.0.1:3000",
-    PROD_BACKEND_URL: "https://dls-backend-uelx.onrender.com"
-};
-
 function isLocalFrontend() {
     return (
         window.location.hostname === "localhost" ||
@@ -77,60 +32,7 @@ function isLocalFrontend() {
     );
 }
 
-// function getDlsBackendUrl() {
-//     const params = new URLSearchParams(window.location.search);
-
-//     if (params.get("api") === "local") {
-//         return DLS_ENV.LOCAL_BACKEND_URL;
-//     }
-
-//     if (params.get("api") === "prod") {
-//         return DLS_ENV.PROD_BACKEND_URL;
-//     }
-
-//     // Force production backend for now
-//     // return DLS_ENV.PROD_BACKEND_URL;
-
-//     return isLocalFrontend()
-//         ? DLS_ENV.LOCAL_BACKEND_URL
-//         : DLS_ENV.PROD_BACKEND_URL;
-// }
-
-// function getDlsBackendUrl(devArg = false) {
-
-//     const params = new URLSearchParams(window.location.search);
-//     if (devArgs) {
-//         if (params.get("api") === "local") {
-//             return DLS_ENV.LOCAL_BACKEND_URL;
-//         }
-
-//         if (params.get("api") === "prod") {
-//             return DLS_ENV.PROD_BACKEND_URL;
-//         }
-
-//         // Force production backend for now
-//         // return DLS_ENV.PROD_BACKEND_URL;
-
-//         return isLocalFrontend()
-//             ? DLS_ENV.LOCAL_BACKEND_URL
-//             : DLS_ENV.PROD_BACKEND_URL;
-//     } else {
-//         const queryMode = params.get("api");
-
-//         if (queryMode === "local" || queryMode === "prod") {
-//             localStorage.setItem("dlsApiMode", queryMode);
-//         }
-
-//         const savedMode = localStorage.getItem("dlsApiMode");
-
-//         if (savedMode === "local") {
-//             return DLS_ENV.LOCAL_BACKEND_URL;
-//         }
-
-//         return DLS_ENV.PROD_BACKEND_URL;
-//     }
-// }
-const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') 
+const API_BASE = (isLocalFrontend()) 
 ? 'http://localhost:3000' 
 : 'https://dls-backend-uelx.onrender.com';
 

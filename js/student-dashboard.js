@@ -548,7 +548,7 @@ async function loadStudentDashboard() {
 
     try {
         const questions = await DLS_API.getMyQuestions({
-            presentationId: STUDENT_DASHBOARD_CONFIG.PRESENTATION_ID
+            sessionCode: STUDENT_DASHBOARD_CONFIG.PRESENTATION_ID
         });
 
         renderStudentQuestions(questions);

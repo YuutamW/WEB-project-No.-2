@@ -284,7 +284,7 @@ async function initializeLiveSession(sessionCode) {
             if(teacherControls) teacherControls.style.display = "none";
             const navControls = document.getElementById("pdfNavigationControls");
             if (navControls) navControls.style.display = "flex";
-            updateStatus("Downloading lecture materials...");
+                updateStatus("Downloading lecture materials...");
         } else {
             updateStatus("Reconnecting to your session...");
         }
