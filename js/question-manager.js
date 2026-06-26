@@ -503,8 +503,8 @@ export function createQuestion(questionData) {
 }
 */
     return {
-        question_id: questionData.question_id || null,
-        presentationId: questionData.presentationId || DEFAULT_PRESENTATION_ID,
+        questionId: questionData.question_id || null,
+        session._id: questionData.presentationId || DEFAULT_PRESENTATION_ID,
         fileName: questionData.fileName || null,
 
         page: questionData.page,
@@ -513,7 +513,6 @@ export function createQuestion(questionData) {
         y: questionData.y,
 
         text: questionData.text || "",
-        status: "open",
 
         createdAt: new Date().toISOString(),
         updatedAt: null
