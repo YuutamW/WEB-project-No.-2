@@ -136,7 +136,7 @@ function renderEmptyState() {
    Create a link back to the presentation page.
 
    Example result:
-   presentetion.html?presentation=abc&page=3&q=q_123
+   presentation.html?presentation=abc&page=3&q=q_123
 ========================================================== */
 
 function createQuestionJumpUrl(question, presentationId) {
@@ -146,7 +146,7 @@ function createQuestionJumpUrl(question, presentationId) {
     params.set("page", question.page);
     params.set("q", question.id);
 
-    return `presentetion.html?${params.toString()}`;
+    return `presentation.html?${params.toString()}`;
 }
 
 
@@ -284,7 +284,7 @@ function setupBackButton(presentationId) {
     params.set("presentation", presentationId);
 
     summaryBackToPresentationButton.href =
-        `presentetion.html?${params.toString()}`;
+        `presentation.html?${params.toString()}`;
 }
 
 

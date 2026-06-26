@@ -64,9 +64,9 @@ const DLS_CONFIG = {
 };
 
 /* URL DEV MODE ENV - BACKEND_URL: getDlsBackendUrl() in console */
-/*  */
+/* switched from localhost to 127.0.0.1:3000 for consistency */
 const DLS_ENV = {
-    LOCAL_BACKEND_URL: "http://localhost:3000",
+    LOCAL_BACKEND_URL: "http://127.0.0.1:3000",
     PROD_BACKEND_URL: "https://dls-backend-uelx.onrender.com"
 };
 
@@ -77,32 +77,77 @@ function isLocalFrontend() {
     );
 }
 
-function getDlsBackendUrl() {
-    const params = new URLSearchParams(window.location.search);
+// function getDlsBackendUrl() {
+//     const params = new URLSearchParams(window.location.search);
 
-    if (params.get("api") === "local") {
-        return DLS_ENV.LOCAL_BACKEND_URL;
-    }
+//     if (params.get("api") === "local") {
+//         return DLS_ENV.LOCAL_BACKEND_URL;
+//     }
 
-    if (params.get("api") === "prod") {
-        return DLS_ENV.PROD_BACKEND_URL;
-    }
+//     if (params.get("api") === "prod") {
+//         return DLS_ENV.PROD_BACKEND_URL;
+//     }
 
-    /*
-    // this section forces to use backend URL if the front is run localy 
-    return isLocalFrontend()
-        ? DLS_ENV.LOCAL_BACKEND_URL
-        : DLS_ENV.PROD_BACKEND_URL;
-    */
-    // Force production backend for now
-    return DLS_ENV.PROD_BACKEND_URL;
-}
+//     // Force production backend for now
+//     // return DLS_ENV.PROD_BACKEND_URL;
 
+//     return isLocalFrontend()
+//         ? DLS_ENV.LOCAL_BACKEND_URL
+//         : DLS_ENV.PROD_BACKEND_URL;
+// }
+
+// function getDlsBackendUrl(devArg = false) {
+
+//     const params = new URLSearchParams(window.location.search);
+//     if (devArgs) {
+//         if (params.get("api") === "local") {
+//             return DLS_ENV.LOCAL_BACKEND_URL;
+//         }
+
+//         if (params.get("api") === "prod") {
+//             return DLS_ENV.PROD_BACKEND_URL;
+//         }
+
+//         // Force production backend for now
+//         // return DLS_ENV.PROD_BACKEND_URL;
+
+//         return isLocalFrontend()
+//             ? DLS_ENV.LOCAL_BACKEND_URL
+//             : DLS_ENV.PROD_BACKEND_URL;
+//     } else {
+//         const queryMode = params.get("api");
+
+//         if (queryMode === "local" || queryMode === "prod") {
+//             localStorage.setItem("dlsApiMode", queryMode);
+//         }
+
+//         const savedMode = localStorage.getItem("dlsApiMode");
+
+//         if (savedMode === "local") {
+//             return DLS_ENV.LOCAL_BACKEND_URL;
+//         }
+
+//         return DLS_ENV.PROD_BACKEND_URL;
+//     }
+// }
+const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') 
+? 'http://localhost:3000' 
+: 'https://dls-backend-uelx.onrender.com';
+
+function getDlsBackendUrl() { return API_BASE; }
 /* Apply backend URL after helper exists */
 DLS_CONFIG.BACKEND_URL = getDlsBackendUrl();
 
 /* REST API HELPER - create full backend API URL */
-function buildApiUrl(path) { return `${DLS_CONFIG.BACKEND_URL}${path}`; }
+// function buildApiUrl(path) { return `${DLS_CONFIG.BACKEND_URL}${path}`; }
+function buildApiUrl(path) {
+    const baseUrl = getDlsBackendUrl();
+
+    DLS_CONFIG.BACKEND_URL = baseUrl;
+    window.DLS_BACKEND_URL = baseUrl;
+
+    return `${baseUrl}${path}`;
+}
 
 /* SEND JSON[momoa/derulo] REQUEST - for small fetch req WRAPPER
 Used by: - GET - POST - PUT - DELETE Returns: server JSON response 
@@ -366,7 +411,7 @@ const DLS_API = {
         formData.append("title", title || "Untitled Session");
         formData.append("ownerId", ownerId);
 
-        const response = await fetch(buildApiUrl(DLS_CONFIG.ROUTES.SESSIONS) , {
+        const response = await fetch(buildApiUrl(DLS_CONFIG.ROUTES.SESSIONS), {
             method: "POST",
             body: formData,
             headers: {
@@ -378,7 +423,7 @@ const DLS_API = {
             return {};
         });
 
-        if(!response.ok)
+        if (!response.ok)
             throw new Error(responseData.message || "Failed to create session on backend");
 
         // Returns backend payload: { code, pdfUrl, title }
@@ -459,8 +504,25 @@ const DLS_API = {
 window.DLS_CONFIG = DLS_CONFIG;
 window.DLS_API = DLS_API;
 window.getCurrentDlsUser = getCurrentDlsUser;
+
 // only if neccessary:
 window.DLS_BACKEND_URL = DLS_CONFIG.BACKEND_URL;
+
+window.DLS_SET_API_MODE = function (mode) {
+    if (mode === "local" || mode === "prod") {
+        localStorage.setItem("dlsApiMode", mode);
+        location.reload();
+        return;
+    }
+
+    if (mode === "reset") {
+        localStorage.removeItem("dlsApiMode");
+        location.reload();
+        return;
+    }
+
+    console.warn("Use: DLS_SET_API_MODE('local'), DLS_SET_API_MODE('prod'), or DLS_SET_API_MODE('reset')");
+};
 
 /* SOCKET IO HELPER */
 
@@ -483,7 +545,7 @@ const DLS_SOCKET = {
         if (dlsSocketInstance) {
             return dlsSocketInstance;
         }
-        dlsSocketInstance = io(DLS_CONFIG.BACKEND_URL);
+        dlsSocketInstance = io(API_BASE_URL);
         dlsSocketInstance.on("connect", function () {
             console.log(`DLS socket connected: ${dlsSocketInstance.id}`);
         });
@@ -495,6 +557,7 @@ const DLS_SOCKET = {
         });
         return dlsSocketInstance;
     },
+    
     /* JOIN PRESENTATION Purpose: Join backend room by presentationId.
      Ex.: presentation:demo-presentation */
     joinPresentation(presentationId) {
@@ -502,40 +565,13 @@ const DLS_SOCKET = {
         if (!socket) { return; }
         if (!presentationId) {
             console.warn("Cannot join presentation - missing presentationId");
+            socket.disconnect(); // <-- added this!
             return;
         }
         socket.emit("presentation:join", { presentationId });
     },
 
-    /* --- DEBUG CHECK IF REALLY NEEDED HERE --- */
-    /* JOIN SESSION
-        Route:
-        POST /api/sessions/:code/join
-
-        Used by:
-        student-dashboard.html -> Join session overlay
-
-        Payload:
-        { userId }
-    */
-    // async joinSession(code, payload = {}) {
-    //     const cleanCode = String(code || "").trim();
-
-    //     if (!cleanCode) {
-    //         throw new Error("Missing session code");
-    //     }
-
-    //     const responseData = await sendJsonRequest(
-    //         `${DLS_CONFIG.ROUTES.SESSIONS}/${encodeURIComponent(cleanCode)}/join`,
-    //         {
-    //             method: "POST",
-    //             body: JSON.stringify(payload)
-    //         }
-    //     );
-
-    //     return responseData.data || responseData;
-    // },
-
+    
     /* ON QUESTION CREATED Purpose: Listen to new question events. */
     onQuestionCreated(callback) {
         const socket = this.connect();
@@ -567,7 +603,7 @@ const DLS_SOCKET = {
         console.log("DLS socket disconnected by logout");
     },
 
-    
+
 };
 
 /* GLOBAL EXPORTS - expose helpers to VanillaJS files (other) 

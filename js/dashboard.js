@@ -213,6 +213,38 @@ function fillEditUserForm(user) {
     }
 }
 
+function resetEditUserForm() {
+    const currentUser = getCurrentDashboardUser();
+
+    const firstNameInput = document.querySelector("#settingsEditFirstName");
+    const lastNameInput = document.querySelector("#settingsEditLastName");
+    const emailInput = document.querySelector("#settingsEditEmail");
+    const passwordInput = document.querySelector("#settingsEditPassword");
+    const confirmPasswordInput = document.querySelector("#settingsEditConfirmPassword");
+
+    if (currentUser) {
+        if (firstNameInput) {
+            firstNameInput.value = currentUser.firstName || "";
+        }
+
+        if (lastNameInput) {
+            lastNameInput.value = currentUser.lastName || "";
+        }
+
+        if (emailInput) {
+            emailInput.value = currentUser.email || "";
+        }
+    }
+
+    if (passwordInput) {
+        passwordInput.value = "";
+    }
+
+    if (confirmPasswordInput) {
+        confirmPasswordInput.value = "";
+    }
+}
+
 function handleEditUserClick() {
     const currentUser = getCurrentDashboardUser();
 
@@ -225,7 +257,10 @@ function handleEditUserClick() {
     const deleteBox = document.querySelector("#deleteUserConfirmBox");
 
     clearSettingsFeedback();
-    fillEditUserForm(currentUser);
+    // fillEditUserForm(currentUser);
+
+    // clear PW on settings edit section always:
+    resetEditUserForm();
 
     if (deleteBox) {
         deleteBox.hidden = true;
@@ -277,11 +312,27 @@ async function handleEditUserSubmit(event) {
     const updatedFields = {
         firstName: firstNameInput ? firstNameInput.value.trim() : "",
         lastName: lastNameInput ? lastNameInput.value.trim() : "",
-        email: emailInput ? emailInput.value.trim() : "",
-        password: passwordInput ? passwordInput.value : ""
+        email: emailInput ? emailInput.value.trim() : ""
     };
 
     /* Check Password Valid */
+    // if (password || confirmPassword) {
+    //     if (password !== confirmPassword) {
+    //         showSettingsFeedback("error", "הסיסמאות אינן תואמות.");
+    //         return;
+    //     }
+
+    //     if (!isStrongPassword(password)) {
+    //         showSettingsFeedback(
+    //             "error",
+    //             "הסיסמה חייבת לכלול אות גדולה, אות קטנה ומספר."
+    //         );
+    //         return;
+    //     }
+
+    //     updatedFields.password = password;
+    // }
+    // check password in settings 
     if (password || confirmPassword) {
         if (password !== confirmPassword) {
             showSettingsFeedback("error", "הסיסמאות אינן תואמות.");
@@ -319,14 +370,14 @@ async function handleEditUserSubmit(event) {
             userEmailElement.textContent = updatedUser.email || "לא נמצא";
         }
 
-        if (password || confirmPassword) {
-            if (password !== confirmPassword) {
-                showSettingsFeedback("error", "הסיסמאות אינן תואמות.");
-                return;
-            }
+        // if (password || confirmPassword) {
+        //     if (password !== confirmPassword) {
+        //         showSettingsFeedback("error", "הסיסמאות אינן תואמות.");
+        //         return;
+        //     }
 
-            updatedFields.password = password;
-        }
+        //     updatedFields.password = password;
+        // }
 
         /* Empty Input Text of Password */
         if (passwordInput) {
@@ -599,15 +650,20 @@ function isSettingsActionActive() {
     );
 }
 
+/* Checks Changed Values in settings edit - checks also password */
 function getEditFormValues() {
     const firstNameInput = document.querySelector("#settingsEditFirstName");
     const lastNameInput = document.querySelector("#settingsEditLastName");
     const emailInput = document.querySelector("#settingsEditEmail");
+    const passwordInput = document.querySelector("#settingsEditPassword");
+    const confirmPasswordInput = document.querySelector("#settingsEditConfirmPassword");
 
     return {
         firstName: firstNameInput ? firstNameInput.value.trim() : "",
         lastName: lastNameInput ? lastNameInput.value.trim() : "",
-        email: emailInput ? emailInput.value.trim() : ""
+        email: emailInput ? emailInput.value.trim() : "",
+        password: passwordInput ? passwordInput.value : "",
+        confirmPassword: confirmPasswordInput ? confirmPasswordInput.value : ""
     };
 }
 
@@ -622,7 +678,9 @@ function isEditFormDirty() {
     return (
         values.firstName !== (currentUser.firstName || "") ||
         values.lastName !== (currentUser.lastName || "") ||
-        values.email !== (currentUser.email || "")
+        values.email !== (currentUser.email || "") ||
+        values.password !== "" ||
+        values.confirmPassword !== ""
     );
 }
 
@@ -673,6 +731,8 @@ function hideAbortSettingsConfirmBox() {
 function resetSettingsActionPanels() {
     const editForm = document.querySelector("#settingsEditForm");
     const deleteBox = document.querySelector("#deleteUserConfirmBox");
+
+    resetEditUserForm();
 
     if (editForm) {
         editForm.hidden = true;
@@ -797,6 +857,121 @@ function closeDashboardOverlay(selectorOrOverlay) {
 }
 
 /* Wayaround - since opendashboardoverlay() use dashboard-core */
+// function setupLecturerDashboardPolishActions() {
+//     const nextLessonsButtons = document.querySelectorAll(
+//         "[data-dashboard-action='open-next-lessons']"
+//     );
+
+//     const jumpSessionButtons = document.querySelectorAll(
+//         "[data-dashboard-action='open-jump-session']"
+//     );
+
+//     const closeOverlayButtons = document.querySelectorAll(
+//         "[data-dashboard-action='close-dashboard-overlay']"
+//     );
+
+//     nextLessonsButtons.forEach(function (button) {
+//         button.addEventListener("click", function () {
+//             openDashboardOverlay("#nextLessonsOverlay");
+//         });
+//     });
+
+//     jumpSessionButtons.forEach(function (button) {
+//         button.addEventListener("click", function () {
+//             openDashboardOverlay("#jumpSessionOverlay");
+//         });
+//     });
+
+//     closeOverlayButtons.forEach(function (button) {
+//         button.addEventListener("click", function () {
+//             const overlay = button.closest(".dashboard-modal");
+//             closeDashboardOverlay(overlay);
+//         });
+//     });
+
+//     /* Settings Guard from breaking Popup behaviour */
+//     document.addEventListener("click", function (event) {
+//         const clickedBackdrop = event.target.classList.contains(
+//             "dashboard-modal__backdrop"
+//         );
+
+//         if (!clickedBackdrop) {
+//             return;
+//         }
+
+//         const overlay = event.target.closest(".dashboard-modal");
+
+//         if (!overlay) {
+//             return;
+//         }
+
+//         if (overlay.id === "settingsOverlay") {
+//             return;
+//         }
+
+//         closeDashboardOverlay(overlay);
+//     });
+
+//     //setupDashboardOverlayBackdropClose(".dashboard-modal");
+//     // switched for local listener since we dont use Dashboard-core;
+//     document.addEventListener("click", function (event) {
+//         const clickedBackdrop = event.target.classList.contains(
+//             "dashboard-modal__backdrop"
+//         );
+
+//         if (!clickedBackdrop) {
+//             return;
+//         }
+
+//         const overlay = event.target.closest(".dashboard-modal");
+
+//         if (!overlay) {
+//             return;
+//         }
+
+//         overlay.classList.remove("is-open");
+
+//         setTimeout(function () {
+//             overlay.hidden = true;
+//         }, 220);
+//     });
+// }
+
+
+
+// setup Mobile Menu:
+
+let dashboardBackdropListenerReady = false;
+
+function setupDashboardOverlayBackdropClose() {
+    if (dashboardBackdropListenerReady) {
+        return;
+    }
+
+    dashboardBackdropListenerReady = true;
+
+    document.addEventListener("click", function (event) {
+        const backdrop = event.target.closest(".dashboard-modal__backdrop");
+
+        if (!backdrop || event.target !== backdrop) {
+            return;
+        }
+
+        const overlay = backdrop.closest(".dashboard-modal");
+
+        if (!overlay) {
+            return;
+        }
+
+        if (overlay.id === "settingsOverlay") {
+            requestCloseSettingsOverlay(event);
+            return;
+        }
+
+        closeDashboardOverlay(overlay);
+    });
+}
+
 function setupLecturerDashboardPolishActions() {
     const nextLessonsButtons = document.querySelectorAll(
         "[data-dashboard-action='open-next-lessons']"
@@ -818,6 +993,7 @@ function setupLecturerDashboardPolishActions() {
 
     jumpSessionButtons.forEach(function (button) {
         button.addEventListener("click", function () {
+            renderLecturerSessionsOverlay(lecturerRecentSessionsCache);
             openDashboardOverlay("#jumpSessionOverlay");
         });
     });
@@ -829,55 +1005,9 @@ function setupLecturerDashboardPolishActions() {
         });
     });
 
-    /* Settings Guard from breaking Popup behaviour */
-    document.addEventListener("click", function (event) {
-        const clickedBackdrop = event.target.classList.contains(
-            "dashboard-modal__backdrop"
-        );
-
-        if (!clickedBackdrop) {
-            return;
-        }
-
-        const overlay = event.target.closest(".dashboard-modal");
-
-        if (!overlay) {
-            return;
-        }
-
-        if (overlay.id === "settingsOverlay") {
-            return;
-        }
-
-        closeDashboardOverlay(overlay);
-    });
-
-    //setupDashboardOverlayBackdropClose(".dashboard-modal");
-    // switched for local listener since we dont use Dashboard-core;
-    document.addEventListener("click", function (event) {
-        const clickedBackdrop = event.target.classList.contains(
-            "dashboard-modal__backdrop"
-        );
-
-        if (!clickedBackdrop) {
-            return;
-        }
-
-        const overlay = event.target.closest(".dashboard-modal");
-
-        if (!overlay) {
-            return;
-        }
-
-        overlay.classList.remove("is-open");
-
-        setTimeout(function () {
-            overlay.hidden = true;
-        }, 220);
-    });
+    setupDashboardOverlayBackdropClose();
 }
 
-// setup Mobile Menu:
 function dashboardOpenMobileMenu(mobileNav, toggleButton) {
     mobileNav.hidden = false;
     toggleButton.classList.add("is-open");
@@ -987,7 +1117,7 @@ function normalizeSessionTitle(session) {
     if (!invalidTitles.includes(cleanedTitle)) {
         return cleanedTitle;
     }
-    else 
+    else
         return `סשן ${code}`;
 
     // const code = session?.code || session?.id || "";
@@ -1003,38 +1133,240 @@ function getSessionCode(session) {
     return session?.code || session?.id || "";
 }
 
+/* CURRENTLY HTML HAS STATIC SESIONS : will pull from Real SESSIONS */
+let lecturerRecentSessionsCache = [];
+
+function getSessionCode(session) {
+    return session?.code || session?.sessionCode || session?.id || session?._id || "";
+}
+
+function getSessionDateValue(session) {
+    return (
+        session?.startedAt ||
+        session?.createdAt ||
+        session?.date ||
+        session?.updatedAt ||
+        null
+    );
+}
+
+function formatSessionDate(session) {
+    const rawDate = getSessionDateValue(session);
+
+    if (!rawDate) {
+        return "ללא תאריך";
+    }
+
+    const date = new Date(rawDate);
+
+    if (Number.isNaN(date.getTime())) {
+        return "ללא תאריך";
+    }
+
+    return date.toLocaleDateString("he-IL", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit"
+    });
+}
+
+function normalizeSessionTitle(session) {
+    const code = getSessionCode(session);
+
+    const rawTitle = String(
+        session?.title ||
+        session?.name ||
+        session?.sessionTitle ||
+        session?.presentationTitle ||
+        session?.fileName ||
+        ""
+    ).trim();
+
+    const cleanedTitle = rawTitle
+        .replace(/^\((.*)\)$/, "$1")
+        .trim();
+
+    const invalidTitles = [
+        "",
+        "undefined",
+        "(undefined)",
+        "null",
+        "(null)",
+        "Session:(undefined)"
+    ];
+
+    if (!invalidTitles.includes(cleanedTitle)) {
+        return cleanedTitle;
+    }
+
+    if (code) {
+        return `סשן ${code}`;
+    }
+
+    return "סשן ללא שם";
+}
+
+function getSessionSearchText(session) {
+    return [
+        normalizeSessionTitle(session),
+        getSessionCode(session),
+        formatSessionDate(session)
+    ]
+        .join(" ")
+        .toLowerCase();
+}
+
+function renderLecturerSessionsOverlay(sessions) {
+    const list = document.querySelector("#lecturerSessionsOverlayList");
+
+    if (!list) {
+        return;
+    }
+
+    if (!sessions || sessions.length === 0) {
+        list.innerHTML = `
+            <p class="dashboard-empty-state">
+                אין סשנים להצגה.
+            </p>
+        `;
+        return;
+    }
+
+    list.innerHTML = "";
+
+    sessions.forEach(function (session) {
+        const code = getSessionCode(session);
+        const title = normalizeSessionTitle(session);
+        const dateText = formatSessionDate(session);
+
+        const link = document.createElement("a");
+
+        link.className = "dashboard-demo-list__item";
+        link.href = code
+            ? `session-landing.html?code=${encodeURIComponent(code)}`
+            : "session-landing.html";
+
+        link.innerHTML = `
+            <strong>${title}</strong>
+            <span>${code ? code + " · " : ""}${dateText}</span>
+        `;
+
+        list.appendChild(link);
+    });
+}
+
+function setupLecturerSessionsSearch() {
+    const input = document.querySelector("#lecturerSessionSearchInput");
+
+    if (!input) {
+        return;
+    }
+
+    input.addEventListener("input", function () {
+        const query = input.value.trim().toLowerCase();
+
+        if (!query) {
+            renderLecturerSessionsOverlay(lecturerRecentSessionsCache);
+            return;
+        }
+
+        const filteredSessions = lecturerRecentSessionsCache.filter(function (session) {
+            return getSessionSearchText(session).includes(query);
+        });
+
+        renderLecturerSessionsOverlay(filteredSessions);
+    });
+}
+
 /* ==========================================================
    RECENT SESSIONS
    
    Backend needs : GET /api/sessions/recent?userId=...&limit=...
 ========================================================== */
+// async function renderRecentSessions() {
+//     const container = document.querySelector("#dashboardRecentSessionsPanel");
+//     if (!container) return;
+
+//     try {
+//         const sessions = await DLS_API.getRecentSessions(5);
+//         if (!sessions || sessions.length === 0) {
+//             container.innerHTML = '<p class="dashboard-empty-state">אין סשנים קודמים להצגה.</p>';
+//             return;
+//         }
+
+//         container.innerHTML = "";
+
+//         sessions.forEach(session => {
+//             const sessionDate = new Date(session.date).toLocaleDateString("he-IL", {
+//                 day: "2-digit",
+//                 month: "2-digit",
+//                 year: "numeric",
+//                 hour: "2-digit",
+//                 minute: "2-digit"
+//             });
+//             const sessionCode = getSessionCode(session);
+//             const sessionTitle = normalizeSessionTitle(session);
+
+//             const card = document.createElement("a");
+//             // Placeholder link - update when session view is ready
+//             card.href = `session.html?code=${encodeURIComponent(session.code || session.id)}`;
+//             card.className = "session-card";
+
+//             card.innerHTML = `
+//                 <div class="session-card__info">
+//                     <h4 class="session-card__title"></h4>
+//                     <span class="session-card__date">${sessionDate}</span>
+//                 </div>
+//                 <div class="session-card__action">▶</div>
+//             `;
+//             card.querySelector(".session-card__title").textContent = sessionTitle;
+//             // session.title || `הרצאה ${new Date().toLocaleDateString("he-IL")}`;
+//             container.appendChild(card);
+//         });
+//     } catch (error) {
+//         console.error("Failed to Load recent Sessions:", error);
+//         container.innerHTML = '<p class="dashboard-empty-state" style="color: #ff637d;">שגיאה בטעינת סשנים.</p>';
+//     }
+// }
+
 async function renderRecentSessions() {
     const container = document.querySelector("#dashboardRecentSessionsPanel");
-    if (!container) return;
+
+    if (!container) {
+        return;
+    }
 
     try {
-        const sessions = await DLS_API.getRecentSessions(5);
-        if (!sessions || sessions.length === 0) {
-            container.innerHTML = '<p class="dashboard-empty-state">אין סשנים קודמים להצגה.</p>';
+        const sessions = await DLS_API.getRecentSessions(20);
+
+        lecturerRecentSessionsCache = sessions || [];
+
+        if (!lecturerRecentSessionsCache.length) {
+            container.innerHTML = `
+                <p class="dashboard-empty-state">
+                    אין סשנים קודמים להצגה.
+                </p>
+            `;
+
+            renderLecturerSessionsOverlay([]);
             return;
         }
 
         container.innerHTML = "";
 
-        sessions.forEach(session => {
-            const sessionDate = new Date(session.date).toLocaleDateString("he-IL", {
-                day: "2-digit",
-                month: "2-digit",
-                year: "numeric",
-                hour: "2-digit",
-                minute: "2-digit"
-            });
+        lecturerRecentSessionsCache.slice(0, 5).forEach(function (session) {
             const sessionCode = getSessionCode(session);
             const sessionTitle = normalizeSessionTitle(session);
+            const sessionDate = formatSessionDate(session);
 
             const card = document.createElement("a");
-            // Placeholder link - update when session view is ready
-            card.href = `session.html?code=${encodeURIComponent(session.code || session.id)}`;
+
+            card.href = sessionCode
+                ? `session-landing.html?code=${encodeURIComponent(sessionCode)}`
+                : "session-landing.html";
+
             card.className = "session-card";
 
             card.innerHTML = `
@@ -1042,15 +1374,28 @@ async function renderRecentSessions() {
                     <h4 class="session-card__title"></h4>
                     <span class="session-card__date">${sessionDate}</span>
                 </div>
+
                 <div class="session-card__action">▶</div>
             `;
+
             card.querySelector(".session-card__title").textContent = sessionTitle;
-            // session.title || `הרצאה ${new Date().toLocaleDateString("he-IL")}`;
+
             container.appendChild(card);
         });
+
+        renderLecturerSessionsOverlay(lecturerRecentSessionsCache);
     } catch (error) {
         console.error("Failed to Load recent Sessions:", error);
-        container.innerHTML = '<p class="dashboard-empty-state" style="color: #ff637d;">שגיאה בטעינת סשנים.</p>';
+
+        lecturerRecentSessionsCache = [];
+
+        container.innerHTML = `
+            <p class="dashboard-empty-state" style="color: #ff637d;">
+                שגיאה בטעינת סשנים.
+            </p>
+        `;
+
+        renderLecturerSessionsOverlay([]);
     }
 }
 
@@ -1070,6 +1415,8 @@ document.addEventListener("DOMContentLoaded", function () {
     setupMobileMenu();
     setupLecturerDashboardPolishActions();
     renderRecentSessions();
+
+    setupLecturerSessionsSearch();
 
     //openSettingsFromUrlIfNeeded();// for debug purposes only
 });

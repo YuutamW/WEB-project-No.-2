@@ -35,10 +35,10 @@ The project is built with client-side technologies only.
 | `login.html` | Email/password login page |
 | `register.html` | Registration form with validation |
 | `dashboard.html` | Lecturer dashboard prototype |
-| `presentetion.html` | PDF presentation viewer with teacher controls |
+| `presentation.html` | PDF presentation viewer with teacher controls |
 | `easteregg.html` | Hidden demo page for future easter eggs |
 
-> Note: the presentation page file is currently named `presentetion.html` in the project.
+> Note: the presentation page file is currently named `presentation.html` in the project.
 
 ---
 

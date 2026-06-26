@@ -2170,4 +2170,47 @@ body {
     }
 }
 
+/* Mobile Popup FIX*/
+.dashboard-modal__panel {
+    max-height: min(88dvh, 820px);
+    overflow-y: auto;
+}
 
+.dashboard-submodal {
+    position: absolute;
+    inset: 0;
+    z-index: 20;
+
+    display: grid;
+    place-items: center;
+
+    padding: 18px;
+
+    background: rgba(0, 0, 0, 0.22);
+    backdrop-filter: blur(8px);
+}
+
+.dashboard-submodal[hidden] {
+    display: none !important;
+}
+
+.dashboard-submodal__card {
+    width: min(100%, 420px);
+}
+
+@media (max-width: 700px) {
+    .dashboard-modal__panel {
+        width: calc(100vw - 28px);
+        max-height: calc(100dvh - 32px);
+        padding: 24px 18px;
+    }
+
+    .dashboard-settings-actions {
+        flex-wrap: wrap;
+    }
+
+    .dashboard-settings-actions button,
+    .dashboard-settings-actions a {
+        flex: 1 1 160px;
+    }
+}

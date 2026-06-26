@@ -20,21 +20,89 @@
 
 /* =========================================================
    1. Constants
-   Purpose:
    Central paths and localStorage keys.
 ========================================================= */
 
 const USERS_JSON_PATH = "data/sample-users.json";
 const REGISTERED_USERS_STORAGE_KEY = "dlsRegisteredUsers";
 const CURRENT_USER_STORAGE_KEY = "dlsCurrentUser";
-const API_BASE_URL = (function () {
-  // Detect environment automatically 
-  if (location.hostname === "localhost" || location.hostname === "127.0.0.1") {
-    return "http://localhost:3000";
-  }
-  // Production URL
-  return "https://dls-backend-uelx.onrender.com";
-})();
+
+/* API LOCALHOST URL
+   Determine if we're running on localhost or production.
+   This is used to switch between local and prod API URLs.
+ */
+const AUTH_ENV = {
+    LOCAL_BACKEND_URL: "http://127.0.0.1:3000",
+    PROD_BACKEND_URL: "https://dls-backend-uelx.onrender.com"
+};
+
+const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') 
+? 'http://localhost:3000' 
+: 'https://dls-backend-uelx.onrender.com';
+
+// function getAuthBackendUrl() {
+//     const params = new URLSearchParams(window.location.search);
+//     const queryMode = params.get("api");
+
+//     if (queryMode === "local" || queryMode === "prod") {
+//         localStorage.setItem("dlsApiMode", queryMode);
+//     }
+
+//     const savedMode = localStorage.getItem("dlsApiMode");
+
+//     if (savedMode === "local") {
+//         return AUTH_ENV.LOCAL_BACKEND_URL;
+//     }
+
+//     return AUTH_ENV.PROD_BACKEND_URL;
+// }
+function getAuthBackendUrl() { return API_BASE; }
+const API_BASE_URL = getAuthBackendUrl();
+
+/* Expose URL to windows */
+window.DLS_AUTH_API_BASE_URL = API_BASE_URL;
+
+/*  DEV MODE */
+function isDevAuthMode() {
+    const params = new URLSearchParams(window.location.search);
+
+    return (
+        params.get("auth") === "dev" ||
+        localStorage.getItem("dlsAuthMode") === "dev"
+    );
+}
+
+window.DLS_SET_AUTH_MODE = function (mode) {
+    if (mode === "dev") {
+        localStorage.setItem("dlsAuthMode", "dev");
+        location.reload();
+        return;
+    }
+
+    if (mode === "backend") {
+        localStorage.removeItem("dlsAuthMode");
+        location.reload();
+        return;
+    }
+
+    console.warn("Use: DLS_SET_AUTH_MODE('dev') or DLS_SET_AUTH_MODE('backend')");
+};
+
+window.DLS_SET_API_MODE = function (mode) {
+    if (mode === "local" || mode === "prod") {
+        localStorage.setItem("dlsApiMode", mode);
+        location.reload();
+        return;
+    }
+
+    if (mode === "reset") {
+        localStorage.removeItem("dlsApiMode");
+        location.reload();
+        return;
+    }
+
+    console.warn("Use: DLS_SET_API_MODE('local'), DLS_SET_API_MODE('prod'), or DLS_SET_API_MODE('reset')");
+};
 
 const USERS_PATH = "/api/users";
 
@@ -338,7 +406,7 @@ async function handleRegisterSubmit(event) {
         email: email,
         // ----DEBUG ---- added username for test purposes
         username: email,
-        
+
         role: role,
         password: password,
         termsAccepted: termsAccepted
@@ -371,23 +439,46 @@ async function handleRegisterSubmit(event) {
 
 
 /* Helper function to send login request to server --- /api/users/login --- */
-async function loginUserOnServer(email,password) { 
-    const response = await fetch(API_BASE_URL + USERS_PATH + "/login" , {
-        method: "POST" ,
+async function loginUserOnServer(email, password) {
+    const response = await fetch(API_BASE_URL + USERS_PATH + "/login", {
+        method: "POST",
         headers: {
             "Content-Type": "application/json"
         },
         body: JSON.stringify({
             email: email,
             password: password
-            })
-        });
-        const data = await response.json().catch(function () { return {}; });
-        
-        if(!response.ok) {
-            throw new Error(data.message || "Login Reqest Failed");
+        })
+    });
+    const data = await response.json().catch(function () { return {}; });
+
+    if (!response.ok) {
+        throw new Error(data.message || "Login Reqest Failed");
+    }
+    return data;
+}
+
+/* LOGIN TO LOCAL USER - TESTS AND DEMO  */
+async function loginUserInDevMode(email) {
+    const normalizedEmail = email.toLowerCase();
+
+    const role = normalizedEmail.includes("student")
+        ? "student"
+        : "lecturer";
+
+    return {
+        success: true,
+        message: "Dev login successful",
+        data: {
+            id: role === "student" ? "dev-student-1" : "dev-lecturer-1",
+            _id: role === "student" ? "dev-student-1" : "dev-lecturer-1",
+            firstName: role === "student" ? "student" : "dor",
+            lastName: role === "student" ? "demo" : "mandel",
+            email: email,
+            role: role,
+            source: "dev-local"
         }
-        return data;
+    };
 }
 
 
@@ -427,17 +518,22 @@ async function handleLoginSubmit(event) {
     }
 
     try {
-        const result = await loginUserOnServer(email,password);
+        // const result = await loginUserOnServer(email, password);
+
+        // const matchedUser = result.data;
+        // const userId = matchedUser.id;
+        const result = isDevAuthMode()
+            ? await loginUserInDevMode(email)
+            : await loginUserOnServer(email, password);
 
         const matchedUser = result.data;
-        const userId = matchedUser.id;
 
         saveCurrentUser(matchedUser);
-        if(rememberMe) 
-            localStorage.setItem("dlsRememberEmail" , email);
-        else 
+        if (rememberMe)
+            localStorage.setItem("dlsRememberEmail", email);
+        else
             localStorage.removeItem("dlsRememberEmail");
-        
+
         showMessage(message, "success", "Login Succesfull");
         showMessage(message, "success", "ההתחברות הצליחה. מעביר אותך...");
 
@@ -549,25 +645,26 @@ setInterval(updateTopDateTime, 1000);
 function restoreRememberEmail() {
     const rememberEmail = localStorage.getItem("dlsRememberEmail");
 
-    if(!rememberEmail) {
+    if (!rememberEmail) {
         return;
     }
 
     const emailInput = document.querySelector("#loginEmail");
     const rememberMeInput = document.querySelector("#rememberMe");
 
-    if(emailInput) {
+    if (emailInput) {
         emailInput.value = rememberEmail;
     }
 
-    if(rememberMeInput) {
+    if (rememberMeInput) {
         rememberMeInput.checked = true;
     }
-    
+
 }
 
+/* Fixed restoreRememberedEmail() not defined */
 document.addEventListener("DOMContentLoaded", function () {
-    restoreRememberedEmail();
+    restoreRememberEmail();
 });
 
 
@@ -583,3 +680,4 @@ window.dlsAuthDebug = {
     loadAllUsers,
     saveRegisteredUsersToStorage
 };
+

@@ -1,6 +1,484 @@
 // Dor Mandel :       ID: 315313825
 // Yotam Weintraub:   ID: 321610859
 
+
+
+/* ==========================================================
+   IN-MEMORY STATE
+   This replaces localStorage for the live presentation.
+   -We use a Map because it's super fast to find/update questions by ID.
+   -Let variable because we want heap mem to release on socket disconnect.
+========================================================== */
+let liveQuestionsState = new Map();
+
+/* ==========================================================
+   COLOR GENERATION (Frontend Only)
+========================================================== */
+const PALETTE = ["#ff3b6b", "#3b82f6", "#10b981", "#f59e0b", "#8b5cf6"];
+
+function assignRandomColor() {
+    return PALETTE[Math.floor(Math.random() * PALETTE.length)];
+}
+
+
+function getQuestionColor(status) {
+    // if closed, it's grey. 
+    // Otherwise, assign a random vibrant color.
+    if (status === "closed") {
+        return "#808080"; 
+    }
+    return assignRandomColor();
+}
+
+
+/* ==========================================================
+   MEMORY MANAGEMENT ALGORITHMS
+========================================================== */
+// 1. Add or Update a question in memory
+export function upsertQuestionToMemory(serverQuestion) {
+    // If we already have it, keep the existing frontend color unless it closed
+    let frontendColor = getQuestionColor(serverQuestion.status);
+    
+    if (liveQuestionsState.has(serverQuestion.id) && serverQuestion.status === "open") {
+        frontendColor = liveQuestionsState.get(serverQuestion.id).frontendColor;
+    }
+
+    const memoryQuestion = {
+        ...serverQuestion,
+        frontendColor: frontendColor 
+    };
+
+    // If it's closed, releasing it from the "rendered" memory.
+    // we need to decide either delete it entirely, OR keep it but filter it out during render.
+    // Filtering is safer if Q&A drawer still needs to read it. -- in testing
+    liveQuestionsState.set(memoryQuestion.id, memoryQuestion);
+}
+// 2. Get questions for rendering dots (Open only)
+export function getActiveQuestionsForPage(pageNumber) {
+    const activeDots = [];
+    
+    liveQuestionsState.forEach(question => {
+        if (question.page === pageNumber && question.status === "open") {
+            activeDots.push(question);
+        }
+    });
+    
+    return activeDots;
+}
+// 3. Clear memory on disconnect
+export function clearQuestionsMemory() {
+    liveQuestionsState.clear();
+    console.log("Memory cleared due to socket disconnect.");
+}
+
+
+/*
+====================Help Comment! ==================
+presentation UI relies on exactly four function names:
+
+createQuestion(questionData)
+
+getQuestionsForPage(pageNum)
+
+getAllQuestions()
+
+updateQuestionStatus(id, newStatus) */
+
+/* ==========================================================
+   2. PACKAGING LAYER (Prepares data to go to the server)
+========================================================== */
+/**
+ * Takes compact coordinate/text data from presentation-manager and transmits to server through the socket pipeline, 
+ * repackages and adds to it with session metadata from local storage - (status ,userId,sessionCode).
+ * 
+ */
+function transmitQuestionToServer(compactData) {
+    // Safely pull session parameters from local cache
+    const currentUser = JSON.parse(localStorage.getItem("dlsCurrentUser") || "{}");
+    const currentSession = JSON.parse(localStorage.getItem("dlsCurrentSession") || "{}");
+
+    const sessionCode = currentSession.code || currentSession.sessionCode || "";
+    const userId = currentUser.id || currentUser._id || "";
+    
+    // This is the clean payload we send to the database via the socket
+    const networkPayload = {
+        sessionCode: sessionCode,
+        userId: userId,
+        page: compactData.page,
+        x: compactData.x, // Relative coordinate (0 to 1)
+        y: compactData.y, // Relative coordinate (0 to 1)
+        text: compactData.text,
+        status: "open"
+    };
+
+    // Trigger the real transmission via the API/Socket pipeline
+    if (window.DLS_SOCKET && typeof window.DLS_SOCKET.emit === "function") {
+        window.DLS_SOCKET.emit("question:create", networkPayload);
+    } else {
+        console.warn("Socket connection unavailable. Payload prepared but not transmitted:", networkPayload);
+    }
+
+    // NOTICE: We return null or empty because we DO NOT draw the dot locally yet.
+    // The dot will only be drawn when the server sends back the official confirmation.
+    return null;
+
+}
+
+/* ==========================================================
+   3. INGESTION LAYER (Receives data back from MongoDB/Sockets)
+========================================================== */
+/**
+ * Triggered when the socket broadcasts a newly saved or updated 
+ * question containing a genuine MongoDB _id.
+ * repackages and adds it's own frame to the  
+ */
+function serverQuestionDataReciever(serverQuestion) {
+    const realId = serverQuestion._id || serverQuestion.id;
+    
+    if (!realId) {
+        console.error("Sane Guard: Cannot store question without a MongoDB ID", serverQuestion);
+        return;
+    }
+
+    // Assign standard color rules
+    let frontendColor = serverQuestion.status === "closed" ? "#808080" : assignRandomColor();
+    
+    // Preserve dot color if it's an existing open question updating its text/state
+    if (liveQuestionsState.has(realId) && serverQuestion.status === "open") {
+        frontendColor = liveQuestionsState.get(realId).frontendColor;
+    }
+
+    const memoryQuestion = {
+        ...serverQuestion,
+        id: realId, // Keep UI compatible with standard 'id' properties
+        frontendColor: frontendColor
+    };
+
+    liveQuestionsState.set(realId, memoryQuestion);
+}
+
+
+/* ==========================================================
+   4. UI LOOKUP METHODS (Required by UI drawing mechanics)
+========================================================== */
+function getQuestionsForPage(pageNumber) {
+    const activeDots = [];
+    liveQuestionsState.forEach(question => {
+        if (question.page === pageNumber && question.status === "open") {
+            activeDots.push(question);
+        }
+    });
+    return activeDots;
+}
+
+function getAllQuestions() {
+    return Array.from(liveQuestionsState.values());
+}
+
+
+
+// Global UI Compatibility Mapping
+window.createQuestion = transmitQuestionToServer;
+window.getQuestionsForPage = getQuestionsForPage;
+window.getAllQuestions = getAllQuestions;
+window.updateQuestionStatus = upsertQuestionToMemory;
+window.upsertQuestionToMemory = upsertQuestionToMemory;
+window.clearQuestionsMemory = clearQuestionsMemory;
+/*============================================THE QUESTION MANAGER - YOTAM ========================*/
+
+
+
+// /*
+// QUESTION MANAGER:
+
+// 1. Create Question
+// 2. Save Question in: presentationData;
+// 3. Save Question to: localStorage;
+// 4. Load Questions from: localStorage;
+// 5. present 'markers' on DOM layer;
+// 6. calculate heatmap data to: Dashboard;
+
+// Template of QuestionJSON:
+// ---
+// const dlsQuestionStore = {
+//   version: 1,
+
+//   presentations: {
+//     "demo-presentation": {
+//       presentationId: "demo-presentation",
+//       fileName: "lecture.pdf",
+
+//       questions: [
+//         {
+//           id: "q_001",
+//           page: 1,
+//           x: 0.42,
+//           y: 0.31,
+//           text: "Can you explain this?",
+//           status: "open",
+//           isAnonymous: true,
+//           createdAt: "2026-05-29T20:15:00.000Z"
+//         },
+//         {
+//           id: "q_002",
+//           page: 2,
+//           x: 0.2,
+//           y: 0.7,
+//           text: "What does this mean?",
+//           status: "open",
+//           isAnonymous: true,
+//           createdAt: "2026-05-29T20:20:00.000Z"
+//         }
+//       ]
+//     }
+//   }
+// };
+
+// ---
+
+// Dashboard can read: 
+// const data = JSON.parse(localStorage.getItem("dlsQuestionStore"));
+// and calculate:
+// how many Questions;
+// which page has most Questions;
+// where is teh Question Density;
+// How many open Questions pressed / answered ?;
+
+
+// Phase 1:
+// <STORE>
+
+// createQuestion()
+// saveQuestion()
+// loadQuestionStore()
+// saveQuestionStore()
+// getQuestionsForPage()
+// getQuestionStats()
+
+// ------
+// Phase 2:
+// <INJECTION>
+
+// in presentation:
+// Shift + Click
+// ↓
+// createQuestion at current page + relative x/y
+// ↓
+// save to localStorage
+// ↓
+// render marker on domLayer
+
+// Phase 3:
+// <PAGE_REDRAW>
+
+// clear domLayer
+// load questions for current page
+// render question markers
+
+// Phase 4:
+// <DASHBOARD_STATS>
+
+// load question store
+// count all questions
+// count by page
+// show basic stats
+
+// Phase 5:
+// <HEATMAP>
+
+// group questions by page
+// group by x/y grid cells
+// draw hot areas
+
+// ---
+// */
+
+// /* ==========================================================
+//    IN-MEMORY STATE
+//    This replaces localStorage for the live presentation.
+//    -We use a Map because it's super fast to find/update questions by ID.
+//    -Let variable because we want heap mem to release on socket disconnect.
+// ========================================================== */
+// let liveQuestionsState = new Map();
+
+// /* ==========================================================
+//    COLOR GENERATION (Frontend Only)
+// ========================================================== */
+// const PALETTE = ["#ff3b6b", "#3b82f6", "#10b981", "#f59e0b", "#8b5cf6"];
+
+// function assignRandomColor() {
+//     return PALETTE[Math.floor(Math.random() * PALETTE.length)];
+// }
+
+
+// function getQuestionColor(status) {
+//     // if closed, it's grey. 
+//     // Otherwise, assign a random vibrant color.
+//     if (status === "closed") {
+//         return "#808080"; 
+//     }
+//     return assignRandomColor();
+// }
+
+
+// /* ==========================================================
+//    MEMORY MANAGEMENT ALGORITHMS
+// ========================================================== */
+// // 1. Add or Update a question in memory
+// export function upsertQuestionToMemory(serverQuestion) {
+//     // If we already have it, keep the existing frontend color unless it closed
+//     let frontendColor = getQuestionColor(serverQuestion.status);
+    
+//     if (liveQuestionsState.has(serverQuestion.id) && serverQuestion.status === "open") {
+//         frontendColor = liveQuestionsState.get(serverQuestion.id).frontendColor;
+//     }
+
+//     const memoryQuestion = {
+//         ...serverQuestion,
+//         frontendColor: frontendColor 
+//     };
+
+//     // If it's closed, releasing it from the "rendered" memory.
+//     // we need to decide either delete it entirely, OR keep it but filter it out during render.
+//     // Filtering is safer if Q&A drawer still needs to read it. -- in testing
+//     liveQuestionsState.set(memoryQuestion.id, memoryQuestion);
+// }
+// // 2. Get questions for rendering dots (Open only)
+// export function getActiveQuestionsForPage(pageNumber) {
+//     const activeDots = [];
+    
+//     liveQuestionsState.forEach(question => {
+//         if (question.page === pageNumber && question.status === "open") {
+//             activeDots.push(question);
+//         }
+//     });
+    
+//     return activeDots;
+// }
+// // 3. Clear memory on disconnect
+// export function clearQuestionsMemory() {
+//     liveQuestionsState.clear();
+//     console.log("Memory cleared due to socket disconnect.");
+// }
+
+
+// /*
+// ====================Help Comment! ==================
+// presentation UI relies on exactly four function names:
+
+// createQuestion(questionData)
+
+// getQuestionsForPage(pageNum)
+
+// getAllQuestions()
+
+// updateQuestionStatus(id, newStatus) */
+
+// /* ==========================================================
+//    2. PACKAGING LAYER (Prepares data to go to the server)
+// ========================================================== */
+// /**
+//  * Takes compact coordinate/text data from presentation-manager
+//  * and enriches it with session metadata from local storage.
+//  */
+// function createQuestion(compactData) {
+//     // Safely pull session parameters from local cache
+//     const currentUser = JSON.parse(localStorage.getItem("dlsCurrentUser") || "{}");
+//     const currentSession = JSON.parse(localStorage.getItem("dlsCurrentSession") || "{}");
+
+//     const sessionCode = currentSession.code || currentSession.sessionCode || "";
+//     const userId = currentUser.id || currentUser._id || "";
+    
+//     // This is the clean payload we send to the database via the socket
+//     const networkPayload = {
+//         sessionCode: sessionCode,
+//         userId: userId,
+//         page: compactData.page,
+//         x: compactData.x, // Relative coordinate (0 to 1)
+//         y: compactData.y, // Relative coordinate (0 to 1)
+//         text: compactData.text,
+//         status: "open"
+//     };
+
+//     // Trigger the real transmission via the API/Socket pipeline
+//     if (window.DLS_SOCKET && typeof window.DLS_SOCKET.emit === "function") {
+//         window.DLS_SOCKET.emit("question:create", networkPayload);
+//     } else {
+//         console.warn("Socket connection unavailable. Payload prepared but not transmitted:", networkPayload);
+//     }
+
+//     // NOTICE: We return null or empty because we DO NOT draw the dot locally yet.
+//     // The dot will only be drawn when the server sends back the official confirmation.
+//     return null;
+
+// }
+
+// /* ==========================================================
+//    3. INGESTION LAYER (Receives data back from MongoDB/Sockets)
+// ========================================================== */
+// /**
+//  * Triggered when the socket broadcasts a newly saved or updated 
+//  * question containing a genuine MongoDB _id.
+//  */
+// function upsertQuestionToMemory(serverQuestion) {
+//     const realId = serverQuestion._id || serverQuestion.id;
+    
+//     if (!realId) {
+//         console.error("Sane Guard: Cannot store question without a MongoDB ID", serverQuestion);
+//         return;
+//     }
+
+//     // Assign standard color rules
+//     let frontendColor = serverQuestion.status === "closed" ? "#808080" : assignRandomColor();
+    
+//     // Preserve dot color if it's an existing open question updating its text/state
+//     if (liveQuestionsState.has(realId) && serverQuestion.status === "open") {
+//         frontendColor = liveQuestionsState.get(realId).frontendColor;
+//     }
+
+//     const memoryQuestion = {
+//         ...serverQuestion,
+//         id: realId, // Keep UI compatible with standard 'id' properties
+//         frontendColor: frontendColor
+//     };
+
+//     liveQuestionsState.set(realId, memoryQuestion);
+// }
+
+
+// /* ==========================================================
+//    4. UI LOOKUP METHODS (Required by UI drawing mechanics)
+// ========================================================== */
+// function getQuestionsForPage(pageNumber) {
+//     const activeDots = [];
+//     liveQuestionsState.forEach(question => {
+//         if (question.page === pageNumber && question.status === "open") {
+//             activeDots.push(question);
+//         }
+//     });
+//     return activeDots;
+// }
+
+// function getAllQuestions() {
+//     return Array.from(liveQuestionsState.values());
+// }
+
+
+// function clearQuestionsMemory() {
+//     liveQuestionsState.clear();
+// }
+
+// // Global UI Compatibility Mapping
+// window.createQuestion = createQuestion;
+// window.getQuestionsForPage = getQuestionsForPage;
+// window.getAllQuestions = getAllQuestions;
+// window.updateQuestionStatus = updateQuestionStatus;
+// window.upsertQuestionToMemory = upsertQuestionToMemory;
+// window.clearQuestionsMemory = clearQuestionsMemory;
+// /*============================================THE QUESTION MANAGER - YOTAM ========================*/
+
+
+
 /*
 QUESTION MANAGER:
 
@@ -57,22 +535,7 @@ which page has most Questions;
 where is teh Question Density;
 How many open Questions pressed / answered ?;
 
----
 
-for HEATMAP::
-Question = relative point in screen;
-a lot of close Dots = HeatZone;
-WEXAMPLE:
-questions = [
-  { page: 3, x: 0.42, y: 0.31 },
-  { page: 3, x: 0.43, y: 0.32 },
-  { page: 3, x: 0.44, y: 0.30 }
-]
-
--- if there are a lot of questions in page 3 
--- students didnt understand it probably
-
-------
 Phase 1:
 <STORE>
 
@@ -327,10 +790,7 @@ export function ensurePresentationInStore(questionStore, presentationId, fileNam
 */
 export function createQuestion(questionData) {
     return {
-        id: createQuestionId(),
-
-        type: "question",
-
+        question_id: questionData.question_id || null,
         presentationId: questionData.presentationId || DEFAULT_PRESENTATION_ID,
         fileName: questionData.fileName || null,
 
@@ -340,12 +800,11 @@ export function createQuestion(questionData) {
         y: questionData.y,
 
         text: questionData.text || "",
-        status: questionData.status || "open",
+        status: "open",
 
-        color: questionData.color || "#ff3b6b",
+        
 
-        studentName: questionData.studentName || "Anonymous",
-        isAnonymous: questionData.isAnonymous !== false,
+        
 
         createdAt: new Date().toISOString(),
         updatedAt: null

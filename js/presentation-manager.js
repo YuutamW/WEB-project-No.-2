@@ -249,14 +249,16 @@ async function initPresentationPage() {
     clearActiveTool();
 
     const urlParams = new URLSearchParams(window.location.search);
-    const sessionCode = urlParams.get("sessionCode");
+    const sessionCode = urlParams.get("sessioncode");
 
     if(sessionCode) {
         //  JOIN an existing session
         updateStatus("Joining live session...");
+        console.log(`sessionCode found ! ${sessionCode}`);
         await initializeLiveSession(sessionCode);
     } else {
         // --- CREATING A NEW SESSION (Default Lecturer Flow) ---
+        console.log(`sessionCode NOT found ! `);
         updateStatus("Presentation page ready. Waiting for upload.");
     }
 }
@@ -274,6 +276,7 @@ async function initializeLiveSession(sessionCode) {
         const sessionInfo = await window.DLS_API.getSessionByCode(sessionCode);
         presentationState.session = sessionInfo;
 
+        // checks to see if the session's owner id matches the user id, if not then it's a student
         const isLecturer = sessionInfo.ownerId === currentUserId;
 
         // 2. Adjust UI based on Role
@@ -1050,7 +1053,7 @@ function buildStudentJoinUrl(code) {
         window.location.hostname === "localhost" ||
             window.location.hostname === "127.0.0.1"
             ? window.location.origin + "/"
-            : "https://dynamic-lecture-system.netlify.app/";
+            : "https://yuutamw.github.io/WEB-project-No.-2/";
 
     return (
         baseUrl +
@@ -1285,9 +1288,9 @@ function ensurePageData(pageNumber) {
 }
 
 
-function createId(prefix) {
-    return `${prefix}_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
-}
+// function createId(prefix) {
+//     return `${prefix}_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+// }
 
 
 function saveQuestionPoint(relativePoint, pageNumber, questionText) {
