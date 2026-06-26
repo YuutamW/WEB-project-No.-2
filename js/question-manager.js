@@ -489,6 +489,19 @@ export function ensurePresentationInStore(questionStore, presentationId, fileNam
    y = 0.5 means center of page vertically.
 */
 export function createQuestion(questionData) {
+/* Shift + Click = Save Q Point - create dot obj
+    JSON Q :
+{
+    id: "q_...",
+    type: "question-point",
+    page: 3,
+    x: 0.42,
+    y: 0.31,
+    text: "",
+    status: "open",
+    createdAt: "..."
+}
+*/
     return {
         question_id: questionData.question_id || null,
         presentationId: questionData.presentationId || DEFAULT_PRESENTATION_ID,
@@ -501,10 +514,6 @@ export function createQuestion(questionData) {
 
         text: questionData.text || "",
         status: "open",
-
-        
-
-        
 
         createdAt: new Date().toISOString(),
         updatedAt: null

@@ -1368,35 +1368,6 @@ function saveQuestionPoint(relativePoint, pageNumber, questionText) {
     );
 }
 
-/* Shift + Click = Save Q Point - create dot obj */
-/* JSON Q :
-{
-    id: "q_...",
-    type: "question-point",
-    page: 3,
-    x: 0.42,
-    y: 0.31,
-    text: "",
-    status: "open",
-    createdAt: "..."
-}
-*/
-function createQuestionPoint(relativePoint, pageNumber) {
-    return {
-        id: createId("q"),
-        type: "question-point",
-
-        page: pageNumber,
-
-        x: relativePoint.x,
-        y: relativePoint.y,
-
-        text: "",
-        status: "open",
-
-        createdAt: new Date().toISOString()
-    };
-}
 
 /* ==========================================================
    15. Question Markers
