@@ -142,7 +142,6 @@ function saveCurrentUser(user) {
     );
 }
 
-
 function getRedirectByUser(user) {
     const role = (user.role || "student").toLowerCase();
 
