@@ -140,7 +140,7 @@ function getRedirectByUser(user) {
 
 /* HELPER - Send real Post to Server  --- MOVE TO API    */
 async function registerUserOnServer(registeredPayload) {
-    const response = await fetch(getAuthBackendUrl() + USERS_PATH + "/signup", {
+    const response = await fetch(getDlsBackendUrl() + USERS_PATH + "/signup", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"

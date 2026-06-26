@@ -62,7 +62,6 @@ import { createPdfViewerManager } from "./pdf-viewer.js";
 /* Question manager on DOM layer */
 import {
     createAndSaveQuestion,
-    createPresentationId,
     getQuestionsForPage,
     getQuestionsForPresentation
 } from "./question-manager.js";
@@ -191,7 +190,7 @@ const presentationState = {
     questionMarkerColor: "#ff3b6b",
 
     pendingFile: null,
-    session: null,
+    sessionId: null, //  Set by the server
     sessionTitle: "",
     sessionJoinUrl: "",
 };
@@ -208,6 +207,7 @@ let pendingQuestionDraft = null;
 
 let qaDrawerFilter = "all";
 
+function getSessionId() {return presentationState.sessionId;}
 /* ==========================================================
    2.1 Presentation Data JSON
    Purpose:
@@ -219,7 +219,6 @@ const presentationData = {
     fileName: null,
     currentPage: 1,
     totalPages: 0,
-
     pages: {}
 };
 
@@ -250,9 +249,10 @@ async function initPresentationPage() {
 
     const urlParams = new URLSearchParams(window.location.search);
     const sessionCode = urlParams.get("sessioncode") || urlParams.get("sessionCode");
-
+    
     if (sessionCode) {
         //  JOIN an existing session
+        presentationState.sessionId = sessionCode;
         updateStatus("Joining live session...");
         await initializeLiveSession(sessionCode);
     } else {
@@ -1072,7 +1072,7 @@ async function createLiveSessionForPresentation(file, title) {
         title: session.title || title,
         fileName: file.name,
         ownerId: session.ownerId,
-        presentationId: `session_${code}`
+        sessionId: `session_${code}`
     };
 }
 
@@ -1342,10 +1342,10 @@ function ensurePageData(pageNumber) {
 function saveQuestionPoint(relativePoint, pageNumber, questionText) {
     const pageData = ensurePageData(pageNumber);
 
-    const presentationId = createPresentationId(presentationData.fileName); // adapt this to the current session id in database
+    const sessionId = getSessionId(); // adapt this to the current session id in database
 
     const savedQuestion = createAndSaveQuestion({
-        presentationId: presentationId,
+        sessionId: sessionId,
         fileName: presentationData.fileName,
 
         page: pageNumber,
@@ -1456,10 +1456,10 @@ function renderQuestionsForCurrentPage() {
         return;
     }
 
-    const presentationId = createPresentationId(presentationData.fileName);
+    const sessionId = getSessionId();
     const pageNumber = getActivePageNumber();
 
-    const questions = getQuestionsForPage(presentationId, pageNumber);
+    const questions = getQuestionsForPage(sessionId, pageNumber);
 
     clearQuestionMarkers();
 
@@ -1604,22 +1604,18 @@ function getAllPresentationQuestions() {
    Render saved questions in the side drawer.
 ========================================================== */
 
-function getActivePresentationId() {
-    return createPresentationId(presentationData.fileName);
-}
-
 
 function getQuestionsForDrawer() {
-    const presentationId = getActivePresentationId();
+    const sessionId = getSessionId();
 
     if (qaDrawerFilter === "currentPage") {
         return getQuestionsForPage(
-            presentationId,
+            sessionId,
             getActivePageNumber()
         );
     }
 
-    return getQuestionsForPresentation(presentationId);
+    return getQuestionsForPresentation(sessionId);
 }
 
 
@@ -1729,7 +1725,7 @@ function setQaDrawerFilter(nextFilter) {
 ========================================================== */
 
 function findQuestionById(questionId) {
-    const questions = getQuestionsForPresentation(getActivePresentationId());
+    const questions = getQuestionsForPresentation(getSessionId());
 
     return questions.find(function (question) {
         return question.id === questionId;
@@ -1778,16 +1774,16 @@ function highlightQuestionMarker(questionId) {
    Open Summary Page
    Purpose:
    Move from the active presentation into the questions summary.
-   We pass the presentationId in the URL so summary.js knows
+   We pass the sessionId in the URL so summary.js knows
    which questions to load from localStorage.
 ========================================================== */
 
 function openSummaryPage() {
-    const presentationId =
-        createPresentationId(presentationData.fileName);
+    const sessionId =
+        getSessionId();
 
     window.location.href =
-        `summary.html?presentation=${encodeURIComponent(presentationId)}`;
+        `summary.html?presentation=${encodeURIComponent(sessionId)}`;
 }
 
 /* ==========================================================

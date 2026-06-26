@@ -446,17 +446,7 @@ export function createQuestionId() {
    Example:
    "lecture 1.pdf" -> "lecture-1-pdf"
 */
-export function createPresentationId(fileName) {
-    if (!fileName) {
-        return DEFAULT_PRESENTATION_ID;
-    }
 
-    return fileName
-        .toLowerCase()
-        .trim()
-        .replace(/[^a-z0-9\u0590-\u05ff]+/gi, "-")
-        .replace(/^-+|-+$/g, "");
-}
 
 
 /* ==========================================================
