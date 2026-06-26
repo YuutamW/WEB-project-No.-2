@@ -19,12 +19,14 @@
    Real systems require backend authentication + hashed passwords.
 ========================================================= */
 
+const { getDlsBackendUrl } = require("./Api-dls");
+
 
 /* =========================================================
    1. Constants
    Central paths and localStorage keys.
 ========================================================= */
-const dls_api = require("/dls-api.js");
+const dls_api = getDlsBackendUrl();
 const REGISTERED_USERS_STORAGE_KEY = "dlsRegisteredUsers";
 const CURRENT_USER_STORAGE_KEY = "dlsCurrentUser";
 
