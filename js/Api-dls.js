@@ -178,31 +178,14 @@ const DLS_API = {
     async createQuestion(questionData) {
 
         const currentUser = getCurrentDlsUser();
-
-        const questionPayload = {
-            ...questionData,
-
-            studentId: currentUser?.id || currentUser?._id || null,
-            studentEmail: currentUser?.email || null,
-            studentName: currentUser
-                ? `${currentUser.firstName || ""} ${currentUser.lastName || ""}`.trim()
-                : "Anonymous"
-        };
+        const questionPayload = { ...questionData, studentId: currentUser.id };
 
         const responseData = await sendJsonRequest(
             DLS_CONFIG.ROUTES.QUESTIONS,
-            { method: "POST", body: JSON.stringify(questionPayload) }); return responseData.data;
-    },
-
-    /* UPDATE QUESTION Route: PUT /api/questions/:id */
-    async updateQuestion(questionId, updateData) {
-        const responseData = await sendJsonRequest(
-            `${DLS_CONFIG.ROUTES.QUESTIONS}/${questionId}`,
-            {
-                method: "PUT",
-                body: JSON.stringify(updateData)
-            });
+            { method: "POST", body: JSON.stringify(questionPayload) }); 
+            
         return responseData.data;
+        
     },
 
     /* DELETE QUESTION Route: DELETE /api/questions/:id */
