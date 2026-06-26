@@ -1,62 +1,54 @@
 // Dor Mandel :       ID: 315313825
 // Yotam Weintraub:   ID: 321610859
 // Load PDF.js
-/* ==========================================================
+/* /* ==========================================================
    DLS PRESENTATION MANAGER
-   File: js/presentation-manager.js
-
-   Purpose:
-   - Control the DLS presentation mockup page.
-   - Handle upload behavior.
-   - Handle teacher toolbar visibility.
-   - Handle active tool selection.
-   - Open matching tool options panel.
-   - Handle Stop / Image / Laser basic behavior.
-========================================================== */
-
-
-/* ==========================================================
-   JS MAP
-
-   1. DOM References
-      Get all important HTML elements.
-
-   2. App State
-      Store current file, active tool and tool settings.
-
-   3. Init
-      Start the page and connect all events.
-
-   4. Event Connections
-      Connect buttons, inputs and mouse movement.
-
-   5. File Upload Handling
-      Detect PDF / PPT / PPTX and hide upload panel.
-
-   6. Teacher Controls Visibility
-      Show toolbar when mouse is in lower third.
-
-   7. Tool Selection
-      Change active tool and button highlight.
-
-   8. Tool Options Panel
-      Show Pen / Eraser / Laser options only when needed.
-
-   9. Tool Inputs
-      Save pen, eraser and laser values.
-
-   10. Image Tool
-      Open hidden image picker.
-
-   11. Laser Pointer
-      Show and move the laser pointer.
-
-   12. Stop Presentation
-      Show end screen.
-
-   13. Helpers
-      Small utility functions.
-========================================================== */
+   File: frontEnd/js/presentation-manager.js
+   ----------------------------------------------------------
+   PURPOSE
+   • Load a PDF / PPTX (PDF only for now) and render it with
+     `pdf-viewer.js`.
+   • Run a live-session (teacher) or join an existing one
+     (student) via the DLS_SOCKET and DLS_API helpers.
+   • Provide the teacher-toolbar (pen, eraser, laser, image,
+     settings, switch-presentation) with auto-hide logic.
+   • Store per-page annotation / question data in `presentationData`.
+   • Sync new questions in real-time (socket “questionCreated”).
+   • Render question markers, the Q&A drawer and the
+     summary-overlay.
+   ----------------------------------------------------------
+   HIGH-LEVEL SECTION MAP (keep in sync with the code)
+   1.  DOM REFERENCES – all `document.getElementById(...)` &
+       `querySelectorAll` calls.
+   2.  APP STATE – `presentationState` & `presentationData`
+       (page-wise JSON model).
+   2.1 Presentation-data JSON helpers (`ensurePageData`,
+       `getAllPresentationQuestions`, …).
+   3.  INIT – `initPresentationPage()` + `initializeLiveSession()`.
+   4.  EVENT CONNECTIONS – `connectEvents()` wiring for
+       uploads, toolbar, navigation, socket updates, etc.
+   5.  FILE-UPLOAD HANDLING – `handlePresentationFilePicked`,
+       `startLectureFromPendingFile`, `activatePresentationMode`,
+       etc.
+   6.  TEACHER-CONTROLS VISIBILITY – mouse-zone logic.
+   7.  TOOL SELECTION – `setActiveTool`, button highlights,
+       special-tool actions (settings / image / switch).
+   8.  TOOL-OPTIONS PANEL – show/hide groups, auto-hide timers.
+   9.  TOOL INPUTS – pen, eraser, laser colour/size handling.
+   10. IMAGE TOOL – upload → DOM-layer insertion.
+   11. LASER POINTER – visibility + mouse tracking.
+   12. STOP PRESENTATION – opens the summary overlay.
+   13. PDF PAGE NAVIGATION – next/prev + page-change UI.
+   14. LIVE-SESSION HELPERS – create/join session, QR code,
+       participants list, copy-link, refresh participants.
+   15. QUESTION MARKER FLOW – pointer-down → compose popup →
+       save → render (local + socket sync).
+   16. Q&A DRAWER – filter (all / current page), list rendering.
+   17. SUMMARY OVERLAY – stats, hottest-page, grouped questions.
+   18. UTILITIES – `updateStatus`, `clamp`, relative pointer
+       conversion, etc.
+   ==========================================================
+*/
 /* impord PDF API Viewer */
 import { createPdfViewerManager } from "./pdf-viewer.js";
 /* Question manager on DOM layer */
