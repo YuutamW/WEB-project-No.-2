@@ -488,3 +488,31 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 
+/* =========================================================
+   11. Debug Helpers
+   Purpose:
+   Inspect auth state from DevTools during development.
+========================================================= */
+window.dlsAuthDebug = {
+    loadDemoUsersFromJson,
+    loadRegisteredUsersFromStorage,
+    loadAllUsers,
+    saveRegisteredUsersToStorage
+};
+
+module.exports = {
+    getAuthBackendUrl,
+    isDevAuthMode,
+    isValidEmail,
+    isValidPassword,
+    showMessage,
+    updateEmailIndicator,
+    saveCurrentUser,
+    getRedirectByUser,
+    registerUserOnServer,
+    handleRegisterSubmit,
+    loginUserOnServer,
+    loginUserInDevMode,
+    updateTopDateTime,
+    restoreRememberEmail
+};
