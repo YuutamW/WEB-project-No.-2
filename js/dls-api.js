@@ -1,3 +1,8 @@
+/*  Dor Mandel :       ID: 315313825
+    Yotam Weintraub:   ID: 321610859 
+    Alex Tkachenkov:   ID: 318760543
+*/
+
 
 const DLS_CONFIG = {
     BACKEND_URL: "https://dls-backend-uelx.onrender.com",
@@ -379,6 +384,7 @@ const DLS_API = {
 
         return responseData.data || responseData;
     },
+
     /* FETCH SESSION PDF BLOB
        Route: GET /api/sessions/:code/pdf
        Used by students to download the live presentation.
@@ -505,19 +511,10 @@ const DLS_SOCKET = {
         console.log("DLS socket disconnected by logout");
     },
 
-
 };
 
+// ------------------------------  REVISED -------------------------
 /* GLOBAL EXPORTS - expose helpers to VanillaJS files (other) 
 Other files can use: DLS_API.getQuestions(), DLS_SOCKET.joinPresentation() */
 window.DLS_API = DLS_API;
 window.DLS_SOCKET = DLS_SOCKET;
-
-/* CHAIN OF OPS: 
-PART A CONSOLE -> 
-DLS_API.createQ -> 
-PART B REST_API ->
-BeckendStore -> 
-SocketIO room emit -> 
-PART A Recieves live event */
-

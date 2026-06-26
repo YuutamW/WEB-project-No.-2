@@ -1,5 +1,7 @@
-// Dor Mandel :       ID: 315313825
-// Yotam Weintraub:   ID: 321610859
+/*  Dor Mandel :       ID: 315313825
+    Yotam Weintraub:   ID: 321610859 
+    Alex Tkachenkov:   ID: 318760543
+*/
 /* =========================================================
    DLS AUTH MANAGER — POC VERSION
    ---------------------------------------------------------
@@ -23,86 +25,27 @@
    Central paths and localStorage keys.
 ========================================================= */
 
-const USERS_JSON_PATH = "data/sample-users.json";
+
 const REGISTERED_USERS_STORAGE_KEY = "dlsRegisteredUsers";
 const CURRENT_USER_STORAGE_KEY = "dlsCurrentUser";
-
-/* API LOCALHOST URL
-   Determine if we're running on localhost or production.
-   This is used to switch between local and prod API URLs.
- */
-const AUTH_ENV = {
-    LOCAL_BACKEND_URL: "http://127.0.0.1:3000",
-    PROD_BACKEND_URL: "https://dls-backend-uelx.onrender.com"
-};
 
 const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') 
 ? 'http://localhost:3000' 
 : 'https://dls-backend-uelx.onrender.com';
 
-// function getAuthBackendUrl() {
-//     const params = new URLSearchParams(window.location.search);
-//     const queryMode = params.get("api");
-
-//     if (queryMode === "local" || queryMode === "prod") {
-//         localStorage.setItem("dlsApiMode", queryMode);
-//     }
-
-//     const savedMode = localStorage.getItem("dlsApiMode");
-
-//     if (savedMode === "local") {
-//         return AUTH_ENV.LOCAL_BACKEND_URL;
-//     }
-
-//     return AUTH_ENV.PROD_BACKEND_URL;
-// }
 function getAuthBackendUrl() { return API_BASE; }
-const API_BASE_URL = getAuthBackendUrl();
 
 /* Expose URL to windows */
-window.DLS_AUTH_API_BASE_URL = API_BASE_URL;
+window.DLS_AUTH_API_BASE_URL = getAuthBackendUrl();
 
 /*  DEV MODE */
 function isDevAuthMode() {
     const params = new URLSearchParams(window.location.search);
-
     return (
         params.get("auth") === "dev" ||
         localStorage.getItem("dlsAuthMode") === "dev"
     );
 }
-
-window.DLS_SET_AUTH_MODE = function (mode) {
-    if (mode === "dev") {
-        localStorage.setItem("dlsAuthMode", "dev");
-        location.reload();
-        return;
-    }
-
-    if (mode === "backend") {
-        localStorage.removeItem("dlsAuthMode");
-        location.reload();
-        return;
-    }
-
-    console.warn("Use: DLS_SET_AUTH_MODE('dev') or DLS_SET_AUTH_MODE('backend')");
-};
-
-window.DLS_SET_API_MODE = function (mode) {
-    if (mode === "local" || mode === "prod") {
-        localStorage.setItem("dlsApiMode", mode);
-        location.reload();
-        return;
-    }
-
-    if (mode === "reset") {
-        localStorage.removeItem("dlsApiMode");
-        location.reload();
-        return;
-    }
-
-    console.warn("Use: DLS_SET_API_MODE('local'), DLS_SET_API_MODE('prod'), or DLS_SET_API_MODE('reset')");
-};
 
 const USERS_PATH = "/api/users";
 
@@ -130,17 +73,12 @@ function isValidPassword(password) {
 }
 
 
-function createUserId() {
-    return `user_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
-}
-
 
 /* =========================================================
    3. Message Helpers
    Purpose:
    Show form feedback in one consistent place.
 ========================================================= */
-
 function showMessage(element, type, text) {
     if (!element) {
         return;
@@ -149,7 +87,6 @@ function showMessage(element, type, text) {
     element.className = `form-message ${type}`;
     element.textContent = text;
 }
-
 
 function updateEmailIndicator(input, statusElement, hintElement) {
     const value = input.value.trim();
@@ -186,103 +123,9 @@ function updateEmailIndicator(input, statusElement, hintElement) {
 }
 
 
-/* =========================================================
-   4. JSON + Local Storage User Sources
-   Purpose:
-   Combine fixed demo users and locally registered users.
-========================================================= */
-
-async function loadDemoUsersFromJson() {
-    try {
-        const response = await fetch(USERS_JSON_PATH);
-
-        if (!response.ok) {
-            console.warn("Could not load sample-users.json");
-            return [];
-        }
-
-        const data = await response.json();
-
-        return data.users || [];
-    } catch (error) {
-        console.warn("Failed loading sample users JSON:", error);
-        return [];
-    }
-}
-
-
-function loadRegisteredUsersFromStorage() {
-    const savedUsersJson = localStorage.getItem(REGISTERED_USERS_STORAGE_KEY);
-
-    if (!savedUsersJson) {
-        return [];
-    }
-
-    try {
-        return JSON.parse(savedUsersJson);
-    } catch (error) {
-        console.warn("Registered users localStorage is invalid. Resetting.");
-
-        localStorage.removeItem(REGISTERED_USERS_STORAGE_KEY);
-
-        return [];
-    }
-}
-
-
-function saveRegisteredUsersToStorage(users) {
-    localStorage.setItem(
-        REGISTERED_USERS_STORAGE_KEY,
-        JSON.stringify(users, null, 2)
-    );
-}
-
-
-async function loadAllUsers() {
-    const demoUsers = await loadDemoUsersFromJson();
-    const localUsers = loadRegisteredUsersFromStorage();
-
-    return demoUsers.concat(localUsers);
-}
-
-
-/* =========================================================
-   5. User Matching
-   Purpose:
-   Login only by email + password.
-========================================================= */
-
-async function findMatchingUserByEmail(email, password) {
-    const users = await loadAllUsers();
-
-    const normalizedEmail = email.toLowerCase();
-
-    return users.find(function (user) {
-        if (!user.email) {
-            return false;
-        }
-
-        const userEmail = user.email.toLowerCase();
-
-        return userEmail === normalizedEmail &&
-            user.password === password;
-    });
-}
-
-
-async function isEmailAlreadyRegistered(email) {
-    const users = await loadAllUsers();
-
-    const normalizedEmail = email.toLowerCase();
-
-    return users.some(function (user) {
-        return user.email &&
-            user.email.toLowerCase() === normalizedEmail;
-    });
-}
-
 // Updated to support MongoDB _id as well
 function saveCurrentUser(user) {
+
     const safeUser = {
         id: user.id || user._id || null,
         _id: user._id || user.id || null,
@@ -306,13 +149,12 @@ function getRedirectByUser(user) {
     if (role === "lecturer" || role === "assistant") {
         return "dashboard.html";
     }
-
     return "student-dashboard.html";
 }
 
-/* HELPER - Send real Post to Server */
+/* HELPER - Send real Post to Server  --- MOVE TO API    */
 async function registerUserOnServer(registeredPayload) {
-    const response = await fetch(API_BASE_URL + USERS_PATH + "/signup", {
+    const response = await fetch(getAuthBackendUrl() + USERS_PATH + "/signup", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
@@ -391,21 +233,11 @@ async function handleRegisterSubmit(event) {
         return;
     }
 
-    const alreadyExists = await isEmailAlreadyRegistered(email);
-
-    if (alreadyExists) {
-        showMessage(message, "error", "משתמש עם האימייל הזה כבר קיים.");
-        return;
-    }
-
-
     /* Sends Signup to Backend */
     const registerPayload = {
         firstName: firstName,
         lastName: lastName,
         email: email,
-        // ----DEBUG ---- added username for test purposes
-        username: email,
 
         role: role,
         password: password,
@@ -438,9 +270,9 @@ async function handleRegisterSubmit(event) {
 }
 
 
-/* Helper function to send login request to server --- /api/users/login --- */
+/* function to send login request to server --- /api/users/login --- MOVE TO API! */
 async function loginUserOnServer(email, password) {
-    const response = await fetch(API_BASE_URL + USERS_PATH + "/login", {
+    const response = await fetch(getDlsBackendUrl() + USERS_PATH + "/login", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
@@ -459,7 +291,7 @@ async function loginUserOnServer(email, password) {
 }
 
 /* LOGIN TO LOCAL USER - TESTS AND DEMO  */
-async function loginUserInDevMode(email) {
+function loginUserInDevMode(email) {
     const normalizedEmail = email.toLowerCase();
 
     const role = normalizedEmail.includes("student")
@@ -518,12 +350,8 @@ async function handleLoginSubmit(event) {
     }
 
     try {
-        // const result = await loginUserOnServer(email, password);
-
-        // const matchedUser = result.data;
-        // const userId = matchedUser.id;
         const result = isDevAuthMode()
-            ? await loginUserInDevMode(email)
+            ? loginUserInDevMode(email)
             : await loginUserOnServer(email, password);
 
         const matchedUser = result.data;
@@ -648,21 +476,16 @@ function restoreRememberEmail() {
     if (!rememberEmail) {
         return;
     }
-
     const emailInput = document.querySelector("#loginEmail");
     const rememberMeInput = document.querySelector("#rememberMe");
-
     if (emailInput) {
         emailInput.value = rememberEmail;
     }
-
     if (rememberMeInput) {
         rememberMeInput.checked = true;
     }
-
 }
 
-/* Fixed restoreRememberedEmail() not defined */
 document.addEventListener("DOMContentLoaded", function () {
     restoreRememberEmail();
 });
@@ -673,7 +496,6 @@ document.addEventListener("DOMContentLoaded", function () {
    Purpose:
    Inspect auth state from DevTools during development.
 ========================================================= */
-
 window.dlsAuthDebug = {
     loadDemoUsersFromJson,
     loadRegisteredUsersFromStorage,
