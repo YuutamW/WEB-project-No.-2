@@ -24,14 +24,11 @@
    1. Constants
    Central paths and localStorage keys.
 ========================================================= */
-
-
+const dls_api = require("/dls-api.js");
 const REGISTERED_USERS_STORAGE_KEY = "dlsRegisteredUsers";
 const CURRENT_USER_STORAGE_KEY = "dlsCurrentUser";
 
-const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') 
-? 'http://localhost:3000' 
-: 'https://dls-backend-uelx.onrender.com';
+const API_BASE = dls_api.getDlsBackendUrl();
 
 function getAuthBackendUrl() { return API_BASE; }
 
