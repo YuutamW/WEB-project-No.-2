@@ -37,9 +37,9 @@ function isLocalFrontend() {
     );
 }
 
-const API_BASE = (isLocalFrontend()) 
-? 'http://localhost:3000' 
-: 'https://dls-backend-uelx.onrender.com';
+const API_BASE = (isLocalFrontend())
+    ? 'http://localhost:3000'
+    : 'https://dls-backend-uelx.onrender.com';
 
 function getDlsBackendUrl() { return API_BASE; }
 /* Apply backend URL after helper exists */
@@ -464,7 +464,7 @@ const DLS_SOCKET = {
         });
         return dlsSocketInstance;
     },
-    
+
     /* JOIN PRESENTATION Purpose: Join backend room by presentationId.
      Ex.: presentation:demo-presentation */
     joinPresentation(presentationId) {
@@ -478,7 +478,19 @@ const DLS_SOCKET = {
         socket.emit("presentation:join", { presentationId });
     },
 
-    
+    /* ON SESSION PARTICIPANTS UPDATED
+        Listen when someone joins/leaves a live session.
+    */
+    onSessionParticipantsUpdated(callback) {
+        const socket = this.connect();
+
+        if (!socket) {
+            return;
+        }
+
+        socket.on("session:participants-updated", callback);
+    },
+
     /* ON QUESTION CREATED Purpose: Listen to new question events. */
     onQuestionCreated(callback) {
         const socket = this.connect();
