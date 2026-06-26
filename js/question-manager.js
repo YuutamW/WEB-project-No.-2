@@ -504,7 +504,7 @@ export function createQuestion(questionData) {
 */
     return {
         questionId: questionData.question_id || null,
-        session._id: questionData.presentationId || DEFAULT_PRESENTATION_ID,
+        sessionId: questionData.presentationId || DEFAULT_PRESENTATION_ID,
         fileName: questionData.fileName || null,
 
         page: questionData.page,
