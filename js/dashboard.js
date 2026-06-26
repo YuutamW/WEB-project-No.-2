@@ -1420,13 +1420,3 @@ document.addEventListener("DOMContentLoaded", function () {
 
     //openSettingsFromUrlIfNeeded();// for debug purposes only
 });
-
-// DEBUG ONLY - enable when needed:!
-// window.dlsDashboardDebug = {
-//     getCurrentDashboardUser,
-//     editCurrentUser,
-//     deleteCurrentUser,
-//     openSettingsOverlay,
-//     requestCloseSettingsOverlay
-// };
-
