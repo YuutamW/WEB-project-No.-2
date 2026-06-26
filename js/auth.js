@@ -19,32 +19,20 @@
    Real systems require backend authentication + hashed passwords.
 ========================================================= */
 
-const { getDlsBackendUrl } = require("./Api-dls");
 
 
 /* =========================================================
-   1. Constants
-   Central paths and localStorage keys.
+1. Constants
+Central paths and localStorage keys.
 ========================================================= */
-const dls_api = getDlsBackendUrl();
+
 const REGISTERED_USERS_STORAGE_KEY = "dlsRegisteredUsers";
 const CURRENT_USER_STORAGE_KEY = "dlsCurrentUser";
+const API_BASE = getDlsBackendUrl();
 
-const API_BASE = dls_api.getDlsBackendUrl();
 
-function getAuthBackendUrl() { return API_BASE; }
 
-/* Expose URL to windows */
-window.DLS_AUTH_API_BASE_URL = getAuthBackendUrl();
 
-/*  DEV MODE */
-function isDevAuthMode() {
-    const params = new URLSearchParams(window.location.search);
-    return (
-        params.get("auth") === "dev" ||
-        localStorage.getItem("dlsAuthMode") === "dev"
-    );
-}
 
 const USERS_PATH = "/api/users";
 
@@ -500,8 +488,6 @@ window.dlsAuthDebug = {
 };
 
 module.exports = {
-    getAuthBackendUrl,
-    isDevAuthMode,
     isValidEmail,
     isValidPassword,
     showMessage,
