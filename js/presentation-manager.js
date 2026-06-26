@@ -192,7 +192,8 @@ const presentationState = {
     pendingFile: null,
     sessionId: null, //  Set by the server
     sessionTitle: "",
-    sessionJoinUrl: "",
+    sessionJoinUrl: ""
+
 };
 
 /* --Added Helper Vars-- */
@@ -395,7 +396,7 @@ function connectEvents() {
             return;
         }
 
-        const currentCode = presentationState.session?.code;
+        const currentCode = presentationState.session.code;
         const updatedCode = updatedSession.code || updatedSession.sessionCode;
 
         if (currentCode && updatedCode && currentCode !== updatedCode) {
@@ -624,6 +625,8 @@ async function startLectureFromPendingFile() {
 
         presentationState.session = session;
         presentationState.sessionJoinUrl = buildStudentJoinUrl(session.code);
+        presentationState.sessionId = session.code;
+        presentationState.sessionTitle = sessionTitle;
 
         saveCurrentSessionToLocalStorage(session);
         renderSessionInfo(session);
@@ -1061,11 +1064,9 @@ async function createLiveSessionForPresentation(file, title) {
     const session = await window.DLS_API.createSession(file, title);
 
     const code = session.code;
-
     if (!code) {
         throw new Error("Backend did not return a session code.");
     }
-
     return {
         ...session,
         code: code,
@@ -1224,11 +1225,6 @@ function renderSessionParticipants(session) {
     if (!sessionParticipantsList) {
         return;
     }
-
-    // if (participants.length === 0) {
-    //     sessionParticipantsList.innerHTML = "<p>אין משתתפים עדיין.</p>";
-    //     return;
-    // }
 
     if (participants.length === 0) {
         if (participantsCount > 0) {
