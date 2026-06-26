@@ -32,7 +32,7 @@ const CURRENT_USER_STORAGE_KEY = "dlsCurrentUser";
 const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') 
 ? 'http://localhost:3000' 
 : 'https://dls-backend-uelx.onrender.com';
-
+    
 function getAuthBackendUrl() { return API_BASE; }
 
 /* Expose URL to windows */
@@ -349,11 +349,9 @@ async function handleLoginSubmit(event) {
     }
 
     try {
-        const result = isDevAuthMode()
-            ? loginUserInDevMode(email)
-            : await loginUserOnServer(email, password);
+        const loginResponse =  await loginUserOnServer(email, password);
 
-        const matchedUser = result.data;
+        const matchedUser = loginResponse.data;
 
         saveCurrentUser(matchedUser);
         if (rememberMe)
@@ -489,16 +487,4 @@ document.addEventListener("DOMContentLoaded", function () {
     restoreRememberEmail();
 });
 
-
-/* =========================================================
-   11. Debug Helpers
-   Purpose:
-   Inspect auth state from DevTools during development.
-========================================================= */
-window.dlsAuthDebug = {
-    loadDemoUsersFromJson,
-    loadRegisteredUsersFromStorage,
-    loadAllUsers,
-    saveRegisteredUsersToStorage
-};
 

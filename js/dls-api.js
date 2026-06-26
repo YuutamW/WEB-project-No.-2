@@ -410,8 +410,7 @@ const DLS_API = {
 };
 
 window.DLS_CONFIG = DLS_CONFIG;
-window.DLS_API = DLS_API;
-window.getCurrentDlsUser = getCurrentDlsUser;
+window.getCurrentDlsUser = DLS_API.getCurrentDlsUser;
 
 // only if neccessary:
 window.DLS_BACKEND_URL = DLS_CONFIG.BACKEND_URL;
@@ -518,3 +517,13 @@ const DLS_SOCKET = {
 Other files can use: DLS_API.getQuestions(), DLS_SOCKET.joinPresentation() */
 window.DLS_API = DLS_API;
 window.DLS_SOCKET = DLS_SOCKET;
+
+module.exports = {
+    getDlsBackendUrl,
+    buildApiUrl,
+    isLocalFrontend,
+    isLocalFrontend,
+    sendJsonRequest,
+    buildQueryString,
+    getCurrentDlsUser,
+}
