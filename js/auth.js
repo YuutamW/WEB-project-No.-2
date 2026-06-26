@@ -346,11 +346,9 @@ async function handleLoginSubmit(event) {
     }
 
     try {
-        const result = isDevAuthMode()
-            ? loginUserInDevMode(email)
-            : await loginUserOnServer(email, password);
+        const loginResponse =  await loginUserOnServer(email, password);
 
-        const matchedUser = result.data;
+        const matchedUser = loginResponse.data;
 
         saveCurrentUser(matchedUser);
         if (rememberMe)
