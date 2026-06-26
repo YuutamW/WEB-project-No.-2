@@ -28,7 +28,7 @@ Central paths and localStorage keys.
 
 const REGISTERED_USERS_STORAGE_KEY = "dlsRegisteredUsers";
 const CURRENT_USER_STORAGE_KEY = "dlsCurrentUser";
-// const API_BASE = getDlsBackendUrl();
+// const API_BASE = getDlsBackendUrl(); <---- DOM typeShit!
 
 
 
@@ -475,14 +475,3 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 
-/* =========================================================
-   11. Debug Helpers
-   Purpose:
-   Inspect auth state from DevTools during development.
-========================================================= */
-window.dlsAuthDebug = {
-    loadDemoUsersFromJson,
-    loadRegisteredUsersFromStorage,
-    loadAllUsers,
-    saveRegisteredUsersToStorage
-};

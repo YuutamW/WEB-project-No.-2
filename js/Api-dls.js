@@ -410,7 +410,7 @@ const DLS_API = {
 };
 
 window.DLS_CONFIG = DLS_CONFIG;
-window.getCurrentDlsUser = DLS_API.getCurrentDlsUser;
+window.getCurrentDlsUser = getCurrentDlsUser;
 
 // only if neccessary:
 window.DLS_BACKEND_URL = DLS_CONFIG.BACKEND_URL;
