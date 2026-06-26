@@ -545,7 +545,7 @@ const DLS_SOCKET = {
         if (dlsSocketInstance) {
             return dlsSocketInstance;
         }
-        dlsSocketInstance = io(DLS_CONFIG.BACKEND_URL);
+        dlsSocketInstance = io(API_BASE_URL);
         dlsSocketInstance.on("connect", function () {
             console.log(`DLS socket connected: ${dlsSocketInstance.id}`);
         });
@@ -557,6 +557,7 @@ const DLS_SOCKET = {
         });
         return dlsSocketInstance;
     },
+    
     /* JOIN PRESENTATION Purpose: Join backend room by presentationId.
      Ex.: presentation:demo-presentation */
     joinPresentation(presentationId) {
@@ -564,40 +565,13 @@ const DLS_SOCKET = {
         if (!socket) { return; }
         if (!presentationId) {
             console.warn("Cannot join presentation - missing presentationId");
+            socket.disconnect(); // <-- added this!
             return;
         }
         socket.emit("presentation:join", { presentationId });
     },
 
-    /* --- DEBUG CHECK IF REALLY NEEDED HERE --- */
-    /* JOIN SESSION
-        Route:
-        POST /api/sessions/:code/join
-
-        Used by:
-        student-dashboard.html -> Join session overlay
-
-        Payload:
-        { userId }
-    */
-    // async joinSession(code, payload = {}) {
-    //     const cleanCode = String(code || "").trim();
-
-    //     if (!cleanCode) {
-    //         throw new Error("Missing session code");
-    //     }
-
-    //     const responseData = await sendJsonRequest(
-    //         `${DLS_CONFIG.ROUTES.SESSIONS}/${encodeURIComponent(cleanCode)}/join`,
-    //         {
-    //             method: "POST",
-    //             body: JSON.stringify(payload)
-    //         }
-    //     );
-
-    //     return responseData.data || responseData;
-    // },
-
+    
     /* ON QUESTION CREATED Purpose: Listen to new question events. */
     onQuestionCreated(callback) {
         const socket = this.connect();

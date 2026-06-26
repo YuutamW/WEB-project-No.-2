@@ -249,7 +249,7 @@ async function initPresentationPage() {
     clearActiveTool();
 
     const urlParams = new URLSearchParams(window.location.search);
-    const sessionCode = urlParams.get("sessionCode");
+    const sessionCode = urlParams.get("code");
 
     if(sessionCode) {
         //  JOIN an existing session
@@ -274,6 +274,7 @@ async function initializeLiveSession(sessionCode) {
         const sessionInfo = await window.DLS_API.getSessionByCode(sessionCode);
         presentationState.session = sessionInfo;
 
+        // checks to see if the session's owner id matches the user id, if not then it's a student
         const isLecturer = sessionInfo.ownerId === currentUserId;
 
         // 2. Adjust UI based on Role
@@ -1285,9 +1286,9 @@ function ensurePageData(pageNumber) {
 }
 
 
-function createId(prefix) {
-    return `${prefix}_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
-}
+// function createId(prefix) {
+//     return `${prefix}_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+// }
 
 
 function saveQuestionPoint(relativePoint, pageNumber, questionText) {
