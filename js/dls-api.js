@@ -447,7 +447,7 @@ const DLS_SOCKET = {
         if (dlsSocketInstance) {
             return dlsSocketInstance;
         }
-        dlsSocketInstance = io(API_BASE_URL);
+        dlsSocketInstance = io(getDlsBackendUrl());
         dlsSocketInstance.on("connect", function () {
             console.log(`DLS socket connected: ${dlsSocketInstance.id}`);
         });
