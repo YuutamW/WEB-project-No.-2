@@ -502,3 +502,19 @@ window.dlsAuthDebug = {
     saveRegisteredUsersToStorage
 };
 
+module.exports = {
+    getAuthBackendUrl,
+    isDevAuthMode,
+    isValidEmail,
+    isValidPassword,
+    showMessage,
+    updateEmailIndicator,
+    saveCurrentUser,
+    getRedirectByUser,
+    registerUserOnServer,
+    handleRegisterSubmit,
+    loginUserOnServer,
+    loginUserInDevMode,
+    updateTopDateTime,
+    restoreRememberEmail
+};
