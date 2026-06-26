@@ -251,7 +251,7 @@ async function initPresentationPage() {
     const urlParams = new URLSearchParams(window.location.search);
     const sessionCode = urlParams.get("sessioncode") || urlParams.get("sessionCode");
 
-    if(sessionCode) {
+    if (sessionCode) {
         //  JOIN an existing session
         updateStatus("Joining live session...");
         await initializeLiveSession(sessionCode);
@@ -281,17 +281,17 @@ async function initializeLiveSession(sessionCode) {
         if (!isLecturer) {
             // Student Setup: Hide teacher controls permanently
             const teacherControls = document.getElementById("teacherControls");
-            if(teacherControls) teacherControls.style.display = "none";
+            if (teacherControls) teacherControls.style.display = "none";
             const navControls = document.getElementById("pdfNavigationControls");
             if (navControls) navControls.style.display = "flex";
-                updateStatus("Downloading lecture materials...");
+            updateStatus("Downloading lecture materials...");
         } else {
             updateStatus("Reconnecting to your session...");
         }
 
         // 3. Download the PDF Blob from the backend
         const pdfBlob = await window.DLS_API.fetchSessionPdfAsBlob(sessionCode);
-        
+
         // 4. Convert Blob to a File-like object so pdfViewerManager accepts it
         const pdfFile = new File([pdfBlob], sessionInfo.title + ".pdf", { type: "application/pdf" });
         presentationState.currentFile = pdfFile;
@@ -308,8 +308,8 @@ async function initializeLiveSession(sessionCode) {
             setupLiveSocketListeners();
         }
         updateStatus(`Connected to room: ${sessionCode}`);
-    
-    }catch (error) {
+
+    } catch (error) {
         console.error("Failed to join live session:", error);
         updateStatus("Error joining session. Please check the code and try again.");
     }
@@ -330,7 +330,7 @@ function setupLiveSocketListeners() {
     window.DLS_SOCKET.onQuestionCreated(function (newQuestion) {
         // 1. Inject the incoming question into our local page data
         const pageData = ensurePageData(newQuestion.page);
-        
+
         // Prevent duplicates just in case the sender also receives their own broadcast
         const exists = pageData.questions.some(q => q.id === newQuestion.id);
         if (!exists) {
@@ -345,7 +345,7 @@ function setupLiveSocketListeners() {
 
         // 3. Always update the Q&A side drawer count and list
         renderQaDrawer();
-        
+
         // Optional: Show a subtle toast/status update
         updateStatus(`New question added on page ${newQuestion.page}`);
     });
@@ -387,6 +387,36 @@ function connectEvents() {
             const selectedTool = button.dataset.tool;
             setActiveTool(selectedTool);
         });
+    });
+
+    /* Listener for Participants Number Update */
+    window.DLS_SOCKET.onSessionParticipantsUpdated(function (updatedSession) {
+        if (!updatedSession) {
+            return;
+        }
+
+        const currentCode = presentationState.session?.code;
+        const updatedCode = updatedSession.code || updatedSession.sessionCode;
+
+        if (currentCode && updatedCode && currentCode !== updatedCode) {
+            return;
+        }
+
+        presentationState.session = {
+            ...presentationState.session,
+            ...updatedSession
+        };
+
+        saveCurrentSessionToLocalStorage(presentationState.session);
+
+        renderSessionParticipants(presentationState.session);
+
+        updateStatus(
+            `Participants updated: ${presentationState.session.participantsCount ||
+            presentationState.session.participants?.length ||
+            0
+            }`
+        );
     });
 
     /* Tool option inputs */
@@ -591,7 +621,7 @@ async function startLectureFromPendingFile() {
 
     try {
         const session = await createLiveSessionForPresentation(file, sessionTitle);
-        
+
         presentationState.session = session;
         presentationState.sessionJoinUrl = buildStudentJoinUrl(session.code);
 
@@ -1060,6 +1090,7 @@ function buildStudentJoinUrl(code) {
     );
 }
 
+// Check if Needed ----LOCAL----
 function saveCurrentSessionToLocalStorage(session) {
     const storageKey =
         window.DLS_CONFIG?.STORAGE_KEYS?.CURRENT_SESSION ||
@@ -1181,6 +1212,11 @@ function normalizeSessionParticipants(session) {
 function renderSessionParticipants(session) {
     const participants = normalizeSessionParticipants(session);
 
+    const participantsCount =
+        Number(session.participantsCount) ||
+        Number(session.participantCount) ||
+        participants.length;
+
     if (sessionParticipantsCount) {
         sessionParticipantsCount.textContent = String(participants.length);
     }
@@ -1189,7 +1225,18 @@ function renderSessionParticipants(session) {
         return;
     }
 
+    // if (participants.length === 0) {
+    //     sessionParticipantsList.innerHTML = "<p>אין משתתפים עדיין.</p>";
+    //     return;
+    // }
+
     if (participants.length === 0) {
+        if (participantsCount > 0) {
+            sessionParticipantsList.innerHTML =
+                `<p>${participantsCount} משתתפים מחוברים. פרטי שמות עדיין לא חוזרים מהשרת.</p>`;
+            return;
+        }
+
         sessionParticipantsList.innerHTML = "<p>אין משתתפים עדיין.</p>";
         return;
     }
@@ -1251,6 +1298,7 @@ async function refreshSessionParticipants() {
 function updateStatus(message) {
     presentationStatusText.textContent = message;
 }
+
 
 /* ==========================================================
    Active Page Helper
