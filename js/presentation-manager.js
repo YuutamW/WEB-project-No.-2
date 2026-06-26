@@ -1,68 +1,59 @@
 // Dor Mandel :       ID: 315313825
 // Yotam Weintraub:   ID: 321610859
 // Load PDF.js
-/* ==========================================================
+/* /* ==========================================================
    DLS PRESENTATION MANAGER
-   File: js/presentation-manager.js
-
-   Purpose:
-   - Control the DLS presentation mockup page.
-   - Handle upload behavior.
-   - Handle teacher toolbar visibility.
-   - Handle active tool selection.
-   - Open matching tool options panel.
-   - Handle Stop / Image / Laser basic behavior.
-========================================================== */
-
-
-/* ==========================================================
-   JS MAP
-
-   1. DOM References
-      Get all important HTML elements.
-
-   2. App State
-      Store current file, active tool and tool settings.
-
-   3. Init
-      Start the page and connect all events.
-
-   4. Event Connections
-      Connect buttons, inputs and mouse movement.
-
-   5. File Upload Handling
-      Detect PDF / PPT / PPTX and hide upload panel.
-
-   6. Teacher Controls Visibility
-      Show toolbar when mouse is in lower third.
-
-   7. Tool Selection
-      Change active tool and button highlight.
-
-   8. Tool Options Panel
-      Show Pen / Eraser / Laser options only when needed.
-
-   9. Tool Inputs
-      Save pen, eraser and laser values.
-
-   10. Image Tool
-      Open hidden image picker.
-
-   11. Laser Pointer
-      Show and move the laser pointer.
-
-   12. Stop Presentation
-      Show end screen.
-
-   13. Helpers
-      Small utility functions.
-========================================================== */
+   File: frontEnd/js/presentation-manager.js
+   ----------------------------------------------------------
+   PURPOSE
+   • Load a PDF / PPTX (PDF only for now) and render it with
+     `pdf-viewer.js`.
+   • Run a live-session (teacher) or join an existing one
+     (student) via the DLS_SOCKET and DLS_API helpers.
+   • Provide the teacher-toolbar (pen, eraser, laser, image,
+     settings, switch-presentation) with auto-hide logic.
+   • Store per-page annotation / question data in `presentationData`.
+   • Sync new questions in real-time (socket “questionCreated”).
+   • Render question markers, the Q&A drawer and the
+     summary-overlay.
+   ----------------------------------------------------------
+   HIGH-LEVEL SECTION MAP (keep in sync with the code)
+   1.  DOM REFERENCES – all `document.getElementById(...)` &
+       `querySelectorAll` calls.
+   2.  APP STATE – `presentationState` & `presentationData`
+       (page-wise JSON model).
+   2.1 Presentation-data JSON helpers (`ensurePageData`,
+       `getAllPresentationQuestions`, …).
+   3.  INIT – `initPresentationPage()` + `initializeLiveSession()`.
+   4.  EVENT CONNECTIONS – `connectEvents()` wiring for
+       uploads, toolbar, navigation, socket updates, etc.
+   5.  FILE-UPLOAD HANDLING – `handlePresentationFilePicked`,
+       `startLectureFromPendingFile`, `activatePresentationMode`,
+       etc.
+   6.  TEACHER-CONTROLS VISIBILITY – mouse-zone logic.
+   7.  TOOL SELECTION – `setActiveTool`, button highlights,
+       special-tool actions (settings / image / switch).
+   8.  TOOL-OPTIONS PANEL – show/hide groups, auto-hide timers.
+   9.  TOOL INPUTS – pen, eraser, laser colour/size handling.
+   10. IMAGE TOOL – upload → DOM-layer insertion.
+   11. LASER POINTER – visibility + mouse tracking.
+   12. STOP PRESENTATION – opens the summary overlay.
+   13. PDF PAGE NAVIGATION – next/prev + page-change UI.
+   14. LIVE-SESSION HELPERS – create/join session, QR code,
+       participants list, copy-link, refresh participants.
+   15. QUESTION MARKER FLOW – pointer-down → compose popup →
+       save → render (local + socket sync).
+   16. Q&A DRAWER – filter (all / current page), list rendering.
+   17. SUMMARY OVERLAY – stats, hottest-page, grouped questions.
+   18. UTILITIES – `updateStatus`, `clamp`, relative pointer
+       conversion, etc.
+   ==========================================================
+*/
 /* impord PDF API Viewer */
 import { createPdfViewerManager } from "./pdf-viewer.js";
 /* Question manager on DOM layer */
 import {
     createAndSaveQuestion,
-    createPresentationId,
     getQuestionsForPage,
     getQuestionsForPresentation
 } from "./question-manager.js";
@@ -191,9 +182,10 @@ const presentationState = {
     questionMarkerColor: "#ff3b6b",
 
     pendingFile: null,
-    session: null,
+    sessionId: null, //  Set by the server
     sessionTitle: "",
-    sessionJoinUrl: "",
+    sessionJoinUrl: ""
+
 };
 
 /* --Added Helper Vars-- */
@@ -208,6 +200,7 @@ let pendingQuestionDraft = null;
 
 let qaDrawerFilter = "all";
 
+function getSessionId() {return presentationState.sessionId;}
 /* ==========================================================
    2.1 Presentation Data JSON
    Purpose:
@@ -219,7 +212,6 @@ const presentationData = {
     fileName: null,
     currentPage: 1,
     totalPages: 0,
-
     pages: {}
 };
 
@@ -250,9 +242,10 @@ async function initPresentationPage() {
 
     const urlParams = new URLSearchParams(window.location.search);
     const sessionCode = urlParams.get("sessioncode") || urlParams.get("sessionCode");
-
-    if(sessionCode) {
+    
+    if (sessionCode) {
         //  JOIN an existing session
+        presentationState.sessionId = sessionCode;
         updateStatus("Joining live session...");
         await initializeLiveSession(sessionCode);
     } else {
@@ -281,17 +274,17 @@ async function initializeLiveSession(sessionCode) {
         if (!isLecturer) {
             // Student Setup: Hide teacher controls permanently
             const teacherControls = document.getElementById("teacherControls");
-            if(teacherControls) teacherControls.style.display = "none";
+            if (teacherControls) teacherControls.style.display = "none";
             const navControls = document.getElementById("pdfNavigationControls");
             if (navControls) navControls.style.display = "flex";
-                updateStatus("Downloading lecture materials...");
+            updateStatus("Downloading lecture materials...");
         } else {
             updateStatus("Reconnecting to your session...");
         }
 
         // 3. Download the PDF Blob from the backend
         const pdfBlob = await window.DLS_API.fetchSessionPdfAsBlob(sessionCode);
-        
+
         // 4. Convert Blob to a File-like object so pdfViewerManager accepts it
         const pdfFile = new File([pdfBlob], sessionInfo.title + ".pdf", { type: "application/pdf" });
         presentationState.currentFile = pdfFile;
@@ -308,8 +301,8 @@ async function initializeLiveSession(sessionCode) {
             setupLiveSocketListeners();
         }
         updateStatus(`Connected to room: ${sessionCode}`);
-    
-    }catch (error) {
+
+    } catch (error) {
         console.error("Failed to join live session:", error);
         updateStatus("Error joining session. Please check the code and try again.");
     }
@@ -330,7 +323,7 @@ function setupLiveSocketListeners() {
     window.DLS_SOCKET.onQuestionCreated(function (newQuestion) {
         // 1. Inject the incoming question into our local page data
         const pageData = ensurePageData(newQuestion.page);
-        
+
         // Prevent duplicates just in case the sender also receives their own broadcast
         const exists = pageData.questions.some(q => q.id === newQuestion.id);
         if (!exists) {
@@ -345,7 +338,7 @@ function setupLiveSocketListeners() {
 
         // 3. Always update the Q&A side drawer count and list
         renderQaDrawer();
-        
+
         // Optional: Show a subtle toast/status update
         updateStatus(`New question added on page ${newQuestion.page}`);
     });
@@ -387,6 +380,36 @@ function connectEvents() {
             const selectedTool = button.dataset.tool;
             setActiveTool(selectedTool);
         });
+    });
+
+    /* Listener for Participants Number Update */
+    window.DLS_SOCKET.onSessionParticipantsUpdated(function (updatedSession) {
+        if (!updatedSession) {
+            return;
+        }
+
+        const currentCode = presentationState.session.code;
+        const updatedCode = updatedSession.code || updatedSession.sessionCode;
+
+        if (currentCode && updatedCode && currentCode !== updatedCode) {
+            return;
+        }
+
+        presentationState.session = {
+            ...presentationState.session,
+            ...updatedSession
+        };
+
+        saveCurrentSessionToLocalStorage(presentationState.session);
+
+        renderSessionParticipants(presentationState.session);
+
+        updateStatus(
+            `Participants updated: ${presentationState.session.participantsCount ||
+            presentationState.session.participants?.length ||
+            0
+            }`
+        );
     });
 
     /* Tool option inputs */
@@ -591,9 +614,11 @@ async function startLectureFromPendingFile() {
 
     try {
         const session = await createLiveSessionForPresentation(file, sessionTitle);
-        
+
         presentationState.session = session;
         presentationState.sessionJoinUrl = buildStudentJoinUrl(session.code);
+        presentationState.sessionId = session.code;
+        presentationState.sessionTitle = sessionTitle;
 
         saveCurrentSessionToLocalStorage(session);
         renderSessionInfo(session);
@@ -1031,18 +1056,16 @@ async function createLiveSessionForPresentation(file, title) {
     const session = await window.DLS_API.createSession(file, title);
 
     const code = session.code;
-
     if (!code) {
         throw new Error("Backend did not return a session code.");
     }
-
     return {
         ...session,
         code: code,
         title: session.title || title,
         fileName: file.name,
         ownerId: session.ownerId,
-        presentationId: `session_${code}`
+        sessionId: `session_${code}`
     };
 }
 
@@ -1060,6 +1083,7 @@ function buildStudentJoinUrl(code) {
     );
 }
 
+// Check if Needed ----LOCAL----
 function saveCurrentSessionToLocalStorage(session) {
     const storageKey =
         window.DLS_CONFIG?.STORAGE_KEYS?.CURRENT_SESSION ||
@@ -1181,6 +1205,11 @@ function normalizeSessionParticipants(session) {
 function renderSessionParticipants(session) {
     const participants = normalizeSessionParticipants(session);
 
+    const participantsCount =
+        Number(session.participantsCount) ||
+        Number(session.participantCount) ||
+        participants.length;
+
     if (sessionParticipantsCount) {
         sessionParticipantsCount.textContent = String(participants.length);
     }
@@ -1190,6 +1219,12 @@ function renderSessionParticipants(session) {
     }
 
     if (participants.length === 0) {
+        if (participantsCount > 0) {
+            sessionParticipantsList.innerHTML =
+                `<p>${participantsCount} משתתפים מחוברים. פרטי שמות עדיין לא חוזרים מהשרת.</p>`;
+            return;
+        }
+
         sessionParticipantsList.innerHTML = "<p>אין משתתפים עדיין.</p>";
         return;
     }
@@ -1252,6 +1287,7 @@ function updateStatus(message) {
     presentationStatusText.textContent = message;
 }
 
+
 /* ==========================================================
    Active Page Helper
    Purpose:
@@ -1294,10 +1330,10 @@ function ensurePageData(pageNumber) {
 function saveQuestionPoint(relativePoint, pageNumber, questionText) {
     const pageData = ensurePageData(pageNumber);
 
-    const presentationId = createPresentationId(presentationData.fileName);
+    const sessionId = getSessionId(); // adapt this to the current session id in database
 
     const savedQuestion = createAndSaveQuestion({
-        presentationId: presentationId,
+        sessionId: sessionId,
         fileName: presentationData.fileName,
 
         page: pageNumber,
@@ -1408,10 +1444,10 @@ function renderQuestionsForCurrentPage() {
         return;
     }
 
-    const presentationId = createPresentationId(presentationData.fileName);
+    const sessionId = getSessionId();
     const pageNumber = getActivePageNumber();
 
-    const questions = getQuestionsForPage(presentationId, pageNumber);
+    const questions = getQuestionsForPage(sessionId, pageNumber);
 
     clearQuestionMarkers();
 
@@ -1556,22 +1592,18 @@ function getAllPresentationQuestions() {
    Render saved questions in the side drawer.
 ========================================================== */
 
-function getActivePresentationId() {
-    return createPresentationId(presentationData.fileName);
-}
-
 
 function getQuestionsForDrawer() {
-    const presentationId = getActivePresentationId();
+    const sessionId = getSessionId();
 
     if (qaDrawerFilter === "currentPage") {
         return getQuestionsForPage(
-            presentationId,
+            sessionId,
             getActivePageNumber()
         );
     }
 
-    return getQuestionsForPresentation(presentationId);
+    return getQuestionsForPresentation(sessionId);
 }
 
 
@@ -1681,7 +1713,7 @@ function setQaDrawerFilter(nextFilter) {
 ========================================================== */
 
 function findQuestionById(questionId) {
-    const questions = getQuestionsForPresentation(getActivePresentationId());
+    const questions = getQuestionsForPresentation(getSessionId());
 
     return questions.find(function (question) {
         return question.id === questionId;
@@ -1730,16 +1762,16 @@ function highlightQuestionMarker(questionId) {
    Open Summary Page
    Purpose:
    Move from the active presentation into the questions summary.
-   We pass the presentationId in the URL so summary.js knows
+   We pass the sessionId in the URL so summary.js knows
    which questions to load from localStorage.
 ========================================================== */
 
 function openSummaryPage() {
-    const presentationId =
-        createPresentationId(presentationData.fileName);
+    const sessionId =
+        getSessionId();
 
     window.location.href =
-        `summary.html?presentation=${encodeURIComponent(presentationId)}`;
+        `summary.html?presentation=${encodeURIComponent(sessionId)}`;
 }
 
 /* ==========================================================
