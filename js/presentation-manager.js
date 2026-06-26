@@ -249,7 +249,7 @@ async function initPresentationPage() {
     clearActiveTool();
 
     const urlParams = new URLSearchParams(window.location.search);
-    const sessionCode = urlParams.get("sessioncode");
+    const sessionCode = urlParams.get("sessioncode") || urlParams.get("sessionCode");
 
     if(sessionCode) {
         //  JOIN an existing session
