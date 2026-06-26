@@ -36,24 +36,27 @@ const AUTH_ENV = {
     PROD_BACKEND_URL: "https://dls-backend-uelx.onrender.com"
 };
 
+const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') 
+? 'http://localhost:3000' 
+: 'https://dls-backend-uelx.onrender.com';
 
-function getAuthBackendUrl() {
-    const params = new URLSearchParams(window.location.search);
-    const queryMode = params.get("api");
+// function getAuthBackendUrl() {
+//     const params = new URLSearchParams(window.location.search);
+//     const queryMode = params.get("api");
 
-    if (queryMode === "local" || queryMode === "prod") {
-        localStorage.setItem("dlsApiMode", queryMode);
-    }
+//     if (queryMode === "local" || queryMode === "prod") {
+//         localStorage.setItem("dlsApiMode", queryMode);
+//     }
 
-    const savedMode = localStorage.getItem("dlsApiMode");
+//     const savedMode = localStorage.getItem("dlsApiMode");
 
-    if (savedMode === "local") {
-        return AUTH_ENV.LOCAL_BACKEND_URL;
-    }
+//     if (savedMode === "local") {
+//         return AUTH_ENV.LOCAL_BACKEND_URL;
+//     }
 
-    return AUTH_ENV.PROD_BACKEND_URL;
-}
-
+//     return AUTH_ENV.PROD_BACKEND_URL;
+// }
+function getAuthBackendUrl() { return API_BASE; }
 const API_BASE_URL = getAuthBackendUrl();
 
 /* Expose URL to windows */

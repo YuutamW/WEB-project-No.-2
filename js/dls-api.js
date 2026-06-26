@@ -96,23 +96,45 @@ function isLocalFrontend() {
 //         : DLS_ENV.PROD_BACKEND_URL;
 // }
 
-function getDlsBackendUrl() {
-    const params = new URLSearchParams(window.location.search);
-    const queryMode = params.get("api");
+// function getDlsBackendUrl(devArg = false) {
 
-    if (queryMode === "local" || queryMode === "prod") {
-        localStorage.setItem("dlsApiMode", queryMode);
-    }
+//     const params = new URLSearchParams(window.location.search);
+//     if (devArgs) {
+//         if (params.get("api") === "local") {
+//             return DLS_ENV.LOCAL_BACKEND_URL;
+//         }
 
-    const savedMode = localStorage.getItem("dlsApiMode");
+//         if (params.get("api") === "prod") {
+//             return DLS_ENV.PROD_BACKEND_URL;
+//         }
 
-    if (savedMode === "local") {
-        return DLS_ENV.LOCAL_BACKEND_URL;
-    }
+//         // Force production backend for now
+//         // return DLS_ENV.PROD_BACKEND_URL;
 
-    return DLS_ENV.PROD_BACKEND_URL;
-}
+//         return isLocalFrontend()
+//             ? DLS_ENV.LOCAL_BACKEND_URL
+//             : DLS_ENV.PROD_BACKEND_URL;
+//     } else {
+//         const queryMode = params.get("api");
 
+//         if (queryMode === "local" || queryMode === "prod") {
+//             localStorage.setItem("dlsApiMode", queryMode);
+//         }
+
+//         const savedMode = localStorage.getItem("dlsApiMode");
+
+//         if (savedMode === "local") {
+//             return DLS_ENV.LOCAL_BACKEND_URL;
+//         }
+
+//         return DLS_ENV.PROD_BACKEND_URL;
+//     }
+// }
+const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') 
+? 'http://localhost:3000' 
+: 'https://dls-backend-uelx.onrender.com';
+
+function getDlsBackendUrl() { return API_BASE; }
 /* Apply backend URL after helper exists */
 DLS_CONFIG.BACKEND_URL = getDlsBackendUrl();
 

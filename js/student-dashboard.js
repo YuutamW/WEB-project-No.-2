@@ -38,7 +38,7 @@ const STUDENT_DASHBOARD_CONFIG = {
 
     ROUTES: {
         LOGIN: "login.html",
-        PRESENTATION: "presentetion.html"
+        PRESENTATION: "presentation.html"
     },
 
     SELECTORS: {
@@ -577,7 +577,7 @@ async function loadStudentDashboard() {
 //     }
 
 //     joinButton.addEventListener("click", function () {
-//         window.location.href = "presentetion.html";
+//         window.location.href = "presentation.html";
 //     });
 // }
 
@@ -1619,10 +1619,7 @@ function renderStudentSessionCards(container, sessions) {
 
         const card = document.createElement("a");
 
-        card.href =
-            "session-landing.html?code=" +
-            encodeURIComponent(sessionCode);
-
+        card.href = '#';
         card.className = "session-card";
 
         card.innerHTML = `
@@ -1636,6 +1633,19 @@ function renderStudentSessionCards(container, sessions) {
 
         card.querySelector(".session-card__title").textContent = sessionTitle;
         card.querySelector(".session-card__date").textContent = sessionDate;
+
+        // Wiring up the click event to trigger joinSessionByCode 
+        card.addEventListener("click", async function (event) {
+            event.preventDefault();
+            
+            try {
+                await joinSessionByCode(sessionCode);
+            } catch (error) {
+                console.error("Failed to join session from card:", error);
+                // Fallback alert since the card isn't tied to the form feedback UI
+                alert(error.message || "הצטרפות לסשן נכשלה.");
+            }
+        });
 
         fragment.appendChild(card);
     });
