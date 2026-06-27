@@ -33,11 +33,11 @@ const DLS_CONFIG = {
 function isLocalFrontend() {
     return (
         window.location.hostname === "localhost" ||
-        window.location.hostname === "127.0.0.1" ||
+        window.location.hostname === "127.0.0.1" 
         // Added for internal testing Streaming data:
-        host.startsWith("192.168.") ||
-        host.startsWith("10.") ||
-        host.startsWith("172.")
+        // host.startsWith("192.168.") ||
+        // host.startsWith("10.") ||
+        // host.startsWith("172.")
     );
 }
 
