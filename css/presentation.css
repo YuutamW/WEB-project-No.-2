@@ -3086,3 +3086,19 @@ body:has(.presentation-page.is-waiting-upload) {
 .session-room-badge[hidden] {
     display: none !important;
 }
+
+/* LOCATRION FIX: Student Bar on Presentation */
+.teacher-controls[data-role="student"] {
+    justify-content: center;
+}
+
+@media (max-width: 700px) {
+    .teacher-controls {
+        left: 50%;
+        right: auto;
+        transform: translateX(-50%);
+        width: min(92vw, 520px);
+        justify-content: center;
+        overflow-x: auto;
+    }
+}

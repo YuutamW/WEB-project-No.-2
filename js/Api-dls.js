@@ -33,7 +33,7 @@ const DLS_CONFIG = {
 function isLocalFrontend() {
     return (
         window.location.hostname === "localhost" ||
-        window.location.hostname === "127.0.0.1" 
+        window.location.hostname === "127.0.0.1"
         // Added for internal testing Streaming data:
         // host.startsWith("192.168.") ||
         // host.startsWith("10.") ||
@@ -409,9 +409,9 @@ const DLS_API = {
         const userId = currentUser?.id || currentUser?._id;
 
         const responseData = await sendJsonRequest(
-            `${DLS_CONFIG.ROUTES.SESSIONS}/${encodeURIComponent(cleanCode)}`,
+            `${DLS_CONFIG.ROUTES.SESSIONS}/${encodeURIComponent(cleanCode)}/end`,
             {
-                method: "DELETE",
+                method: "POST",
                 headers: userId
                     ? {
                         "x-user-id": userId
@@ -608,6 +608,23 @@ const DLS_SOCKET = {
         dlsSocketInstance = null;
 
         console.log("DLS socket disconnected by logout");
+    },
+    /* Session End - terminate them all... */
+    async endSession(code) {
+        const cleanCode = String(code || "").trim();
+
+        if (!cleanCode) {
+            throw new Error("Missing session code.");
+        }
+
+        const responseData = await sendJsonRequest(
+            `${DLS_CONFIG.ROUTES.SESSIONS}/${encodeURIComponent(cleanCode)}/end`,
+            {
+                method: "POST"
+            }
+        );
+
+        return responseData.data || responseData.session || responseData;
     },
 
 };

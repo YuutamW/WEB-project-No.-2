@@ -598,6 +598,32 @@ function handleIncomingSocketQuestion(newQuestion) {
     updateStatus(`New question added on page ${savedQuestion.page}`);
 }
 
+// added session ender for all when lecturer finish:
+function handleSessionEnded(sessionData) {
+    console.log("SESSION ENDED EVENT:", sessionData);
+
+    const endedCode = sessionData?.code || sessionData?.sessionId;
+    const currentCode = getSessionId();
+
+    if (endedCode && currentCode && String(endedCode) !== String(currentCode)) {
+        return;
+    }
+
+    localStorage.removeItem("dlsCurrentSession");
+
+    updateStatus("Session ended.");
+
+    const currentUser = getCurrentDlsUser ? getCurrentDlsUser() : null;
+    const role = String(currentUser?.role || presentationState.currentRole || "").toLowerCase();
+
+    if (role === "student") {
+        window.location.href = "student-dashboard.html";
+        return;
+    }
+
+    window.location.href = "dashboard.html";
+}
+
 // if connected after added questions - so it can be seen also:
 async function loadSessionQuestionsFromServer() {
     const sessionId = getSessionId();
@@ -1670,6 +1696,31 @@ async function leaveCurrentSession() {
     }
 
     window.location.href = "student-dashboard.html";
+}
+
+// End Session FOR ALL!
+async function endCurrentSessionForEveryone() {
+    const sessionCode = getSessionId();
+
+    if (!sessionCode) {
+        updateStatus("No active session to end.");
+        return;
+    }
+
+    try {
+        updateStatus("Ending session...");
+
+        if (window.DLS_API?.endSession) {
+            await window.DLS_API.endSession(sessionCode);
+        }
+
+        localStorage.removeItem("dlsCurrentSession");
+
+        window.location.href = "dashboard.html";
+    } catch (error) {
+        console.error("Failed to end session:", error);
+        updateStatus("Failed to end session.");
+    }
 }
 
 
