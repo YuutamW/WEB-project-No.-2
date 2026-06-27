@@ -393,7 +393,8 @@ async function initializeLiveSession(sessionCode) {
             updateStatus("Downloading lecture materials...");
         } else {
             setPresentationRole("lecturer");
-            renderSessionInfo(sessionInfo);
+            //renderSessionInfo(sessionInfo);
+            renderSessionInfo(presentationState.session);
             updateStatus("Reconnecting to your session...");
         }
 
@@ -412,8 +413,10 @@ async function initializeLiveSession(sessionCode) {
 
         // 7. Join the Socket.IO room for real-time updates
         if (window.DLS_SOCKET) {
-            window.DLS_SOCKET.joinPresentation(`session_${sessionCode}`);
+            // window.DLS_SOCKET.joinPresentation(`session_${sessionCode}`);
+            window.DLS_SOCKET.joinPresentation(sessionCode);
             setupLiveSocketListeners();
+            await loadSessionQuestionsFromServer();
         }
         updateStatus(`Connected to room: ${sessionCode}`);
 
@@ -434,32 +437,110 @@ function setupLiveSocketListeners() {
         return;
     }
 
-    // Listen for new questions arriving from the server
-    window.DLS_SOCKET.onQuestionCreated(function (newQuestion) {
-        // 1. Inject the incoming question into our local page data
-        const pageData = ensurePageData(newQuestion.page);
 
-        // Prevent duplicates just in case the sender also receives their own broadcast
-        const exists = pageData.questions.some(q => q.id === newQuestion.id);
+    // Listen for new questions arriving from the server
+    // window.DLS_SOCKET.onQuestionCreated1(function (newQuestion) {
+    //     // 1. Inject the incoming question into our local page data
+    //     const pageData = ensurePageData(newQuestion.page);
+
+    //     // Prevent duplicates just in case the sender also receives their own broadcast
+    //     const exists = pageData.questions.some(q => q.id === newQuestion.id);
+    //     if (!exists) {
+    //         pageData.questions.push(newQuestion);
+    //     }
+
+    //     // 2. Check if the user is currently looking at the page where the question was dropped
+    //     if (getActivePageNumber() === newQuestion.page) {
+    //         // If yes, re-render the dots so the new one pops up instantly!
+    //         renderQuestionsForCurrentPage();
+    //     }
+
+    //     // 3. Always update the Q&A side drawer count and list
+    //     renderQaDrawer();
+
+    //     // Optional: Show a subtle toast/status update
+    //     updateStatus(`New question added on page ${newQuestion.page}`);
+    // });
+
+    window.DLS_SOCKET.onQuestionCreated(function (newQuestion) {
+        const sessionId = getSessionId();
+
+        const savedQuestion = createAndSaveQuestion({
+            ...newQuestion,
+            id: newQuestion.id || newQuestion._id || newQuestion.questionId,
+            code: newQuestion.code || sessionId,
+            sessionId: newQuestion.code || newQuestion.sessionId || sessionId,
+            color: newQuestion.color || presentationState.questionMarkerColor,
+            status: newQuestion.status || "open"
+        });
+
+        const pageData = ensurePageData(savedQuestion.page);
+
+        const exists = pageData.questions.some(function (question) {
+            return question.id === savedQuestion.id;
+        });
+
         if (!exists) {
-            pageData.questions.push(newQuestion);
+            pageData.questions.push(savedQuestion);
         }
 
-        // 2. Check if the user is currently looking at the page where the question was dropped
-        if (getActivePageNumber() === newQuestion.page) {
-            // If yes, re-render the dots so the new one pops up instantly!
+        presentationState.questionMarkersVisible = true;
+
+        if (getActivePageNumber() === savedQuestion.page) {
             renderQuestionsForCurrentPage();
         }
 
-        // 3. Always update the Q&A side drawer count and list
         renderQaDrawer();
 
-        // Optional: Show a subtle toast/status update
-        updateStatus(`New question added on page ${newQuestion.page}`);
+        updateStatus(`New question added on page ${savedQuestion.page}`);
     });
+
+
 
     // add listeners for updates/deletes here later!
     // window.DLS_SOCKET.onQuestionDeleted(function(deletedQuestionId) { ... });
+}
+
+// if connected after added questions - so it can be seen also:
+async function loadSessionQuestionsFromServer() {
+    const sessionId = getSessionId();
+
+    if (!sessionId || !window.DLS_API?.getQuestions) {
+        return;
+    }
+
+    try {
+        const questions = await window.DLS_API.getQuestions({
+            code: sessionId,
+            sessionId: sessionId
+        });
+
+        questions.forEach(function (question) {
+            const savedQuestion = createAndSaveQuestion({
+                ...question,
+                id: question.id || question._id || question.questionId,
+                code: question.code || sessionId,
+                sessionId: question.code || question.sessionId || sessionId,
+                color: question.color || presentationState.questionMarkerColor,
+                status: question.status || "open"
+            });
+
+            const pageData = ensurePageData(savedQuestion.page);
+
+            const exists = pageData.questions.some(function (item) {
+                return item.id === savedQuestion.id;
+            });
+
+            if (!exists) {
+                pageData.questions.push(savedQuestion);
+            }
+        });
+
+        renderQuestionsForCurrentPage();
+        renderQaDrawer();
+    } catch (error) {
+        console.warn("Could not load session questions:", error);
+    }
 }
 
 initPresentationPage();
@@ -753,7 +834,8 @@ async function startLectureFromPendingFile() {
 
         // in create session - the lecturer will "join" participants number
         if (window.DLS_SOCKET) {
-            window.DLS_SOCKET.joinPresentation(`session_${session.code}`);
+            //window.DLS_SOCKET.joinPresentation(`session_${session.code}`);
+            window.DLS_SOCKET.joinPresentation(session.code);
             setupLiveSocketListeners();
         }
     } catch (error) {
@@ -1694,8 +1776,30 @@ function openQuestionComposePopup(relativePoint, pageNumber, event) {
     };
 
     questionComposeInput.value = "";
-    questionComposePopup.style.left = `${event.clientX + 14}px`;
-    questionComposePopup.style.top = `${event.clientY + 14}px`;
+
+    // Popup Location
+    // questionComposePopup.style.left = `${event.clientX + 14}px`;
+    // questionComposePopup.style.top = `${event.clientY + 14}px`;
+    const popupWidth = 280;
+    const popupHeight = 180;
+    const margin = 12;
+
+    let left = event.clientX + 14;
+    let top = event.clientY + 14;
+
+    if (left + popupWidth > window.innerWidth - margin) {
+        left = event.clientX - popupWidth - 14;
+    }
+
+    if (top + popupHeight > window.innerHeight - margin) {
+        top = event.clientY - popupHeight - 14;
+    }
+
+    left = Math.max(margin, Math.min(left, window.innerWidth - popupWidth - margin));
+    top = Math.max(margin, Math.min(top, window.innerHeight - popupHeight - margin));
+
+    questionComposePopup.style.left = `${left}px`;
+    questionComposePopup.style.top = `${top}px`;
 
     questionComposePopup.classList.add("is-visible");
     questionComposePopup.setAttribute("aria-hidden", "false");

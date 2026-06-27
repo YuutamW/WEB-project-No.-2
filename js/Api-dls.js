@@ -85,6 +85,9 @@ async function sendJsonRequest(path, options = {}) {
 Ex.: { sessionId: "demo", page: 2 } -> ?sessionId=demo&page=2 */
 function buildQueryString(filters = {}) {
     const params = new URLSearchParams();
+    if (filters.code) {
+        params.set("code", filters.code);
+    }
     if (filters.sessionId) {
         params.set("sessionId", filters.sessionId);
     }
@@ -175,17 +178,40 @@ const DLS_API = {
     /* CREATE QUESTION
      Route: POST /api/questions 
      Required: { sessionId, page, x, y, text } */
-    async createQuestion(questionData) {
+    // async createQuestion(questionData) {
 
+    //     const currentUser = getCurrentDlsUser();
+    //     const questionPayload = { ...questionData, studentId: currentUser.id };
+
+    //     const responseData = await sendJsonRequest(
+    //         DLS_CONFIG.ROUTES.QUESTIONS,
+    //         { method: "POST", body: JSON.stringify(questionPayload) });
+
+    //     return responseData.data;
+
+    // },
+    async createQuestion(questionData) {
         const currentUser = getCurrentDlsUser();
-        const questionPayload = { ...questionData, studentId: currentUser.id };
+
+        const questionPayload = {
+            ...questionData,
+            code: questionData.code || questionData.sessionId,
+            studentId:
+                questionData.studentId ||
+                currentUser?.id ||
+                currentUser?._id ||
+                null
+        };
 
         const responseData = await sendJsonRequest(
             DLS_CONFIG.ROUTES.QUESTIONS,
-            { method: "POST", body: JSON.stringify(questionPayload) });
+            {
+                method: "POST",
+                body: JSON.stringify(questionPayload)
+            }
+        );
 
-        return responseData.data;
-
+        return responseData.data || responseData.question || responseData;
     },
 
     /* DELETE QUESTION Route: DELETE /api/questions/:id */

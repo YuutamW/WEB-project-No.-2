@@ -524,10 +524,10 @@ export function createQuestion(questionData) {
         text: questionData.text || "",
 
         // OPTIONAL: Added for Question Manager
-        // status: questionData.status || "open",
-        // color: questionData.color || "#ff3b6b",
-        // studentName: questionData.studentName || "Anonymous",
-        // isAnonymous: questionData.isAnonymous !== false,
+        status: questionData.status || "open",
+        color: questionData.color || "#ff3b6b",
+        studentName: questionData.studentName || "Anonymous",
+        isAnonymous: questionData.isAnonymous !== false,
 
         createdAt: new Date().toISOString(),
         updatedAt: null

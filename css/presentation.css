@@ -3006,3 +3006,43 @@ body:has(.presentation-page.is-waiting-upload) {
     color: rgba(255, 255, 255, 0.62);
     font-size: 0.82rem;
 }
+
+/* Question Popup Overlay Fit */
+.question-compose-popup {
+    max-width: min(280px, calc(100vw - 24px));
+}
+
+@media (max-width: 640px) {
+    .question-compose-popup {
+        width: min(280px, calc(100vw - 24px));
+    }
+
+    .question-compose-popup__input {
+        width: 100%;
+        min-height: 82px;
+    }
+
+    .question-compose-popup__actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+}
+
+/* Question Tab / Drawer Size -- Mobile */
+@media (max-width: 700px) {
+    .questions-drawer {
+        width: min(88vw, 390px);
+        transform: translateX(calc(100% - 44px));
+        transition: transform 220ms ease;
+    }
+
+    .questions-drawer.is-open {
+        transform: translateX(0);
+    }
+
+    .questions-drawer__panel {
+        max-height: calc(100dvh - 120px);
+        overflow-y: auto;
+    }
+}
