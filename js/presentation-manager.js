@@ -370,6 +370,24 @@ async function initializeLiveSession(sessionCode) {
         const sessionInfo = await window.DLS_API.getSessionByCode(sessionCode);
         presentationState.sessionId = sessionInfo.code || sessionCode;
 
+        // Handle Session End for All:
+        if (sessionInfo.status === "ended") {
+            localStorage.removeItem(
+                window.DLS_CONFIG?.STORAGE_KEYS?.CURRENT_SESSION ||
+                "dlsCurrentSession"
+            );
+
+            const currentUser = getCurrentDlsUser ? getCurrentDlsUser() : null;
+            const role = String(currentUser?.role || "").toLowerCase();
+
+            window.location.href = role === "student"
+                ? "student-dashboard.html"
+                : "dashboard.html";
+
+            return;
+        }
+        // if student do refresh while session ended - wont be able to stay in
+
         saveCurrentSessionToLocalStorage({
             ...sessionInfo,
             code: presentationState.sessionId
@@ -1702,7 +1720,7 @@ async function leaveCurrentSession() {
     window.location.href = "student-dashboard.html";
 }
 
-// End Session FOR ALL!
+// End Session FOR ALL! + Msgs
 async function endCurrentSessionForEveryone() {
     const sessionCode = getSessionId();
 
@@ -1711,19 +1729,25 @@ async function endCurrentSessionForEveryone() {
         return;
     }
 
+    if (!window.DLS_API || typeof window.DLS_API.endSession !== "function") {
+        updateStatus("End session API is not available.");
+        return;
+    }
+
     try {
-        updateStatus("Ending session...");
+        updateStatus("Ending session for all users...");
 
-        if (window.DLS_API?.endSession) {
-            await window.DLS_API.endSession(sessionCode);
-        }
+        await window.DLS_API.endSession(sessionCode);
 
-        localStorage.removeItem("dlsCurrentSession");
+        localStorage.removeItem(
+            window.DLS_CONFIG?.STORAGE_KEYS?.CURRENT_SESSION ||
+            "dlsCurrentSession"
+        );
 
         window.location.href = "dashboard.html";
     } catch (error) {
-        console.error("Failed to end session:", error);
-        updateStatus("Failed to end session.");
+        console.error("Failed to end session for everyone:", error);
+        updateStatus("Failed to end session for everyone. Check backend route /api/sessions/:code/end.");
     }
 }
 
