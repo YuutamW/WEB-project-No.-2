@@ -1245,8 +1245,8 @@ function renderLecturerSessionsOverlay(sessions) {
 
         link.className = "dashboard-demo-list__item";
         link.href = code
-            ? `session-landing.html?code=${encodeURIComponent(code)}`
-            : "session-landing.html";
+            ? `presentation.html?code=${encodeURIComponent(code)}`
+            : "presentation.html";
 
         link.innerHTML = `
             <strong>${title}</strong>
@@ -1364,8 +1364,8 @@ async function renderRecentSessions() {
             const card = document.createElement("a");
 
             card.href = sessionCode
-                ? `session-landing.html?code=${encodeURIComponent(sessionCode)}`
-                : "session-landing.html";
+                ? `presentation.html?code=${encodeURIComponent(sessionCode)}`
+                : "presentation.html";
 
             card.className = "session-card";
 

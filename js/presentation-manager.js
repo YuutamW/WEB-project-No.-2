@@ -222,6 +222,14 @@ let isSavingQuestion = false;
 
 let qaDrawerFilter = "all";
 
+function setToolbarButtonVisible(button, isVisible) {
+    button.hidden = !isVisible;
+    button.disabled = !isVisible;
+    button.classList.toggle("is-role-hidden", !isVisible);
+    button.setAttribute("aria-hidden", String(!isVisible));
+    button.style.display = isVisible ? "" : "none";
+}
+
 function applyPresentationRole() {
     const role = presentationState.currentRole || "lecturer";
 
@@ -236,7 +244,7 @@ function applyPresentationRole() {
         const buttonRole = button.dataset.controlRole;
 
         if (buttonRole !== role) {
-            button.hidden = true;
+            setToolbarButtonVisible(button, false);
             return;
         }
 
@@ -247,12 +255,12 @@ function applyPresentationRole() {
                 featureName &&
                 STUDENT_TOOLBAR_FEATURES[featureName] === false
             ) {
-                button.hidden = true;
+                setToolbarButtonVisible(button, false);
                 return;
             }
         }
 
-        button.hidden = false;
+        setToolbarButtonVisible(button, true);
     });
 }
 
@@ -261,7 +269,9 @@ function setPresentationRole(role) {
     applyPresentationRole();
 }
 
-function getSessionId() { return presentationState.sessionId; }
+function getSessionId() {
+    return presentationState.sessionId || presentationState.session?.code || "";
+}
 /* ==========================================================
    2.1 Presentation Data JSON
    Purpose:
@@ -301,12 +311,29 @@ async function initPresentationPage() {
     connectEvents();
     clearActiveTool();
 
+    // const urlParams = new URLSearchParams(window.location.search);
+    // const sessionCode = urlParams.get("sessioncode") || urlParams.get("sessionCode");
     const urlParams = new URLSearchParams(window.location.search);
-    const sessionCode = urlParams.get("sessioncode") || urlParams.get("sessionCode");
 
+    const savedSession = JSON.parse(
+        localStorage.getItem("dlsCurrentSession") || "{}"
+    );
+
+    const sessionCode =
+        urlParams.get("sessionCode") ||
+        urlParams.get("sessioncode") ||
+        urlParams.get("code") ||
+        savedSession.code ||
+        "";
+    //
     if (sessionCode) {
         //  JOIN an existing session
         presentationState.sessionId = sessionCode;
+
+        // Save SessionCode in URL
+        urlParams.set("sessionCode", sessionCode);
+        window.history.replaceState({}, "", `${window.location.pathname}?${urlParams.toString()}`);
+
         updateStatus("Joining live session...");
         await initializeLiveSession(sessionCode);
     } else {
@@ -337,10 +364,23 @@ async function initializeLiveSession(sessionCode) {
 
         // 1. Get session metadata
         const sessionInfo = await window.DLS_API.getSessionByCode(sessionCode);
-        presentationState.session = sessionInfo;
+        presentationState.sessionId = sessionInfo.code || sessionCode;
+
+        saveCurrentSessionToLocalStorage({
+            ...sessionInfo,
+            code: presentationState.sessionId
+        });
+
+        // for refresh but stay in page 
+        presentationState.session = {
+            ...sessionInfo,
+            code: presentationState.sessionId
+        };
 
         // checks to see if the session's owner id matches the user id, if not then it's a student
-        const isLecturer = sessionInfo.ownerId === currentUserId;
+        const isLecturer =
+            String(sessionInfo.ownerId || sessionInfo.owner || "") ===
+            String(currentUserId || "");
 
         // 2. Adjust UI based on Role
         if (!isLecturer) {
@@ -352,7 +392,7 @@ async function initializeLiveSession(sessionCode) {
             if (navControls) navControls.style.display = "flex";
             updateStatus("Downloading lecture materials...");
         } else {
-            updateStatus("Reconnecting to your session...");
+            setPresentationRole("lecturer");
             renderSessionInfo(sessionInfo);
             updateStatus("Reconnecting to your session...");
         }
@@ -702,6 +742,9 @@ async function startLectureFromPendingFile() {
         presentationState.session = session;
         presentationState.sessionJoinUrl = buildStudentJoinUrl(session.code);
         presentationState.sessionId = session.code;
+        const nextUrl = new URL(window.location.href);
+        nextUrl.searchParams.set("sessionCode", session.code);
+        window.history.replaceState({}, "", nextUrl.toString());
         presentationState.sessionTitle = sessionTitle;
 
         saveCurrentSessionToLocalStorage(session);
@@ -765,6 +808,7 @@ function activatePresentationMode() {
     presentationPage.classList.add("is-presentation-active");
 
     clearActiveTool();
+    applyPresentationRole();
 
     teacherControls.classList.remove("is-visible");
     hideToolOptionsPanel();
@@ -1477,6 +1521,7 @@ function saveQuestionPoint(relativePoint, pageNumber, questionText) {
     const sessionId = getSessionId(); // adapt this to the current session id in database
 
     const savedQuestion = createAndSaveQuestion({
+        code: sessionId,
         sessionId: sessionId,
         fileName: presentationData.fileName,
 
@@ -1503,6 +1548,22 @@ function saveQuestionPoint(relativePoint, pageNumber, questionText) {
 
     renderQaDrawer();
 
+    // For Backend Schema:
+    if (window.DLS_API?.createQuestion) {
+        window.DLS_API.createQuestion({
+            code: sessionId,
+            sessionId: sessionId,
+            fileName: presentationData.fileName,
+            page: pageNumber,
+            x: relativePoint.x,
+            y: relativePoint.y,
+            text: questionText,
+            status: "open"
+        }).catch(function (error) {
+            console.warn("Question saved locally but not online:", error);
+        });
+    }
+
     console.log("Saved question on page:", pageNumber);
     console.log("Saved question:", savedQuestion);
     console.log("Presentation runtime JSON:", presentationData);
@@ -1510,6 +1571,8 @@ function saveQuestionPoint(relativePoint, pageNumber, questionText) {
         "Question localStorage JSON:",
         dlsQuestionDebug.loadQuestionStore()
     );
+
+    //questionMarkersVisible(hidden);
 }
 
 

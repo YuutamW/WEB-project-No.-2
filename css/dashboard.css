@@ -2214,3 +2214,9 @@ body {
         flex: 1 1 160px;
     }
 }
+
+/* Hide Toolbar */
+.teacher-controls__button.is-role-hidden,
+.teacher-controls__button[hidden] {
+    display: none !important;
+}

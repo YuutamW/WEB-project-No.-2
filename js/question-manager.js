@@ -38,7 +38,7 @@
 // export function upsertQuestionToMemory(serverQuestion) {
 //     // If we already have it, keep the existing frontend color unless it closed
 //     let frontendColor = getQuestionColor(serverQuestion.status);
-    
+
 //     if (liveQuestionsState.has(serverQuestion.id) && serverQuestion.status === "open") {
 //         frontendColor = liveQuestionsState.get(serverQuestion.id).frontendColor;
 //     }
@@ -56,13 +56,13 @@
 // // 2. Get questions for rendering dots (Open only)
 // export function getActiveQuestionsForPage(pageNumber) {
 //     const activeDots = [];
-    
+
 //     liveQuestionsState.forEach(question => {
 //         if (question.page === pageNumber && question.status === "open") {
 //             activeDots.push(question);
 //         }
 //     });
-    
+
 //     return activeDots;
 // }
 // // 3. Clear memory on disconnect
@@ -98,7 +98,7 @@
 
 //     const sessionCode = currentSession.code || currentSession.sessionCode || "";
 //     const userId = currentUser.id || currentUser._id || "";
-    
+
 //     // This is the clean payload we send to the database via the socket
 //     const networkPayload = {
 //         sessionCode: sessionCode,
@@ -132,7 +132,7 @@
 //  */
 // function upsertQuestionToMemory(serverQuestion) {
 //     const realId = serverQuestion._id || serverQuestion.id;
-    
+
 //     if (!realId) {
 //         console.error("Sane Guard: Cannot store question without a MongoDB ID", serverQuestion);
 //         return;
@@ -140,7 +140,7 @@
 
 //     // Assign standard color rules
 //     let frontendColor = serverQuestion.status === "closed" ? "#808080" : assignRandomColor();
-    
+
 //     // Preserve dot color if it's an existing open question updating its text/state
 //     if (liveQuestionsState.has(realId) && serverQuestion.status === "open") {
 //         frontendColor = liveQuestionsState.get(realId).frontendColor;
@@ -489,22 +489,31 @@ export function ensurePresentationInStore(questionStore, presentationId, fileNam
    y = 0.5 means center of page vertically.
 */
 export function createQuestion(questionData) {
-/* Shift + Click = Save Q Point - create dot obj
-    JSON Q :
-{
-    id: "q_...",
-    type: "question-point",
-    page: 3,
-    x: 0.42,
-    y: 0.31,
-    text: "",
-    status: "open",
-    createdAt: "..."
-}
-*/
+    /* Shift + Click = Save Q Point - create dot obj
+        JSON Q :
+    {
+        id: "q_...",
+        type: "question-point",
+        page: 3,
+        x: 0.42,
+        y: 0.31,
+        text: "",
+        status: "open",
+        createdAt: "..."
+    }
+    */
+    const id =
+        questionData.id ||
+        questionData._id ||
+        questionData.questionId ||
+        createQuestionId();
+
     return {
-        questionId: questionData.question_id || null,
-        sessionId: questionData.presentationId || DEFAULT_PRESENTATION_ID,
+        id: id,
+        questionId: id,
+        _id: questionData._id || null,
+        code: questionData.code || questionData.sessionId || DEFAULT_PRESENTATION_ID,
+        sessionId: questionData.sessionId || questionData.code || DEFAULT_PRESENTATION_ID,
         fileName: questionData.fileName || null,
 
         page: questionData.page,
@@ -513,6 +522,12 @@ export function createQuestion(questionData) {
         y: questionData.y,
 
         text: questionData.text || "",
+
+        // OPTIONAL: Added for Question Manager
+        // status: questionData.status || "open",
+        // color: questionData.color || "#ff3b6b",
+        // studentName: questionData.studentName || "Anonymous",
+        // isAnonymous: questionData.isAnonymous !== false,
 
         createdAt: new Date().toISOString(),
         updatedAt: null
@@ -529,19 +544,19 @@ export function createQuestion(questionData) {
 export function saveQuestion(question) {
     const questionStore = loadQuestionStore();
 
-    const presentationId =
-        question.presentationId || DEFAULT_PRESENTATION_ID;
+    const sessionId =
+        question.sessionId || question.code || DEFAULT_PRESENTATION_ID;
 
     const presentationQuestions = ensurePresentationInStore(
         questionStore,
-        presentationId,
+        sessionId,
         question.fileName
     );
 
     presentationQuestions.questions.push(question);
 
+    // save to local storage
     saveQuestionStore(questionStore);
-
     return question;
 }
 
