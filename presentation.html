@@ -253,11 +253,13 @@
         <nav id="teacherControls" class="teacher-controls">
             <!-- Hide/Reveal Q Markers -->
             <button id="questionMarkersToggleButton" class="teacher-controls__button" type="button"
-                aria-label="Show/Hide Questions">❓</button>
+                data-control-role="lecturer" aria-label="Show/Hide Questions">
+                ❓
+            </button>
 
             <!-- Settings -->
             <button class="teacher-controls__button teacher-controls__button--tool" type="button" data-tool="settings"
-                data-tooltip="Settings" title="Settings" aria-label="Settings">
+                data-tooltip="Settings" title="Settings" aria-label="Settings" data-control-role="lecturer">
 
                 <img class="teacher-controls__icon" src="assets/icons/Settings-Icn.svg" alt="">
 
@@ -266,7 +268,7 @@
             <!-- Switch Presentation -->
             <button id="switchPresentationButton" class="teacher-controls__button teacher-controls__button--tool"
                 type="button" data-tool="switch" data-tooltip="Switch Presentation" title="Switch presentation"
-                aria-label="Switch presentation">
+                aria-label="Switch presentation" data-control-role="lecturer">
 
                 <img class="teacher-controls__icon" src="assets/icons/Switch-Presentation-Icn.svg" alt="">
 
@@ -274,7 +276,7 @@
 
             <!-- Laser -->
             <button class="teacher-controls__button teacher-controls__button--tool" type="button" data-tool="laser"
-                data-tooltip="Laser" title="Laser tool" aria-label="Laser tool">
+                data-tooltip="Laser" title="Laser tool" aria-label="Laser tool" data-control-role="lecturer">
 
                 <img class="teacher-controls__icon" src="assets/icons/Lazer-Icn.svg" alt="">
 
@@ -282,7 +284,7 @@
 
             <!-- Image -->
             <button class="teacher-controls__button teacher-controls__button--tool" type="button" data-tool="image"
-                data-tooltip="Image" title="Image tool" aria-label="Image tool">
+                data-tooltip="Image" title="Image tool" aria-label="Image tool" data-control-role="lecturer">
 
                 <img class="teacher-controls__icon" src="assets/icons/Image-Icn.svg" alt="">
 
@@ -290,7 +292,7 @@
 
             <!-- Text -->
             <button class="teacher-controls__button teacher-controls__button--tool" type="button" data-tool="text"
-                data-tooltip="Text" title="Text tool" aria-label="Text tool">
+                data-tooltip="Text" title="Text tool" aria-label="Text tool" data-control-role="lecturer">
 
                 <img class="teacher-controls__icon" src="assets/icons/Text-Icn.svg" alt="">
 
@@ -298,7 +300,7 @@
 
             <!-- Eraser -->
             <button class="teacher-controls__button teacher-controls__button--tool" type="button" data-tool="eraser"
-                data-tooltip="Eraser" title="Eraser tool" aria-label="Eraser tool">
+                data-tooltip="Eraser" title="Eraser tool" aria-label="Eraser tool" data-control-role="lecturer">
 
                 <img class="teacher-controls__icon" src="assets/icons/eraser-Icn.svg" alt="">
 
@@ -306,7 +308,7 @@
 
             <!-- Pen -->
             <button class="teacher-controls__button teacher-controls__button--tool" type="button" data-tool="pen"
-                data-tooltip="Pen" title="Pen tool" aria-label="Pen tool">
+                data-tooltip="Pen" title="Pen tool" aria-label="Pen tool" data-control-role="lecturer">
 
                 <img class="teacher-controls__icon" src="assets/icons/Anottator-Icn.svg" alt="">
 
@@ -314,10 +316,75 @@
 
             <!-- Stop -->
             <button id="stopPresentationButton" class="teacher-controls__button teacher-controls__button--stop"
-                type="button" data-tooltip="Stop" title="Stop presentation" aria-label="Stop presentation">
+                type="button" data-tooltip="Stop" title="Stop presentation" aria-label="Stop presentation"
+                data-control-role="lecturer">
 
                 <img class="teacher-controls__icon" src="assets/icons/Stop-Class-Icn.svg" alt="">
 
+            </button>
+
+            <!-- =====================================================
+                STUDENT CONTROLS
+                 Same toolbar, but role-based buttons for students.
+                 These buttons are hidden/shown by presentation-manager.js.
+            ====================================================== -->
+
+            <!-- Pen -->
+            <button class="teacher-controls__button teacher-controls__button--tool" type="button"
+                data-control-role="student" data-student-feature="annotation" data-tool="pen" data-tooltip="Annotate"
+                title="Annotate" aria-label="Annotate" hidden>
+                ✏️
+            </button>
+
+            <!-- Text -->
+            <button class="teacher-controls__button teacher-controls__button--tool" type="button"
+                data-control-role="student" data-student-feature="text" data-tool="text" data-tooltip="Text"
+                title="Text" aria-label="Text" hidden>
+                T
+            </button>
+
+            <!-- Eraser -->
+            <button class="teacher-controls__button teacher-controls__button--tool" type="button"
+                data-control-role="student" data-student-feature="eraser" data-tool="eraser" data-tooltip="Eraser"
+                title="Eraser" aria-label="Eraser" hidden>
+                🧽
+            </button>
+
+            <!-- Students Add Question -->
+            <button id="studentQuestionToolButton" class="teacher-controls__button teacher-controls__button--tool"
+                type="button" data-control-role="student" data-student-feature="question" data-tool="question"
+                data-tooltip="Add Question" title="Add Question" aria-label="Add Question" hidden>
+                ❓
+            </button>
+
+            <!-- Cast + Layers Manager -->
+            <button id="studentLayersToolButton" class="teacher-controls__button teacher-controls__button--tool"
+                type="button" data-control-role="student" data-student-feature="layers" data-tool="layers"
+                data-tooltip="Layers / Cast" title="Layers / Cast" aria-label="Layers / Cast" hidden>
+                📡
+            </button>
+
+            <!-- Share -->
+            <button id="studentShareToolButton" class="teacher-controls__button teacher-controls__button--tool"
+                type="button" data-control-role="student" data-student-feature="share" data-tool="share"
+                data-tooltip="Share / Export PDF" title="Share / Export PDF" aria-label="Share / Export PDF" hidden>
+                ⤴
+            </button>
+
+            <!-- Follow Lecturer -->
+            <button id="studentFollowLecturerButton" class="teacher-controls__button teacher-controls__button--tool"
+                type="button" data-control-role="student" data-student-feature="followLecturer"
+                data-tool="follow-lecturer" data-tooltip="Follow Lecturer" title="Follow Lecturer"
+                aria-label="Follow Lecturer" hidden>
+                👁
+            </button>
+
+            <!-- Leave Session -->
+            <button id="studentExitSessionButton" class="teacher-controls__button teacher-controls__button--stop"
+                type="button" data-control-role="student" data-student-feature="exit"
+                data-session-action="leave-session" data-tooltip="Exit Session" title="Exit Session"
+                aria-label="Exit Session" hidden>
+                ⎋
             </button>
 
         </nav>
@@ -465,18 +532,28 @@
             </section>
 
             <!-- Summary actions -->
+            <!-- Summary actions -->
             <section class="summary-overlay__actions">
 
                 <button id="summaryOverlayBackButton"
                     class="summary-overlay__action-button summary-overlay__action-button--primary" type="button">
-                    Back To Presentation 🔙
+                    Back To Presentation
                 </button>
 
                 <button id="summaryOverlayRefreshButton" class="summary-overlay__action-button" type="button">
-                    Refresh Summary 🔃
+                    Refresh Summary
+                </button>
+
+                <button id="summaryOverlayEndSessionButton"
+                    class="summary-overlay__action-button summary-overlay__action-button--danger" type="button">
+                    End Session & Back To Dashboard
                 </button>
 
             </section>
+
+            <p class="summary-overlay__end-hint">
+                סיום הסשן יחזיר אותך לדשבורד. בהמשך הפעולה גם תעדכן את הסטודנטים שההרצאה הסתיימה.
+            </p>
 
             <!-- Questions list -->
             <section id="overlayQuestionsList" class="summary-overlay__questions-list"

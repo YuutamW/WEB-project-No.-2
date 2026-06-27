@@ -1912,6 +1912,25 @@ body {
     cursor: pointer;
 }
 
+.summary-overlay__action-button--danger {
+    background: linear-gradient(135deg, rgba(255, 59, 92, 0.95), rgba(160, 25, 55, 0.95));
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow: 0 14px 34px rgba(255, 59, 92, 0.22);
+}
+
+.summary-overlay__action-button--danger:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 18px 42px rgba(255, 59, 92, 0.32);
+}
+
+.summary-overlay__end-hint {
+    margin: 10px 0 0;
+    color: rgba(255, 255, 255, 0.68);
+    font-size: 0.88rem;
+    line-height: 1.5;
+}
+
 
 /* ==========================================================
    Summary Overlay Stats
@@ -2783,7 +2802,7 @@ body:has(.presentation-page.is-waiting-upload) {
    SESSION ROOM BADGE + INFO OVERLAY
 ========================================================= */
 
-.session-room-badge [hidden]{
+.session-room-badge [hidden] {
     position: fixed;
     top: 18px;
     left: 18px;
@@ -2987,4 +3006,3 @@ body:has(.presentation-page.is-waiting-upload) {
     color: rgba(255, 255, 255, 0.62);
     font-size: 0.82rem;
 }
-

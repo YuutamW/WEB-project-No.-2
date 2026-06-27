@@ -182,10 +182,10 @@ const DLS_API = {
 
         const responseData = await sendJsonRequest(
             DLS_CONFIG.ROUTES.QUESTIONS,
-            { method: "POST", body: JSON.stringify(questionPayload) }); 
-            
+            { method: "POST", body: JSON.stringify(questionPayload) });
+
         return responseData.data;
-        
+
     },
 
     /* DELETE QUESTION Route: DELETE /api/questions/:id */
@@ -367,6 +367,31 @@ const DLS_API = {
 
         return responseData.data || responseData;
     },
+    /*  END OF SESSIONS API METHODS */
+    async endSession(code) {
+        const cleanCode = String(code || "").trim();
+
+        if (!cleanCode) {
+            throw new Error("Missing session code.");
+        }
+
+        const currentUser = getCurrentDlsUser();
+        const userId = currentUser?.id || currentUser?._id;
+
+        const responseData = await sendJsonRequest(
+            `${DLS_CONFIG.ROUTES.SESSIONS}/${encodeURIComponent(cleanCode)}`,
+            {
+                method: "DELETE",
+                headers: userId
+                    ? {
+                        "x-user-id": userId
+                    }
+                    : {}
+            }
+        );
+
+        return responseData.data || responseData;
+    },
 
     /* FETCH SESSION PDF BLOB
        Route: GET /api/sessions/:code/pdf
@@ -461,18 +486,19 @@ const DLS_SOCKET = {
         socket.emit("presentation:join", { sessionId });
     },
 
-    // /* ON SESSION PARTICIPANTS UPDATED
-    //     Listen when someone joins/leaves a live session.
-    // */
-    // onSessionParticipantsUpdated(callback) {
-    //     const socket = this.connect();
+    /* ON SESSION PARTICIPANTS UPDATED
+       Listen when someone joins/leaves a live session.
+    */
+    onSessionParticipantsUpdated(callback) {
+        const socket = this.connect();
 
-    //     if (!socket) {
-    //         return;
-    //     }
+        if (!socket) {
+            return;
+        }
 
-       
-    // },
+        socket.off("session:participants-updated");
+        socket.on("session:participants-updated", callback);
+    },
 
     /* ON QUESTION CREATED Purpose: Listen to new question events. */
     onQuestionCreated(callback) {

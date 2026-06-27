@@ -159,6 +159,7 @@ const summaryOverlayRefreshButton = document.getElementById("summaryOverlayRefre
 const overlayTotalQuestions = document.getElementById("overlayTotalQuestions");
 const overlayHottestPage = document.getElementById("overlayHottestPage");
 const overlayQuestionsList = document.getElementById("overlayQuestionsList");
+const summaryOverlayEndSessionButton = document.getElementById("summaryOverlayEndSessionButton");
 
 
 /* ==========================================================
@@ -168,6 +169,7 @@ const overlayQuestionsList = document.getElementById("overlayQuestionsList");
 ========================================================== */
 
 const presentationState = {
+    currentRole: "lecturer",
     currentFile: null,
     activeTool: null,
 
@@ -188,6 +190,24 @@ const presentationState = {
 
 };
 
+const STUDENT_TOOLBAR_FEATURES = {
+    annotation: false,
+    text: false,
+    eraser: false,
+
+    question: true,
+    layers: true,
+    share: true,
+    exit: true,
+
+    followLecturer: false
+};
+const LECTURER_TOOLBAR_FEATURES = {
+    annotation: true,
+    text: true,
+    eraser: true,
+}
+
 /* --Added Helper Vars-- */
 
 let toolOptionsHideTimer = null;
@@ -198,9 +218,50 @@ let shouldKeepToolbarHiddenUntilMouseLeavesBottom = false;
 
 let pendingQuestionDraft = null;
 
+let isSavingQuestion = false;
+
 let qaDrawerFilter = "all";
 
-function getSessionId() {return presentationState.sessionId;}
+function applyPresentationRole() {
+    const role = presentationState.currentRole || "lecturer";
+
+    if (teacherControls) {
+        teacherControls.style.display = "";
+        teacherControls.dataset.role = role;
+    }
+
+    const roleButtons = document.querySelectorAll("[data-control-role]");
+
+    roleButtons.forEach(function (button) {
+        const buttonRole = button.dataset.controlRole;
+
+        if (buttonRole !== role) {
+            button.hidden = true;
+            return;
+        }
+
+        if (role === "student") {
+            const featureName = button.dataset.studentFeature;
+
+            if (
+                featureName &&
+                STUDENT_TOOLBAR_FEATURES[featureName] === false
+            ) {
+                button.hidden = true;
+                return;
+            }
+        }
+
+        button.hidden = false;
+    });
+}
+
+function setPresentationRole(role) {
+    presentationState.currentRole = role;
+    applyPresentationRole();
+}
+
+function getSessionId() { return presentationState.sessionId; }
 /* ==========================================================
    2.1 Presentation Data JSON
    Purpose:
@@ -242,7 +303,7 @@ async function initPresentationPage() {
 
     const urlParams = new URLSearchParams(window.location.search);
     const sessionCode = urlParams.get("sessioncode") || urlParams.get("sessionCode");
-    
+
     if (sessionCode) {
         //  JOIN an existing session
         presentationState.sessionId = sessionCode;
@@ -251,6 +312,17 @@ async function initPresentationPage() {
     } else {
         // --- CREATING A NEW SESSION (Default Lecturer Flow) ---
         updateStatus("Presentation page ready. Waiting for upload.");
+        setPresentationRole("lecturer");
+        updateStatus("Presentation page ready. Waiting for upload.");
+    }
+
+    // Leave Session:
+    const studentExitSessionButton = document.querySelector(
+        "[data-session-action='leave-session']"
+    );
+
+    if (studentExitSessionButton) {
+        studentExitSessionButton.addEventListener("click", leaveCurrentSession);
     }
 }
 
@@ -272,13 +344,16 @@ async function initializeLiveSession(sessionCode) {
 
         // 2. Adjust UI based on Role
         if (!isLecturer) {
+            setPresentationRole("student");
             // Student Setup: Hide teacher controls permanently
-            const teacherControls = document.getElementById("teacherControls");
-            if (teacherControls) teacherControls.style.display = "none";
+            // const teacherControls = document.getElementById("teacherControls");
+            // if (teacherControls) teacherControls.style.display = "none";
             const navControls = document.getElementById("pdfNavigationControls");
             if (navControls) navControls.style.display = "flex";
             updateStatus("Downloading lecture materials...");
         } else {
+            updateStatus("Reconnecting to your session...");
+            renderSessionInfo(sessionInfo);
             updateStatus("Reconnecting to your session...");
         }
 
@@ -383,34 +458,39 @@ function connectEvents() {
     });
 
     /* Listener for Participants Number Update */
-    window.DLS_SOCKET.onSessionParticipantsUpdated(function (updatedSession) {
-        if (!updatedSession) {
-            return;
-        }
+    if (
+        window.DLS_SOCKET &&
+        typeof window.DLS_SOCKET.onSessionParticipantsUpdated === "function"
+    ) {
+        window.DLS_SOCKET.onSessionParticipantsUpdated(function (updatedSession) {
+            if (!updatedSession) {
+                return;
+            }
 
-        const currentCode = presentationState.session.code;
-        const updatedCode = updatedSession.code || updatedSession.sessionCode;
+            const currentCode = presentationState.session?.code;
+            const updatedCode = updatedSession.code || updatedSession.sessionCode;
 
-        if (currentCode && updatedCode && currentCode !== updatedCode) {
-            return;
-        }
+            if (currentCode && updatedCode && currentCode !== updatedCode) {
+                return;
+            }
 
-        presentationState.session = {
-            ...presentationState.session,
-            ...updatedSession
-        };
+            presentationState.session = {
+                ...presentationState.session,
+                ...updatedSession
+            };
 
-        saveCurrentSessionToLocalStorage(presentationState.session);
+            saveCurrentSessionToLocalStorage(presentationState.session);
 
-        renderSessionParticipants(presentationState.session);
+            renderSessionParticipants(presentationState.session);
 
-        updateStatus(
-            `Participants updated: ${presentationState.session.participantsCount ||
-            presentationState.session.participants?.length ||
-            0
-            }`
-        );
-    });
+            updateStatus(
+                `Participants updated: ${presentationState.session.participantsCount ||
+                presentationState.session.participants?.length ||
+                0
+                }`
+            );
+        });
+    }
 
     /* Tool option inputs */
     penColorInput.addEventListener("input", updatePenColor);
@@ -481,6 +561,10 @@ function connectEvents() {
 
     if (summaryOverlayRefreshButton) {
         summaryOverlayRefreshButton.addEventListener("click", renderSummaryOverlay);
+    }
+
+    if (summaryOverlayEndSessionButton) {
+        summaryOverlayEndSessionButton.addEventListener("click", endLecturerSessionFromSummary);
     }
 
     /* Live session overlay */
@@ -623,6 +707,12 @@ async function startLectureFromPendingFile() {
         saveCurrentSessionToLocalStorage(session);
         renderSessionInfo(session);
         openSessionInfoOverlay();
+
+        // in create session - the lecturer will "join" participants number
+        if (window.DLS_SOCKET) {
+            window.DLS_SOCKET.joinPresentation(`session_${session.code}`);
+            setupLiveSocketListeners();
+        }
     } catch (error) {
         console.error("Session creation failed:", error);
         updateStatus("Session creation failed. Starting presentation without room.");
@@ -774,6 +864,28 @@ function updateActiveToolButton(toolName) {
 
 /* Handles tools that need immediate action */
 function handleSpecialToolAction(toolName) {
+    if (toolName === "question") {
+        updateStatus("לחץ על מקום ב־PDF כדי להוסיף שאלה.");
+        return;
+    }
+
+    if (toolName === "layers") {
+        updateStatus("Layers / Cast panel will be added here.");
+        clearActiveTool();
+        return;
+    }
+
+    if (toolName === "share") {
+        updateStatus("Share / Export PDF will be added here.");
+        clearActiveTool();
+        return;
+    }
+
+    if (toolName === "follow-lecturer") {
+        updateStatus("Follow Lecturer mode will be added later.");
+        clearActiveTool();
+        return;
+    }
     if (toolName === "settings") {
         openSessionInfoOverlay();
         clearActiveTool();
@@ -1211,7 +1323,7 @@ function renderSessionParticipants(session) {
         participants.length;
 
     if (sessionParticipantsCount) {
-        sessionParticipantsCount.textContent = String(participants.length);
+        sessionParticipantsCount.textContent = String(participantsCount);
     }
 
     if (!sessionParticipantsList) {
@@ -1285,6 +1397,38 @@ async function refreshSessionParticipants() {
 /* Updates the upload/status text */
 function updateStatus(message) {
     presentationStatusText.textContent = message;
+}
+
+/* Exit / Leave Session Helper : */
+async function leaveCurrentSession() {
+    const session = presentationState.session;
+    const code = session?.code || session?.sessionCode;
+
+    try {
+        if (
+            code &&
+            window.DLS_API &&
+            typeof window.DLS_API.leaveSession === "function"
+        ) {
+            await window.DLS_API.leaveSession(code);
+        }
+    } catch (error) {
+        console.warn("Leave session API failed. Continuing local exit.", error);
+    }
+
+    localStorage.removeItem(
+        window.DLS_CONFIG?.STORAGE_KEYS?.CURRENT_SESSION ||
+        "dlsCurrentSession"
+    );
+
+    if (
+        window.DLS_SOCKET &&
+        typeof window.DLS_SOCKET.disconnect === "function"
+    ) {
+        window.DLS_SOCKET.disconnect();
+    }
+
+    window.location.href = "student-dashboard.html";
 }
 
 
@@ -1516,6 +1660,10 @@ function savePendingQuestionFromPopup() {
         return;
     }
 
+    if (!pendingQuestionDraft) {
+        return;
+    }
+
     const questionText = questionComposeInput.value.trim();
 
     if (questionText === "") {
@@ -1525,14 +1673,29 @@ function savePendingQuestionFromPopup() {
         return;
     }
 
+    isSavingQuestion = true;
+
+    const draftToSave = {
+        ...pendingQuestionDraft
+    };
+
     const relativePoint = {
         x: pendingQuestionDraft.x,
         y: pendingQuestionDraft.y
     };
 
-    const pageNumber = pendingQuestionDraft.page;
+    //const pageNumber = pendingQuestionDraft.page;
+    const pageNumber = draftToSave.page;
+
+    // added question to the presentation data
+    presentationState.questionMarkersVisible = true;
+
     saveQuestionPoint(relativePoint, pageNumber, questionText);
     closeQuestionComposePopup();
+
+    // Clear the active tool
+    clearActiveTool();
+
     updateStatus(" Question Saved 💾 ");
 }
 
@@ -1773,6 +1936,49 @@ function closeSummaryOverlay() {
     summaryOverlay.setAttribute("aria-hidden", "true");
 }
 
+async function endLecturerSessionFromSummary() {
+    const confirmed = window.confirm(
+        "לסיים את ההרצאה ולחזור לדשבורד?\nהסטודנטים ינותקו בהמשך כאשר נחבר את צד השרת."
+    );
+
+    if (!confirmed) {
+        return;
+    }
+
+    const session = presentationState.session;
+    const sessionCode = session?.code || session?.sessionCode;
+
+    try {
+        if (
+            sessionCode &&
+            window.DLS_API &&
+            typeof window.DLS_API.endSession === "function"
+        ) {
+            await window.DLS_API.endSession(sessionCode);
+        }
+    } catch (error) {
+        console.warn("End session API failed. Continuing local exit.", error);
+    }
+
+    try {
+        if (
+            window.DLS_SOCKET &&
+            typeof window.DLS_SOCKET.disconnect === "function"
+        ) {
+            window.DLS_SOCKET.disconnect();
+        }
+    } catch (error) {
+        console.warn("Socket disconnect failed:", error);
+    }
+
+    localStorage.removeItem(
+        window.DLS_CONFIG?.STORAGE_KEYS?.CURRENT_SESSION ||
+        "dlsCurrentSession"
+    );
+
+    window.location.href = "dashboard.html";
+}
+
 /* ==========================================================
    Get Hottest Question Page
    Purpose:
@@ -1962,6 +2168,25 @@ function handleAnnotationCanvasPointerDown(event) {
         y: relativePoint.y,
         raw: relativePoint.raw
     });
+
+    // Added to open student question Popup:
+    if (presentationState.activeTool === "question") {
+        if (questionComposePopup.classList.contains("is-visible")) {
+            return;
+        }
+
+        openQuestionComposePopup(relativePoint, pageNumber, event);
+
+        /*
+           One question button press = one placement.
+           After opening the popup, we clear the active tool
+           so extra PDF clicks do not create more popups.
+        */
+        clearActiveTool();
+
+        updateStatus("כתוב שאלה ולחץ Save.");
+        return;
+    }
 
     if (event.shiftKey) {
         openQuestionComposePopup(relativePoint, pageNumber, event);
