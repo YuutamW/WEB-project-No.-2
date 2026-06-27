@@ -397,7 +397,11 @@ const DLS_API = {
 
         return responseData.data || responseData;
     },
-    /*  END OF SESSIONS API METHODS */
+    /* END SESSION
+       Route:
+       POST /api/sessions/:code/end
+
+      END OF SESSIONS API METHODS */
     async endSession(code) {
         const cleanCode = String(code || "").trim();
 

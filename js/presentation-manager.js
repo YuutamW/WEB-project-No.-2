@@ -547,6 +547,10 @@ function setupLiveSocketListeners() {
 
     socket.off("question:created", handleIncomingSocketQuestion);
     socket.on("question:created", handleIncomingSocketQuestion);
+
+    // Handle Session End Kick All - THIS IS SPARTAAAA:
+    socket.off("session:ended", handleSessionEnded);
+    socket.on("session:ended", handleSessionEnded);
 }
 
 function handleIncomingSocketQuestion(newQuestion) {
@@ -2269,47 +2273,17 @@ function closeSummaryOverlay() {
     summaryOverlay.setAttribute("aria-hidden", "true");
 }
 
+// End Session for ALL:
 async function endLecturerSessionFromSummary() {
     const confirmed = window.confirm(
-        "לסיים את ההרצאה ולחזור לדשבורד?\nהסטודנטים ינותקו בהמשך כאשר נחבר את צד השרת."
+        "לסיים את ההרצאה לכל המשתתפים ולחזור לדשבורד?"
     );
 
     if (!confirmed) {
         return;
     }
 
-    const session = presentationState.session;
-    const sessionCode = session?.code || session?.sessionCode;
-
-    try {
-        if (
-            sessionCode &&
-            window.DLS_API &&
-            typeof window.DLS_API.endSession === "function"
-        ) {
-            await window.DLS_API.endSession(sessionCode);
-        }
-    } catch (error) {
-        console.warn("End session API failed. Continuing local exit.", error);
-    }
-
-    try {
-        if (
-            window.DLS_SOCKET &&
-            typeof window.DLS_SOCKET.disconnect === "function"
-        ) {
-            window.DLS_SOCKET.disconnect();
-        }
-    } catch (error) {
-        console.warn("Socket disconnect failed:", error);
-    }
-
-    localStorage.removeItem(
-        window.DLS_CONFIG?.STORAGE_KEYS?.CURRENT_SESSION ||
-        "dlsCurrentSession"
-    );
-
-    window.location.href = "dashboard.html";
+    await endCurrentSessionForEveryone();
 }
 
 /* ==========================================================
