@@ -26,6 +26,9 @@
     <!-- Page CSS -->
     <link rel="stylesheet" href="css/presentation.css">
 
+    <!-- Socket.IO client script creates io() // added defer will work on order after load -->
+    <script src="https://dls-backend-uelx.onrender.com/socket.io/socket.io.js" defer></script>
+    
     <!-- API first: exposes window.DLS_API / window.DLS_CONFIG -- Api-dls.js uses io()                 -->
     <script src="js/Api-dls.js" defer></script>
 
@@ -35,8 +38,6 @@
     <!-- Page JavaScript -->
     <script src="js/presentation-manager.js" type="module" defer></script>
 
-    <!-- Socket.IO client script creates io() // added defer will work on order after load -->
-    <script src="https://dls-backend-uelx.onrender.com/socket.io/socket.io.js" defer></script>
     <!-- question-manager.js uses DLS_API and DLS_SOCKET -->
     <!-- <script src="js/question-manager.js" defer></script> // Currently unexpecrted token-->
 </head>
@@ -253,7 +254,7 @@
         <nav id="teacherControls" class="teacher-controls">
             <!-- Hide/Reveal Q Markers -->
             <button id="questionMarkersToggleButton" class="teacher-controls__button" type="button"
-                data-control-role="lecturer" aria-label="Show/Hide Questions">
+                data-control-role="lecturer" aria-label="Show/Hide Questions" data-tool="show-questions">
                 ❓
             </button>
 
@@ -355,6 +356,14 @@
                 type="button" data-control-role="student" data-student-feature="question" data-tool="question"
                 data-tooltip="Add Question" title="Add Question" aria-label="Add Question" hidden>
                 ❓
+            </button>
+
+            <!-- Show / Hide Questions -->
+            <button id="studentShowQuestionsButton" class="teacher-controls__button teacher-controls__button--tool"
+                type="button" data-control-role="student" data-student-feature="showQuestions"
+                data-tool="show-questions" data-tooltip="Show / Hide Questions" title="Show / Hide Questions"
+                aria-label="Show / Hide Questions" hidden>
+                👁
             </button>
 
             <!-- Cast + Layers Manager -->

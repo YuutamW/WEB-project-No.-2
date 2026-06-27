@@ -504,12 +504,22 @@ const DLS_SOCKET = {
     joinPresentation(sessionId) {
         const socket = this.connect();
         if (!socket) { return; }
-        if (!sessionId) {
+        const cleanSessionId = String(sessionId || "").trim();
+        if (!cleanSessionId) {
             console.warn("Cannot join presentation - missing sessionId");
             socket.disconnect(); // <-- added this!
             return;
         }
-        socket.emit("presentation:join", { sessionId });
+        const joinPayload = {
+            sessionId: cleanCode,
+            code: cleanCode
+        };
+        if (socket.connected) {
+            emitJoin();
+        } else {
+            socket.once("connect", emitJoin);
+        }
+        //socket.emit("presentation:join", { sessionId });
     },
 
     /* ON SESSION PARTICIPANTS UPDATED

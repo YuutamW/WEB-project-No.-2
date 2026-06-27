@@ -184,7 +184,10 @@ const presentationState = {
     questionMarkerColor: "#ff3b6b",
 
     pendingFile: null,
-    sessionId: null, //  Set by the server
+
+    session: null,
+    sessionId: null, // session code from backend
+
     sessionTitle: "",
     sessionJoinUrl: ""
 
@@ -195,6 +198,7 @@ const STUDENT_TOOLBAR_FEATURES = {
     text: false,
     eraser: false,
 
+    showQuestions: true,
     question: true,
     layers: true,
     share: true,
@@ -378,7 +382,10 @@ async function initializeLiveSession(sessionCode) {
         };
 
         // checks to see if the session's owner id matches the user id, if not then it's a student
+        const currentUserRole = String(currentUser?.role || "").toLowerCase();
+        // WAYAROUND: show CODE on left not working bc i think its not recogs as lecturer
         const isLecturer =
+            currentUserRole === "lecturer" ||
             String(sessionInfo.ownerId || sessionInfo.owner || "") ===
             String(currentUserId || "");
 
@@ -411,12 +418,18 @@ async function initializeLiveSession(sessionCode) {
         // 6. Load the PDF into the viewer
         await pdfViewerManager.loadPdfFile(pdfFile);
 
+        // Render Session ID on top left corner
+        renderSessionInfo(presentationState.session);
+
         // 7. Join the Socket.IO room for real-time updates
         if (window.DLS_SOCKET) {
+            setupLiveSocketListeners();
+
             // window.DLS_SOCKET.joinPresentation(`session_${sessionCode}`);
             window.DLS_SOCKET.joinPresentation(sessionCode);
-            setupLiveSocketListeners();
-            await loadSessionQuestionsFromServer();
+
+            // currently try wayaround DLS_SOCKET
+            //await loadSessionQuestionsFromServer();
         }
         updateStatus(`Connected to room: ${sessionCode}`);
 
@@ -431,74 +444,144 @@ async function initializeLiveSession(sessionCode) {
     3.75 setup live socket listener
     Purpose: 
 */
+// function setupLiveSocketListeners() {
+//     if (!window.DLS_SOCKET) {
+//         console.warn("Socket module not found.");
+//         return;
+//     }
+
+
+//     // Listen for new questions arriving from the server
+//     // window.DLS_SOCKET.onQuestionCreated1(function (newQuestion) {
+//     //     // 1. Inject the incoming question into our local page data
+//     //     const pageData = ensurePageData(newQuestion.page);
+
+//     //     // Prevent duplicates just in case the sender also receives their own broadcast
+//     //     const exists = pageData.questions.some(q => q.id === newQuestion.id);
+//     //     if (!exists) {
+//     //         pageData.questions.push(newQuestion);
+//     //     }
+
+//     //     // 2. Check if the user is currently looking at the page where the question was dropped
+//     //     if (getActivePageNumber() === newQuestion.page) {
+//     //         // If yes, re-render the dots so the new one pops up instantly!
+//     //         renderQuestionsForCurrentPage();
+//     //     }
+
+//     //     // 3. Always update the Q&A side drawer count and list
+//     //     renderQaDrawer();
+
+//     //     // Optional: Show a subtle toast/status update
+//     //     updateStatus(`New question added on page ${newQuestion.page}`);
+//     // });
+
+//     window.DLS_SOCKET.onQuestionCreated(function (newQuestion) {
+//         const sessionId = getSessionId();
+
+//         const savedQuestion = createAndSaveQuestion({
+//             ...newQuestion,
+//             id: newQuestion.id || newQuestion._id || newQuestion.questionId,
+//             code: newQuestion.code || sessionId,
+//             sessionId: newQuestion.code || newQuestion.sessionId || sessionId,
+//             color: newQuestion.color || presentationState.questionMarkerColor,
+//             status: newQuestion.status || "open"
+//         });
+
+//         const pageData = ensurePageData(savedQuestion.page);
+
+//         const exists = pageData.questions.some(function (question) {
+//             return question.id === savedQuestion.id;
+//         });
+
+//         if (!exists) {
+//             pageData.questions.push(savedQuestion);
+//         }
+
+//         presentationState.questionMarkersVisible = true;
+
+//         if (getActivePageNumber() === savedQuestion.page) {
+//             renderQuestionsForCurrentPage();
+//         }
+
+//         renderQaDrawer();
+
+//         updateStatus(`New question added on page ${savedQuestion.page}`);
+//     });
+
+
+
+//     // add listeners for updates/deletes here later!
+//     // window.DLS_SOCKET.onQuestionDeleted(function(deletedQuestionId) { ... });
+// }
+
+// current : wayaround DLS_SOCKET.onQWuestionCreatd()
 function setupLiveSocketListeners() {
     if (!window.DLS_SOCKET) {
         console.warn("Socket module not found.");
         return;
     }
 
+    const socket =
+        typeof window.DLS_SOCKET.connect === "function"
+            ? window.DLS_SOCKET.connect()
+            : null;
 
-    // Listen for new questions arriving from the server
-    // window.DLS_SOCKET.onQuestionCreated1(function (newQuestion) {
-    //     // 1. Inject the incoming question into our local page data
-    //     const pageData = ensurePageData(newQuestion.page);
+    if (!socket || typeof socket.on !== "function") {
+        console.warn("Socket instance is not available.");
+        return;
+    }
 
-    //     // Prevent duplicates just in case the sender also receives their own broadcast
-    //     const exists = pageData.questions.some(q => q.id === newQuestion.id);
-    //     if (!exists) {
-    //         pageData.questions.push(newQuestion);
-    //     }
+    socket.off("question:created", handleIncomingSocketQuestion);
+    socket.on("question:created", handleIncomingSocketQuestion);
+}
 
-    //     // 2. Check if the user is currently looking at the page where the question was dropped
-    //     if (getActivePageNumber() === newQuestion.page) {
-    //         // If yes, re-render the dots so the new one pops up instantly!
-    //         renderQuestionsForCurrentPage();
-    //     }
+function handleIncomingSocketQuestion(newQuestion) {
+    console.log("RAW QUESTION EVENT:", newQuestion);
+    const sessionId = getSessionId();
 
-    //     // 3. Always update the Q&A side drawer count and list
-    //     renderQaDrawer();
+    const incomingQuestion = {
+        ...newQuestion,
+        id: newQuestion.id || newQuestion._id || newQuestion.questionId,
+        code: newQuestion.code || sessionId,
+        sessionId: newQuestion.code || newQuestion.sessionId || sessionId,
+        color: newQuestion.color || presentationState.questionMarkerColor,
+        status: newQuestion.status || "open"
+    };
 
-    //     // Optional: Show a subtle toast/status update
-    //     updateStatus(`New question added on page ${newQuestion.page}`);
-    // });
+    const pageData = ensurePageData(incomingQuestion.page);
 
-    window.DLS_SOCKET.onQuestionCreated(function (newQuestion) {
-        const sessionId = getSessionId();
+    const alreadyExists = pageData.questions.some(function (question) {
+        const sameId =
+            question.id && incomingQuestion.id && question.id === incomingQuestion.id;
 
-        const savedQuestion = createAndSaveQuestion({
-            ...newQuestion,
-            id: newQuestion.id || newQuestion._id || newQuestion.questionId,
-            code: newQuestion.code || sessionId,
-            sessionId: newQuestion.code || newQuestion.sessionId || sessionId,
-            color: newQuestion.color || presentationState.questionMarkerColor,
-            status: newQuestion.status || "open"
-        });
+        const sameLocalQuestion =
+            question.page === incomingQuestion.page &&
+            question.text === incomingQuestion.text &&
+            Math.abs(Number(question.x) - Number(incomingQuestion.x)) < 0.01 &&
+            Math.abs(Number(question.y) - Number(incomingQuestion.y)) < 0.01;
 
-        const pageData = ensurePageData(savedQuestion.page);
-
-        const exists = pageData.questions.some(function (question) {
-            return question.id === savedQuestion.id;
-        });
-
-        if (!exists) {
-            pageData.questions.push(savedQuestion);
-        }
-
-        presentationState.questionMarkersVisible = true;
-
-        if (getActivePageNumber() === savedQuestion.page) {
-            renderQuestionsForCurrentPage();
-        }
-
-        renderQaDrawer();
-
-        updateStatus(`New question added on page ${savedQuestion.page}`);
+        return sameId || sameLocalQuestion;
     });
 
+    if (alreadyExists) {
+        renderQaDrawer();
+        renderQuestionsForCurrentPage();
+        return;
+    }
 
+    const savedQuestion = createAndSaveQuestion(incomingQuestion);
 
-    // add listeners for updates/deletes here later!
-    // window.DLS_SOCKET.onQuestionDeleted(function(deletedQuestionId) { ... });
+    pageData.questions.push(savedQuestion);
+
+    presentationState.questionMarkersVisible = true;
+
+    if (getActivePageNumber() === savedQuestion.page) {
+        renderQuestionsForCurrentPage();
+    }
+
+    renderQaDrawer();
+
+    updateStatus(`New question added on page ${savedQuestion.page}`);
 }
 
 // if connected after added questions - so it can be seen also:
@@ -834,9 +917,12 @@ async function startLectureFromPendingFile() {
 
         // in create session - the lecturer will "join" participants number
         if (window.DLS_SOCKET) {
+
+            setupLiveSocketListeners();
+
             //window.DLS_SOCKET.joinPresentation(`session_${session.code}`);
             window.DLS_SOCKET.joinPresentation(session.code);
-            setupLiveSocketListeners();
+
         }
     } catch (error) {
         console.error("Session creation failed:", error);
@@ -850,6 +936,9 @@ async function startLectureFromPendingFile() {
             files: [file]
         }
     });
+
+    // For sessionId Tag:
+    renderSessionInfo(presentationState.session);
 }
 
 function buildDefaultSessionTitle(file) {
@@ -1025,6 +1114,12 @@ function handleSpecialToolAction(toolName) {
     if (toolName === "switch") {
         openPresentationPicker();
         clearActiveTool();
+    }
+
+    if (toolName === "show-questions") {
+        toggleQuestionMarkerVisibility();
+        clearActiveTool();
+        return;
     }
 }
 
@@ -1363,8 +1458,9 @@ function renderSessionInfo(session) {
 
     if (sessionRoomBadge) {
         sessionRoomBadge.hidden = false;
+        sessionRoomBadge.style.display = "";
+        sessionRoomBadge.style.pointerEvents = "auto";
     }
-
     if (sessionRoomCodeText) {
         sessionRoomCodeText.textContent = code;
     }
