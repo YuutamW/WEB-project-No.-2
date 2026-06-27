@@ -33,7 +33,11 @@ const DLS_CONFIG = {
 function isLocalFrontend() {
     return (
         window.location.hostname === "localhost" ||
-        window.location.hostname === "127.0.0.1"
+        window.location.hostname === "127.0.0.1" ||
+        // Added for internal testing Streaming data:
+        host.startsWith("192.168.") ||
+        host.startsWith("10.") ||
+        host.startsWith("172.")
     );
 }
 
@@ -496,30 +500,68 @@ const DLS_SOCKET = {
         dlsSocketInstance.on("server:welcome", function (data) {
             console.log("DLS socket welcome:", data);
         });
+        // added join room debug:
+        dlsSocketInstance.on("presentation:joined", function (data) {
+            console.log("[DLS SOCKET] joined room:", data);
+        });
+
+        dlsSocketInstance.onAny(function (eventName, ...args) {
+            console.log("[DLS SOCKET IN]", eventName, args);
+        });
         return dlsSocketInstance;
     },
 
     /* JOIN PRESENTATION Purpose: Join backend room by sessionId.
      Ex.: presentation:demo-presentation */
+    // joinPresentation(sessionId) {
+    //     const socket = this.connect();
+    //     if (!socket) { return; }
+    //     const cleanSessionId = String(sessionId || "").trim();
+    //     if (!cleanSessionId) {
+    //         console.warn("Cannot join presentation - missing sessionId");
+    //         socket.disconnect(); // <-- added this!
+    //         return;
+    //     }
+    //     const joinPayload = {
+    //         sessionId: cleanCode,
+    //         code: cleanCode
+    //     };
+    //     if (socket.connected) {
+    //         emitJoin();
+    //     } else {
+    //         socket.once("connect", emitJoin);
+    //     }
+    //     //socket.emit("presentation:join", { sessionId });
+    // },
+
+    // Server Listens to session:join -> socket.join("presentation:" + sessionId)
     joinPresentation(sessionId) {
         const socket = this.connect();
-        if (!socket) { return; }
-        const cleanSessionId = String(sessionId || "").trim();
-        if (!cleanSessionId) {
-            console.warn("Cannot join presentation - missing sessionId");
-            socket.disconnect(); // <-- added this!
+
+        if (!socket) {
             return;
         }
-        const joinPayload = {
-            sessionId: cleanCode,
-            code: cleanCode
-        };
+
+        const cleanSessionId = String(sessionId || "").trim();
+
+        if (!cleanSessionId) {
+            console.warn("Cannot join session room - missing sessionId");
+            return;
+        }
+
+        function emitJoin() {
+            console.log("DLS joining session room:", cleanSessionId);
+
+            socket.emit("session:join", {
+                sessionId: cleanSessionId
+            });
+        }
+
         if (socket.connected) {
             emitJoin();
         } else {
             socket.once("connect", emitJoin);
         }
-        //socket.emit("presentation:join", { sessionId });
     },
 
     /* ON SESSION PARTICIPANTS UPDATED
@@ -532,8 +574,9 @@ const DLS_SOCKET = {
             return;
         }
 
-        socket.off("session:participants-updated");
-        socket.on("session:participants-updated", callback);
+        // switched from "presentation:participants_updated" to "session:participantsUpdated"
+        socket.off("session:participantsUpdated");
+        socket.on("session:participantsUpdated", callback);
     },
 
     /* ON QUESTION CREATED Purpose: Listen to new question events. */

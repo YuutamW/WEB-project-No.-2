@@ -3046,3 +3046,43 @@ body:has(.presentation-page.is-waiting-upload) {
         overflow-y: auto;
     }
 }
+
+/* Fix Try for Room No Badge on Top Left */
+.session-room-badge {
+    position: fixed !important;
+    top: 18px !important;
+    left: 18px !important;
+    z-index: 9999 !important;
+
+    display: inline-flex !important;
+    align-items: center;
+    gap: 8px;
+
+    padding: 10px 14px;
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    border-radius: 999px;
+
+    font-family: "Heebo", Arial, sans-serif;
+    font-size: 13px;
+    font-weight: 800;
+
+    color: #ffffff;
+    background: rgba(30, 18, 48, 0.72);
+
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+
+    box-shadow: 0 12px 34px rgba(0, 0, 0, 0.24);
+    cursor: pointer;
+}
+
+.session-room-badge::before {
+    content: "Room";
+    opacity: 0.72;
+    font-weight: 700;
+    content: none !important;
+}
+
+.session-room-badge[hidden] {
+    display: none !important;
+}

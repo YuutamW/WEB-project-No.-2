@@ -419,7 +419,13 @@ async function initializeLiveSession(sessionCode) {
         await pdfViewerManager.loadPdfFile(pdfFile);
 
         // Render Session ID on top left corner
-        renderSessionInfo(presentationState.session);
+        //renderSessionInfo(presentationState.session);
+        // switched to show Badge Romm No only for Lecturer:
+        if (isLecturer) {
+            renderSessionInfo(presentationState.session);
+        } else {
+            hideSessionRoomBadge();
+        }
 
         // 7. Join the Socket.IO room for real-time updates
         if (window.DLS_SOCKET) {
@@ -436,6 +442,14 @@ async function initializeLiveSession(sessionCode) {
     } catch (error) {
         console.error("Failed to join live session:", error);
         updateStatus("Error joining session. Please check the code and try again.");
+    }
+}
+
+// small helper to prevent student from seeing Room No Badge:
+function hideSessionRoomBadge() {
+    if (sessionRoomBadge) {
+        sessionRoomBadge.hidden = true;
+        sessionRoomBadge.style.display = "none";
     }
 }
 
@@ -1459,10 +1473,15 @@ function renderSessionInfo(session) {
     if (sessionRoomBadge) {
         sessionRoomBadge.hidden = false;
         sessionRoomBadge.style.display = "";
+        sessionRoomBadge.style.opacity = "1";
         sessionRoomBadge.style.pointerEvents = "auto";
+        // check if no show is because Z index?:
+        sessionRoomBadge.style.zIndex = "9999";
     }
     if (sessionRoomCodeText) {
         sessionRoomCodeText.textContent = code;
+        // DEBIGLOG: See if we have Sessionm Badge with room number
+        console.log("Rendered session badge:", code, sessionRoomBadge, sessionRoomCodeText);
     }
 
     if (sessionInfoTitle) {
