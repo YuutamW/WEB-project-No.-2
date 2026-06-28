@@ -27,7 +27,7 @@
     rel="stylesheet" />
 
   <link rel="stylesheet" href="css/style.css" />
-  
+
   <script src="./js/server-wakeup.js"></script>
 </head>
 
@@ -105,6 +105,38 @@
         <!-- #endregion -->
       </div>
     </section>
+
+    <!-- QR for Class - Register -->
+    <button type="button" id="openQrOverlayButton" class="qr-floating-icon-button" aria-label="Open QR code"
+      title="Open QR code">
+      <img src="./assets/dls-qr-button-icon.png" alt="" class="qr-floating-icon-button__icon">
+    </button>
+
+    <div class="qr-overlay" id="qrOverlay" hidden>
+      <div class="qr-overlay__backdrop" data-close-qr></div>
+
+      <section class="qr-overlay__card" role="dialog" aria-modal="true" aria-labelledby="qrOverlayTitle">
+        <button type="button" class="qr-overlay__close" id="closeQrOverlayButton" aria-label="Close QR overlay">
+          ×
+        </button>
+
+        <div class="qr-overlay__header">
+          <p class="qr-overlay__eyebrow">DLS Quick Register QR</p>
+          <h2 class="qr-overlay__title" id="qrOverlayTitle">סרקו להרשמה</h2>
+          <p class="qr-overlay__text">
+
+          </p>
+        </div>
+
+        <div class="qr-overlay__image-frame">
+          <div class="qr-overlay__qr-shell">
+            <img class="qr-overlay__image" src="/assets/qr-index.png" alt="QR code for DLS GitHub index page">
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <script src="./js/qr-overlay.js"></script>
     <!-- #endregion -->
   </main>
 

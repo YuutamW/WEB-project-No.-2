@@ -151,6 +151,9 @@ const qaDrawerList = document.getElementById("qaDrawerList");
 const qaShowAllButton = document.getElementById("qaShowAllButton");
 const qaShowCurrentPageButton = document.getElementById("qaShowCurrentPageButton");
 
+const questionsTabButton = document.getElementById("questionsTabButton");
+const qaDrawerCloseButton = document.getElementById("qaDrawerCloseButton");
+
 /* Summary Overlay */
 const summaryOverlay = document.getElementById("summaryOverlay");
 const closeSummaryOverlayButton = document.getElementById("closeSummaryOverlayButton");
@@ -276,6 +279,82 @@ function setPresentationRole(role) {
 function getSessionId() {
     return presentationState.sessionId || presentationState.session?.code || "";
 }
+
+/* Questions Color Pallette */
+const QUESTION_COLOR_PALETTE = [
+    "#ff3b6b",
+    "#7c3aed",
+    "#2563eb",
+    "#0891b2",
+    "#059669",
+    "#f59e0b",
+    "#db2777"
+];
+
+// Gets Random Color for Each User when adding Questions(using Hash):
+function getStableColorFromKey(key) {
+    const text = String(key || "anonymous");
+
+    let hash = 0;
+
+    for (let index = 0; index < text.length; index += 1) {
+        hash = ((hash << 5) - hash) + text.charCodeAt(index);
+        hash |= 0;
+    }
+
+    const colorIndex = Math.abs(hash) % QUESTION_COLOR_PALETTE.length;
+
+    return QUESTION_COLOR_PALETTE[colorIndex];
+}
+
+function getQuestionColor(question = {}) {
+    if (question.color) {
+        return question.color;
+    }
+
+    //const user = getCurrentDlsUser ? getCurrentDlsUser() : null;
+    const user =
+        typeof getCurrentDlsUser === "function"
+            ? getCurrentDlsUser()
+            : null;
+
+    return getStableColorFromKey(
+        question.studentId ||
+        question.studentEmail ||
+        question.studentName ||
+        user?.id ||
+        user?._id ||
+        user?.email ||
+        "anonymous"
+    );
+}
+
+function getQuestionColorForCurrentUser() {
+    const storageKey = "dlsQuestionClientColor";
+
+    const existingColor = localStorage.getItem(storageKey);
+
+    if (existingColor) {
+        return existingColor;
+    }
+
+    const randomKey =
+        crypto?.randomUUID?.() ||
+        `${Date.now()}-${Math.random()}`;
+
+    const color = getStableColorFromKey(randomKey);
+
+    localStorage.setItem(storageKey, color);
+
+    return color;
+}
+
+// added to check in console:
+window.DLS_DEBUG_QUESTIONS = {
+    getStableColorFromKey,
+    getQuestionColor
+};
+
 /* ==========================================================
    2.1 Presentation Data JSON
    Purpose:
@@ -422,6 +501,8 @@ async function initializeLiveSession(sessionCode) {
             renderSessionInfo(presentationState.session);
             updateStatus("Reconnecting to your session...");
         }
+        // Loading:
+        setSessionLoading(true, "Downloading presentation...");
 
         // 3. Download the PDF Blob from the backend
         const pdfBlob = await window.DLS_API.fetchSessionPdfAsBlob(sessionCode);
@@ -434,6 +515,7 @@ async function initializeLiveSession(sessionCode) {
         activatePresentationMode();
 
         // 6. Load the PDF into the viewer
+        setSessionLoading(true, "Opening PDF...");
         await pdfViewerManager.loadPdfFile(pdfFile);
 
         // Render Session ID on top left corner
@@ -452,14 +534,18 @@ async function initializeLiveSession(sessionCode) {
             // window.DLS_SOCKET.joinPresentation(`session_${sessionCode}`);
             window.DLS_SOCKET.joinPresentation(sessionCode);
 
-            // currently try wayaround DLS_SOCKET
-            //await loadSessionQuestionsFromServer();
+            setSessionLoading(true, "Loading questions...");
+
+            await loadSessionQuestionsFromServer();
         }
         updateStatus(`Connected to room: ${sessionCode}`);
 
     } catch (error) {
         console.error("Failed to join live session:", error);
         updateStatus("Error joining session. Please check the code and try again.");
+    } finally {
+        // CLose loading:
+        setSessionLoading(false);
     }
 }
 
@@ -471,81 +557,28 @@ function hideSessionRoomBadge() {
     }
 }
 
+// Loading...
+function setSessionLoading(isLoading, message = "Loading session...") {
+    const overlay = document.getElementById("sessionLoadingOverlay");
+    const text = document.getElementById("sessionLoadingText");
+
+    if (!overlay) {
+        return;
+    }
+
+    if (text) {
+        text.textContent = message;
+    }
+
+    overlay.classList.toggle("is-open", Boolean(isLoading));
+    overlay.setAttribute("aria-hidden", isLoading ? "false" : "true");
+}
+
 
 /*==========================================================
     3.75 setup live socket listener
     Purpose: 
 */
-// function setupLiveSocketListeners() {
-//     if (!window.DLS_SOCKET) {
-//         console.warn("Socket module not found.");
-//         return;
-//     }
-
-
-//     // Listen for new questions arriving from the server
-//     // window.DLS_SOCKET.onQuestionCreated1(function (newQuestion) {
-//     //     // 1. Inject the incoming question into our local page data
-//     //     const pageData = ensurePageData(newQuestion.page);
-
-//     //     // Prevent duplicates just in case the sender also receives their own broadcast
-//     //     const exists = pageData.questions.some(q => q.id === newQuestion.id);
-//     //     if (!exists) {
-//     //         pageData.questions.push(newQuestion);
-//     //     }
-
-//     //     // 2. Check if the user is currently looking at the page where the question was dropped
-//     //     if (getActivePageNumber() === newQuestion.page) {
-//     //         // If yes, re-render the dots so the new one pops up instantly!
-//     //         renderQuestionsForCurrentPage();
-//     //     }
-
-//     //     // 3. Always update the Q&A side drawer count and list
-//     //     renderQaDrawer();
-
-//     //     // Optional: Show a subtle toast/status update
-//     //     updateStatus(`New question added on page ${newQuestion.page}`);
-//     // });
-
-//     window.DLS_SOCKET.onQuestionCreated(function (newQuestion) {
-//         const sessionId = getSessionId();
-
-//         const savedQuestion = createAndSaveQuestion({
-//             ...newQuestion,
-//             id: newQuestion.id || newQuestion._id || newQuestion.questionId,
-//             code: newQuestion.code || sessionId,
-//             sessionId: newQuestion.code || newQuestion.sessionId || sessionId,
-//             color: newQuestion.color || presentationState.questionMarkerColor,
-//             status: newQuestion.status || "open"
-//         });
-
-//         const pageData = ensurePageData(savedQuestion.page);
-
-//         const exists = pageData.questions.some(function (question) {
-//             return question.id === savedQuestion.id;
-//         });
-
-//         if (!exists) {
-//             pageData.questions.push(savedQuestion);
-//         }
-
-//         presentationState.questionMarkersVisible = true;
-
-//         if (getActivePageNumber() === savedQuestion.page) {
-//             renderQuestionsForCurrentPage();
-//         }
-
-//         renderQaDrawer();
-
-//         updateStatus(`New question added on page ${savedQuestion.page}`);
-//     });
-
-
-
-//     // add listeners for updates/deletes here later!
-//     // window.DLS_SOCKET.onQuestionDeleted(function(deletedQuestionId) { ... });
-// }
-
 // current : wayaround DLS_SOCKET.onQWuestionCreatd()
 function setupLiveSocketListeners() {
     if (!window.DLS_SOCKET) {
@@ -580,7 +613,7 @@ function handleIncomingSocketQuestion(newQuestion) {
         id: newQuestion.id || newQuestion._id || newQuestion.questionId,
         code: newQuestion.code || sessionId,
         sessionId: newQuestion.code || newQuestion.sessionId || sessionId,
-        color: newQuestion.color || presentationState.questionMarkerColor,
+        color: newQuestion.color || getQuestionColor(newQuestion),
         status: newQuestion.status || "open"
     };
 
@@ -666,7 +699,7 @@ async function loadSessionQuestionsFromServer() {
                 id: question.id || question._id || question.questionId,
                 code: question.code || sessionId,
                 sessionId: question.code || question.sessionId || sessionId,
-                color: question.color || presentationState.questionMarkerColor,
+                color: question.color || getQuestionColor(question),
                 status: question.status || "open"
             });
 
@@ -816,6 +849,20 @@ function connectEvents() {
         });
     }
 
+    // Added for X :
+    if (qaDrawerCloseButton) {
+        qaDrawerCloseButton.addEventListener("click", function (event) {
+            event.preventDefault();
+            event.stopPropagation();
+
+            const drawer = document.getElementById("questionsDrawer");
+
+            if (drawer && drawer.classList.contains("is-open")) {
+                toggleQuestionsDrawer();
+            }
+        });
+    }
+
     /* Summary Events */
     if (closeSummaryOverlayButton) {
         closeSummaryOverlayButton.addEventListener("click", closeSummaryOverlay);
@@ -828,6 +875,14 @@ function connectEvents() {
     if (summaryOverlayRefreshButton) {
         summaryOverlayRefreshButton.addEventListener("click", renderSummaryOverlay);
     }
+
+    // Duplicates the Questions - so cancel
+    // if (summaryOverlayRefreshButton) {
+    //     summaryOverlayRefreshButton.addEventListener("click", async function () {
+    //         await loadSessionQuestionsFromServer();
+    //         renderSummaryOverlay();
+    //     });
+    // }
 
     if (summaryOverlayEndSessionButton) {
         summaryOverlayEndSessionButton.addEventListener("click", endLecturerSessionFromSummary);
@@ -1180,6 +1235,7 @@ function handleSpecialToolAction(toolName) {
 
     if (toolName === "show-questions") {
         toggleQuestionMarkerVisibility();
+        toggleQuestionsDrawer();
         clearActiveTool();
         return;
     }
@@ -1785,16 +1841,13 @@ function ensurePageData(pageNumber) {
     return presentationData.pages[pageNumber];
 }
 
-
-// function createId(prefix) {
-//     return `${prefix}_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
-// }
-
-
 function saveQuestionPoint(relativePoint, pageNumber, questionText) {
     const pageData = ensurePageData(pageNumber);
 
     const sessionId = getSessionId(); // adapt this to the current session id in database
+
+    // Added for Random Color for each User:
+    const questionColor = getQuestionColorForCurrentUser();
 
     const savedQuestion = createAndSaveQuestion({
         code: sessionId,
@@ -1809,7 +1862,7 @@ function saveQuestionPoint(relativePoint, pageNumber, questionText) {
         text: questionText,
         status: "open",
 
-        color: presentationState.questionMarkerColor,
+        color: questionColor,
 
         studentName: "Anonymous",
         isAnonymous: true
@@ -1834,7 +1887,8 @@ function saveQuestionPoint(relativePoint, pageNumber, questionText) {
             x: relativePoint.x,
             y: relativePoint.y,
             text: questionText,
-            status: "open"
+            status: "open",
+            color: questionColor
         }).catch(function (error) {
             console.warn("Question saved locally but not online:", error);
         });
@@ -1881,7 +1935,8 @@ function renderQuestionMarker(question) {
 
     marker.style.left = `${question.x * 100}%`;
     marker.style.top = `${question.y * 100}%`;
-    marker.style.backgroundColor = question.color || "#ff3b6b";
+    //marker.style.backgroundColor = question.color || "#ff3b6b";
+    marker.style.backgroundColor = getQuestionColor(question);
 
     marker.addEventListener("click", function () {
         console.log("Question marker clicked:", question);
@@ -2081,6 +2136,41 @@ function getAllPresentationQuestions() {
     return allQuestions;
 }
 
+/* Question Helpers --> Fix Double Questions -from DB + Local */
+function getQuestionKey(question) {
+    return String(
+        question?._id ||
+        question?.id ||
+        question?.questionId ||
+        [
+            question?.code || question?.sessionId || getSessionId(),
+            question?.page,
+            Number(question?.x || 0).toFixed(5),
+            Number(question?.y || 0).toFixed(5),
+            question?.text || ""
+        ].join("|")
+    );
+}
+
+function upsertQuestionToArray(questions, question) {
+    const key = getQuestionKey(question);
+    const existingIndex = questions.findIndex(
+        (item) => getQuestionKey(item) === key
+    );
+
+    if (existingIndex >= 0) {
+        questions[existingIndex] = {
+            ...questions[existingIndex],
+            ...question
+        };
+        return questions[existingIndex];
+    }
+
+    // questions.push(question);
+    upsertQuestionToArray(questions, question);
+    return question;
+}
+
 /* ==========================================================
    Q&A DRAWER RENDERING
    Purpose:
@@ -2128,6 +2218,11 @@ function renderQaQuestionCard(question) {
     card.type = "button";
 
     card.dataset.questionId = question.id;
+
+    card.style.setProperty(
+        "--question-color",
+        getQuestionColor(question)
+    );
 
     card.innerHTML = `
         <div class="qa-question-card__meta">
@@ -2199,6 +2294,17 @@ function setQaDrawerFilter(nextFilter) {
     }
 
     renderQaDrawer();
+}
+
+// Toggle for Q&A Tab - For Mobile:
+function toggleQuestionsDrawer() {
+    const drawer = document.getElementById("questionsDrawer");
+
+    if (!drawer) {
+        return;
+    }
+
+    drawer.classList.toggle("is-open");
 }
 
 /* ==========================================================
@@ -2297,17 +2403,72 @@ function closeSummaryOverlay() {
     summaryOverlay.setAttribute("aria-hidden", "true");
 }
 
-// End Session for ALL:
+// End Session for ALL (with COnfirm - MUST CHANGE TO POPUP - this is POC ):
 async function endLecturerSessionFromSummary() {
-    const confirmed = window.confirm(
-        "לסיים את ההרצאה לכל המשתתפים ולחזור לדשבורד?"
-    );
+    const confirmed = await openDlsConfirm({
+        title: "End live session?",
+        message: "This will disconnect all connected students and return you to the dashboard.",
+        okText: "End Session",
+        cancelText: "Cancel"
+    });
 
     if (!confirmed) {
         return;
     }
 
     await endCurrentSessionForEveryone();
+}
+
+function openDlsConfirm(options = {}) {
+    return new Promise((resolve) => {
+        const modal = document.getElementById("dlsConfirmModal");
+        const title = document.getElementById("dlsConfirmTitle");
+        const message = document.getElementById("dlsConfirmMessage");
+        const okButton = document.getElementById("dlsConfirmOkButton");
+        const cancelButton = document.getElementById("dlsConfirmCancelButton");
+
+        if (!modal || !okButton || !cancelButton) {
+            resolve(window.confirm(options.message || "Are you sure?"));
+            return;
+        }
+
+        title.textContent = options.title || "Confirm action";
+        message.textContent = options.message || "Are you sure?";
+        okButton.textContent = options.okText || "OK";
+        cancelButton.textContent = options.cancelText || "Cancel";
+
+        modal.classList.add("is-open");
+        modal.setAttribute("aria-hidden", "false");
+
+        function close(result) {
+            modal.classList.remove("is-open");
+            modal.setAttribute("aria-hidden", "true");
+
+            okButton.removeEventListener("click", onOk);
+            cancelButton.removeEventListener("click", onCancel);
+            modal.removeEventListener("click", onBackdrop);
+
+            resolve(result);
+        }
+
+        function onOk() {
+            close(true);
+        }
+
+        function onCancel() {
+            close(false);
+        }
+
+        function onBackdrop(event) {
+            if (event.target === modal) {
+                close(false);
+            }
+        }
+
+        okButton.addEventListener("click", onOk);
+        cancelButton.addEventListener("click", onCancel);
+        modal.addEventListener("click", onBackdrop);
+    });
 }
 
 /* ==========================================================

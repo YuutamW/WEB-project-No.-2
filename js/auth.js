@@ -19,8 +19,6 @@
    Real systems require backend authentication + hashed passwords.
 ========================================================= */
 
-
-
 /* =========================================================
 1. Constants
 Central paths and localStorage keys.
@@ -30,12 +28,7 @@ const REGISTERED_USERS_STORAGE_KEY = "dlsRegisteredUsers";
 const CURRENT_USER_STORAGE_KEY = "dlsCurrentUser";
 // const API_BASE = getDlsBackendUrl(); <---- DOM typeShit!
 
-
-
-
-
 const USERS_PATH = "/api/users";
-
 
 /* =========================================================
    2. Validation Helpers
@@ -49,7 +42,6 @@ function isValidEmail(email) {
     return emailPattern.test(email);
 }
 
-
 function isValidPassword(password) {
     const hasMinLength = password.length >= 6;
     const hasLowercase = /[a-z]/.test(password);
@@ -58,8 +50,6 @@ function isValidPassword(password) {
 
     return hasMinLength && hasLowercase && hasUppercase && hasNumber;
 }
-
-
 
 /* =========================================================
    3. Message Helpers
@@ -109,7 +99,6 @@ function updateEmailIndicator(input, statusElement, hintElement) {
     hintElement.textContent = "מבנה אימייל לדוגמה: name@example.com";
 }
 
-
 // Updated to support MongoDB _id as well
 function saveCurrentUser(user) {
 
@@ -158,7 +147,6 @@ async function registerUserOnServer(registeredPayload) {
     return data;
 }
 
-
 /* =========================================================
    6. Register Flow
    Purpose:
@@ -170,7 +158,6 @@ const registerForm = document.querySelector("#registerForm");
 if (registerForm) {
     registerForm.addEventListener("submit", handleRegisterSubmit);
 }
-
 
 async function handleRegisterSubmit(event) {
     event.preventDefault();
@@ -299,7 +286,6 @@ function loginUserInDevMode(email) {
     };
 }
 
-
 /* =========================================================
    7. Login Flow
    Purpose:
@@ -361,7 +347,6 @@ async function handleLoginSubmit(event) {
 
 }
 
-
 /* =========================================================
    8. Live Email Indicator
    Purpose:
@@ -382,7 +367,6 @@ emailInputs.forEach(function (input) {
         updateEmailIndicator(input, statusElement, hintElement);
     });
 });
-
 
 /* =========================================================
    9. Live Password Indicator
@@ -415,7 +399,6 @@ if (passwordInput && passwordHint) {
             "חסר משהו: אות קטנה, אות גדולה, מספר או 6 תווים.";
     });
 }
-
 
 /* =========================================================
    10. Topbar Date And Clock

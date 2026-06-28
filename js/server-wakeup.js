@@ -1,14 +1,9 @@
 // ======================================================
 // DLS Server Wakeup
 // ------------------------------------------------------
-// Least invasive version:
-// - Does NOT change login logic
-// - Does NOT depend on DLS_API
-// - Does NOT touch localStorage
-// - Does NOT touch sockets
-// - Does NOT require backend changes
 // - Only sends one small GET request to wake Render
 // ======================================================
+// WakeUp Redeplow : https://api.render.com/deploy/srv-d8rgv5mgvqtc73f26lrg?key=TVtLQJEjbio
 
 (function () {
     const DLS_BACKEND_WAKEUP_URL = "https://dls-backend-uelx.onrender.com/";

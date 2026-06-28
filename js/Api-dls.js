@@ -31,13 +31,10 @@ const DLS_CONFIG = {
 };
 
 function isLocalFrontend() {
+    const host = window.location.hostname;
     return (
         window.location.hostname === "localhost" ||
         window.location.hostname === "127.0.0.1"
-        // Added for internal testing Streaming data:
-        // host.startsWith("192.168.") ||
-        // host.startsWith("10.") ||
-        // host.startsWith("172.")
     );
 }
 
@@ -182,18 +179,6 @@ const DLS_API = {
     /* CREATE QUESTION
      Route: POST /api/questions 
      Required: { sessionId, page, x, y, text } */
-    // async createQuestion(questionData) {
-
-    //     const currentUser = getCurrentDlsUser();
-    //     const questionPayload = { ...questionData, studentId: currentUser.id };
-
-    //     const responseData = await sendJsonRequest(
-    //         DLS_CONFIG.ROUTES.QUESTIONS,
-    //         { method: "POST", body: JSON.stringify(questionPayload) });
-
-    //     return responseData.data;
-
-    // },
     async createQuestion(questionData) {
         const currentUser = getCurrentDlsUser();
 
@@ -517,27 +502,6 @@ const DLS_SOCKET = {
 
     /* JOIN PRESENTATION Purpose: Join backend room by sessionId.
      Ex.: presentation:demo-presentation */
-    // joinPresentation(sessionId) {
-    //     const socket = this.connect();
-    //     if (!socket) { return; }
-    //     const cleanSessionId = String(sessionId || "").trim();
-    //     if (!cleanSessionId) {
-    //         console.warn("Cannot join presentation - missing sessionId");
-    //         socket.disconnect(); // <-- added this!
-    //         return;
-    //     }
-    //     const joinPayload = {
-    //         sessionId: cleanCode,
-    //         code: cleanCode
-    //     };
-    //     if (socket.connected) {
-    //         emitJoin();
-    //     } else {
-    //         socket.once("connect", emitJoin);
-    //     }
-    //     //socket.emit("presentation:join", { sessionId });
-    // },
-
     // Server Listens to session:join -> socket.join("presentation:" + sessionId)
     joinPresentation(sessionId) {
         const socket = this.connect();

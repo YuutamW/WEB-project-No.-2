@@ -28,7 +28,7 @@
 
     <!-- Socket.IO client script creates io() // added defer will work on order after load -->
     <script src="https://dls-backend-uelx.onrender.com/socket.io/socket.io.js" defer></script>
-    
+
     <!-- API first: exposes window.DLS_API / window.DLS_CONFIG -- Api-dls.js uses io()                 -->
     <script src="js/Api-dls.js" defer></script>
 
@@ -223,6 +223,9 @@
             <section class="questions-drawer__panel">
 
                 <header class="qa-drawer__header">
+                    <button id="qaDrawerCloseButton" class="qa-drawer__close" type="button" aria-label="Close Q&A">
+                        ×
+                    </button>
                     <h2 class="qa-drawer__title">Q&A</h2>
 
                     <span id="qaDrawerCount" class="qa-drawer__count">0</span>
@@ -237,6 +240,8 @@
                         Current Page
                     </button>
                 </div>
+
+
 
                 <section id="qaDrawerList" class="qa-drawer__list" aria-label="Questions list">
                 </section>
@@ -481,11 +486,11 @@
     </div>
 
     <!-- =====================================================
-     SUMMARY OVERLAY
-     Purpose:
-     Shows the lecture question summary inside the same
-     presentation page, so the uploaded PDF stays in memory.
-====================================================== -->
+         SUMMARY OVERLAY
+         Purpose:
+         Shows the lecture question summary inside the same
+         presentation page, so the uploaded PDF stays in memory.
+    ====================================================== -->
 
     <section id="summaryOverlay" class="summary-overlay" aria-hidden="true">
 
@@ -534,13 +539,12 @@
                     </span>
 
                     <small>
-                        🌶️ Hottest Page 🔥
+                        Hottest Page
                     </small>
                 </article>
 
             </section>
 
-            <!-- Summary actions -->
             <!-- Summary actions -->
             <section class="summary-overlay__actions">
 
@@ -561,7 +565,7 @@
             </section>
 
             <p class="summary-overlay__end-hint">
-                סיום הסשן יחזיר אותך לדשבורד. בהמשך הפעולה גם תעדכן את הסטודנטים שההרצאה הסתיימה.
+                סיום הסשן יחזיר אותך לדשבורד. פעולה זו תסיים לכלל המשתתפים את הסשן.
             </p>
 
             <!-- Questions list -->
@@ -630,6 +634,28 @@
                     <p>אין משתתפים עדיין.</p>
                 </div>
             </section>
+        </div>
+    </section>
+
+    <!-- Custom Confirm for End Session -->
+    <section id="dlsConfirmModal" class="dls-confirm-modal" aria-hidden="true">
+        <div class="dls-confirm-modal__card">
+            <h2 id="dlsConfirmTitle">Confirm action</h2>
+            <p id="dlsConfirmMessage">Are you sure?</p>
+
+            <div class="dls-confirm-modal__actions">
+                <button id="dlsConfirmCancelButton" type="button">Cancel</button>
+                <button id="dlsConfirmOkButton" type="button">OK</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- LOADING... -->
+    <section id="sessionLoadingOverlay" class="session-loading-overlay" aria-hidden="true">
+        <div class="session-loading-overlay__card">
+            <div class="session-loading-overlay__spinner"></div>
+            <h2>Loading session</h2>
+            <p id="sessionLoadingText">Connecting to lecture...</p>
         </div>
     </section>
 

@@ -856,89 +856,6 @@ function closeDashboardOverlay(selectorOrOverlay) {
     }, 220);
 }
 
-/* Wayaround - since opendashboardoverlay() use dashboard-core */
-// function setupLecturerDashboardPolishActions() {
-//     const nextLessonsButtons = document.querySelectorAll(
-//         "[data-dashboard-action='open-next-lessons']"
-//     );
-
-//     const jumpSessionButtons = document.querySelectorAll(
-//         "[data-dashboard-action='open-jump-session']"
-//     );
-
-//     const closeOverlayButtons = document.querySelectorAll(
-//         "[data-dashboard-action='close-dashboard-overlay']"
-//     );
-
-//     nextLessonsButtons.forEach(function (button) {
-//         button.addEventListener("click", function () {
-//             openDashboardOverlay("#nextLessonsOverlay");
-//         });
-//     });
-
-//     jumpSessionButtons.forEach(function (button) {
-//         button.addEventListener("click", function () {
-//             openDashboardOverlay("#jumpSessionOverlay");
-//         });
-//     });
-
-//     closeOverlayButtons.forEach(function (button) {
-//         button.addEventListener("click", function () {
-//             const overlay = button.closest(".dashboard-modal");
-//             closeDashboardOverlay(overlay);
-//         });
-//     });
-
-//     /* Settings Guard from breaking Popup behaviour */
-//     document.addEventListener("click", function (event) {
-//         const clickedBackdrop = event.target.classList.contains(
-//             "dashboard-modal__backdrop"
-//         );
-
-//         if (!clickedBackdrop) {
-//             return;
-//         }
-
-//         const overlay = event.target.closest(".dashboard-modal");
-
-//         if (!overlay) {
-//             return;
-//         }
-
-//         if (overlay.id === "settingsOverlay") {
-//             return;
-//         }
-
-//         closeDashboardOverlay(overlay);
-//     });
-
-//     //setupDashboardOverlayBackdropClose(".dashboard-modal");
-//     // switched for local listener since we dont use Dashboard-core;
-//     document.addEventListener("click", function (event) {
-//         const clickedBackdrop = event.target.classList.contains(
-//             "dashboard-modal__backdrop"
-//         );
-
-//         if (!clickedBackdrop) {
-//             return;
-//         }
-
-//         const overlay = event.target.closest(".dashboard-modal");
-
-//         if (!overlay) {
-//             return;
-//         }
-
-//         overlay.classList.remove("is-open");
-
-//         setTimeout(function () {
-//             overlay.hidden = true;
-//         }, 220);
-//     });
-// }
-
-
-
 // setup Mobile Menu:
 
 let dashboardBackdropListenerReady = false;
@@ -1119,14 +1036,6 @@ function normalizeSessionTitle(session) {
     }
     else
         return `סשן ${code}`;
-
-    // const code = session?.code || session?.id || "";
-
-    // if (code) {
-    //     return `סשן ${code}`;
-    // }
-
-    // return "סשן ללא שם";
 }
 
 function getSessionCode(session) {
@@ -1285,51 +1194,7 @@ function setupLecturerSessionsSearch() {
    
    Backend needs : GET /api/sessions/recent?userId=...&limit=...
 ========================================================== */
-// async function renderRecentSessions() {
-//     const container = document.querySelector("#dashboardRecentSessionsPanel");
-//     if (!container) return;
 
-//     try {
-//         const sessions = await DLS_API.getRecentSessions(5);
-//         if (!sessions || sessions.length === 0) {
-//             container.innerHTML = '<p class="dashboard-empty-state">אין סשנים קודמים להצגה.</p>';
-//             return;
-//         }
-
-//         container.innerHTML = "";
-
-//         sessions.forEach(session => {
-//             const sessionDate = new Date(session.date).toLocaleDateString("he-IL", {
-//                 day: "2-digit",
-//                 month: "2-digit",
-//                 year: "numeric",
-//                 hour: "2-digit",
-//                 minute: "2-digit"
-//             });
-//             const sessionCode = getSessionCode(session);
-//             const sessionTitle = normalizeSessionTitle(session);
-
-//             const card = document.createElement("a");
-//             // Placeholder link - update when session view is ready
-//             card.href = `session.html?code=${encodeURIComponent(session.code || session.id)}`;
-//             card.className = "session-card";
-
-//             card.innerHTML = `
-//                 <div class="session-card__info">
-//                     <h4 class="session-card__title"></h4>
-//                     <span class="session-card__date">${sessionDate}</span>
-//                 </div>
-//                 <div class="session-card__action">▶</div>
-//             `;
-//             card.querySelector(".session-card__title").textContent = sessionTitle;
-//             // session.title || `הרצאה ${new Date().toLocaleDateString("he-IL")}`;
-//             container.appendChild(card);
-//         });
-//     } catch (error) {
-//         console.error("Failed to Load recent Sessions:", error);
-//         container.innerHTML = '<p class="dashboard-empty-state" style="color: #ff637d;">שגיאה בטעינת סשנים.</p>';
-//     }
-// }
 
 async function renderRecentSessions() {
     const container = document.querySelector("#dashboardRecentSessionsPanel");

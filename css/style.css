@@ -457,3 +457,261 @@ a {
   }
 
 }
+
+/* ======================================================
+   DLS QR Overlay
+   Purpose:
+   Quick QR modal for opening DLS entry/index page.
+   ====================================================== */
+
+.qr-open-button {
+  margin-top: 14px;
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.04));
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  backdrop-filter: blur(12px);
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    background 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.qr-open-button:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255, 214, 102, 0.65);
+  background:
+    linear-gradient(135deg, rgba(255, 214, 102, 0.18), rgba(111, 66, 193, 0.16));
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.22);
+}
+
+.qr-overlay[hidden] {
+  display: none;
+}
+
+.qr-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.qr-overlay__backdrop {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at top left, rgba(255, 214, 102, 0.16), transparent 34%),
+    radial-gradient(circle at bottom right, rgba(111, 66, 193, 0.24), transparent 38%),
+    rgba(11, 7, 24, 0.78);
+  backdrop-filter: blur(12px);
+}
+
+.qr-overlay__card {
+  position: relative;
+  z-index: 1;
+  width: min(440px, 100%);
+  padding: 26px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 28px;
+  background:
+    linear-gradient(145deg, rgba(36, 24, 66, 0.92), rgba(17, 12, 32, 0.92));
+  color: #ffffff;
+  box-shadow:
+    0 28px 80px rgba(0, 0, 0, 0.48),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  animation: qrOverlayIn 180ms ease-out;
+}
+
+.qr-overlay__close {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  font-size: 1.7rem;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    transform 160ms ease,
+    background 160ms ease;
+}
+
+.qr-overlay__close:hover {
+  transform: scale(1.06);
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.qr-overlay__header {
+  padding-inline-end: 42px;
+  margin-bottom: 18px;
+}
+
+.qr-overlay__eyebrow {
+  margin: 0 0 6px;
+  color: #ffd666;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.qr-overlay__title {
+  margin: 0;
+  font-size: clamp(1.45rem, 4vw, 2rem);
+  line-height: 1.1;
+}
+
+.qr-overlay__text {
+  margin: 10px 0 0;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.qr-overlay__image-frame {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0;
+  border-radius: 24px;
+  background: transparent;
+  box-shadow: none;
+}
+
+.qr-overlay__qr-shell {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  max-width: 340px;
+  aspect-ratio: 1 / 1;
+  padding: 14px;
+  border-radius: 24px;
+
+  /* soft yellow gradient background */
+  background: linear-gradient(145deg,
+      #cb9fd6 0%,
+      #cecabf 45%,
+      #a38b4f 100%);
+
+  box-shadow:
+    0 14px 36px rgba(0, 0, 0, 0.20),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+.qr-overlay__image {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 18px;
+}
+
+.qr-overlay-is-open {
+  overflow: hidden;
+}
+
+@keyframes qrOverlayIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.qr-open-button {
+  position: absolute;
+  right: 18px;
+  bottom: 18px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 8px 12px;
+  border: 1px solid rgba(255, 214, 102, 0.35);
+  border-radius: 999px;
+  background: rgba(44, 33, 72, 0.48);
+  color: #ffd666;
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 800;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+  opacity: 0.72;
+  transition:
+    opacity 160ms ease,
+    transform 160ms ease,
+    border-color 160ms ease,
+    background 160ms ease;
+}
+
+.qr-open-button:hover {
+  opacity: 1;
+  transform: translateY(-1px);
+  border-color: rgba(255, 214, 102, 0.8);
+  background: rgba(44, 33, 72, 0.72);
+}
+
+.qr-open-button__icon {
+  width: 18px;
+  height: 18px;
+  display: block;
+}
+
+/* Tiny QR Button in Login */
+.qr-floating-icon-button {
+    position: absolute;
+    right: 14px;
+    bottom: 14px;
+
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    margin: 0;
+
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    cursor: pointer;
+
+    opacity: 0.55;
+    transition:
+        opacity 160ms ease,
+        transform 160ms ease,
+        filter 160ms ease;
+}
+
+.qr-floating-icon-button:hover {
+    opacity: 1;
+    transform: scale(1.08);
+    filter: drop-shadow(0 0 8px rgba(255, 214, 102, 0.25));
+}
+
+.qr-floating-icon-button__icon {
+    display: block;
+    width: 18px;
+    height: 18px;
+    object-fit: contain;
+}

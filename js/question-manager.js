@@ -540,6 +540,91 @@ export function createQuestion(questionData) {
    Purpose:
    Save questions and retrieve them later.
 ========================================================== */
+// Avoidance when refresh to load question twice (DB + LocalStorage):
+function getStoredQuestionIds(question) {
+    return [
+        question?.id,
+        question?._id,
+        question?.questionId
+    ]
+        .filter(Boolean)
+        .map(String);
+}
+
+function isSameQuestionByFingerprint(firstQuestion, secondQuestion) {
+    const firstSession = String(
+        firstQuestion?.sessionId ||
+        firstQuestion?.code ||
+        DEFAULT_PRESENTATION_ID
+    );
+
+    const secondSession = String(
+        secondQuestion?.sessionId ||
+        secondQuestion?.code ||
+        DEFAULT_PRESENTATION_ID
+    );
+
+    const sameSession = firstSession === secondSession;
+    const samePage = Number(firstQuestion?.page) === Number(secondQuestion?.page);
+    const sameText =
+        String(firstQuestion?.text || "").trim() ===
+        String(secondQuestion?.text || "").trim();
+
+    const sameX =
+        Math.abs(Number(firstQuestion?.x || 0) - Number(secondQuestion?.x || 0)) < 0.0005;
+
+    const sameY =
+        Math.abs(Number(firstQuestion?.y || 0) - Number(secondQuestion?.y || 0)) < 0.0005;
+
+    return sameSession && samePage && sameText && sameX && sameY;
+}
+
+function isSameStoredQuestion(existingQuestion, incomingQuestion) {
+    const existingIds = getStoredQuestionIds(existingQuestion);
+    const incomingIds = getStoredQuestionIds(incomingQuestion);
+
+    const sameId = existingIds.some(function (id) {
+        return incomingIds.includes(id);
+    });
+
+    return sameId || isSameQuestionByFingerprint(existingQuestion, incomingQuestion);
+}
+
+function upsertQuestionToList(questions, incomingQuestion) {
+    const existingIndex = questions.findIndex(function (existingQuestion) {
+        return isSameStoredQuestion(existingQuestion, incomingQuestion);
+    });
+
+    if (existingIndex === -1) {
+        questions.push(incomingQuestion);
+        return incomingQuestion;
+    }
+
+    questions[existingIndex] = {
+        ...questions[existingIndex],
+        ...incomingQuestion,
+
+        id:
+            incomingQuestion.id ||
+            incomingQuestion._id ||
+            incomingQuestion.questionId ||
+            questions[existingIndex].id,
+
+        questionId:
+            incomingQuestion.questionId ||
+            incomingQuestion.id ||
+            incomingQuestion._id ||
+            questions[existingIndex].questionId,
+
+        color:
+            incomingQuestion.color ||
+            questions[existingIndex].color ||
+            "#ff3b6b"
+    };
+
+    return questions[existingIndex];
+}
+//
 
 export function saveQuestion(question) {
     const questionStore = loadQuestionStore();
@@ -553,11 +638,14 @@ export function saveQuestion(question) {
         question.fileName
     );
 
-    presentationQuestions.questions.push(question);
+    const savedQuestion = upsertQuestionToList(
+        presentationQuestions.questions,
+        question
+    );
 
     // save to local storage
     saveQuestionStore(questionStore);
-    return question;
+    return savedQuestion;
 }
 
 

@@ -33,36 +33,6 @@ dashboard-student.js
 ---
 */
 
-/*
-Phase 1:
-Keep dashboard.html and student-dashboard.html as they are.
-Create dashboard-core.js and move shared helpers there.
-
-Phase 2:
-Make both pages use dashboard-core.js for:
-clock, logout, overlays, mobile menu, current user.
-
-Phase 3:
-Create shared dashboard shell functions:
-renderHeader, renderSidebar, renderCalendarPanel.
-
-Phase 4:
-Move role-specific panels into lecturer/student renderers.
-
-Phase 5:
-Optional final:
-Replace student-dashboard.html with redirect to dashboard.html.
----
-we want : 
-student-dashboard.html - contain -> :
-```
-<script>
-    window.location.href = "dashboard.html";
-</script>
-``` / delete after route works!
-
-*/
-
 /* 
    DLS DASHBOARD CORE
    ----------------------------------------------------------
