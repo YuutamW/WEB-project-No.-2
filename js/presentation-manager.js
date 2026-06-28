@@ -192,7 +192,10 @@ const presentationState = {
     sessionId: null, // session code from backend
 
     sessionTitle: "",
-    sessionJoinUrl: ""
+    sessionJoinUrl: "",
+
+    isFollowingLecturer: true,
+    isApplyingRemotePage: false
 
 };
 
@@ -207,7 +210,7 @@ const STUDENT_TOOLBAR_FEATURES = {
     share: true,
     exit: true,
 
-    followLecturer: false
+    followLecturer: true
 };
 const LECTURER_TOOLBAR_FEATURES = {
     annotation: true,
@@ -602,6 +605,42 @@ function setupLiveSocketListeners() {
     // Handle Session End Kick All - THIS IS SPARTAAAA:
     socket.off("session:ended", handleSessionEnded);
     socket.on("session:ended", handleSessionEnded);
+
+    //
+    async function handleRemoteLecturerPageChanged(pageData) {
+        if (presentationState.currentRole !== "student") {
+            return;
+        }
+
+        if (!presentationState.isFollowingLecturer) {
+            return;
+        }
+
+        const incomingCode = pageData?.code || pageData?.sessionId;
+        const currentCode = getSessionId();
+
+        if (incomingCode && currentCode && String(incomingCode) !== String(currentCode)) {
+            return;
+        }
+
+        const nextPage = Number(pageData.page);
+
+        if (!nextPage || nextPage === getActivePageNumber()) {
+            return;
+        }
+
+        presentationState.isApplyingRemotePage = true;
+
+        try {
+            await pdfViewerManager.goToPage(nextPage);
+            updateStatus(`Following lecturer: page ${nextPage}`);
+        } finally {
+            presentationState.isApplyingRemotePage = false;
+        }
+    }
+
+    socket.off("presentation:page-changed", handleRemoteLecturerPageChanged);
+    socket.on("presentation:page-changed", handleRemoteLecturerPageChanged);
 }
 
 function handleIncomingSocketQuestion(newQuestion) {
@@ -1196,6 +1235,26 @@ function updateActiveToolButton(toolName) {
 
 /* Handles tools that need immediate action */
 function handleSpecialToolAction(toolName) {
+
+    if (toolName === "qa-drawer") {
+        toggleQuestionsDrawer();
+        clearActiveTool();
+        return;
+    }
+
+    if (toolName === "follow-lecturer") {
+        presentationState.isFollowingLecturer = !presentationState.isFollowingLecturer;
+
+        updateStatus(
+            presentationState.isFollowingLecturer
+                ? "Following lecturer page."
+                : "Follow lecturer disabled."
+        );
+
+        clearActiveTool();
+        return;
+    }
+
     if (toolName === "question") {
         updateStatus("לחץ על מקום ב־PDF כדי להוסיף שאלה.");
         return;
@@ -1235,6 +1294,12 @@ function handleSpecialToolAction(toolName) {
 
     if (toolName === "show-questions") {
         toggleQuestionMarkerVisibility();
+        toggleQuestionsDrawer();
+        clearActiveTool();
+        return;
+    }
+
+    if (toolName === "qa-drawer") {
         toggleQuestionsDrawer();
         clearActiveTool();
         return;
@@ -1476,6 +1541,24 @@ function handlePdfPageChange(pageInfo) {
 
     console.log("PDF page changed:", pageInfo);
     console.log("Current presentation JSON:", presentationData);
+
+    // Follow Lecturer
+    if (
+        presentationState.currentRole === "lecturer" &&
+        !presentationState.isApplyingRemotePage &&
+        window.DLS_SOCKET &&
+        typeof window.DLS_SOCKET.connect === "function"
+    ) {
+        const socket = window.DLS_SOCKET.connect();
+
+        if (socket && typeof socket.emit === "function") {
+            socket.emit("presentation:page-changed", {
+                code: getSessionId(),
+                sessionId: getSessionId(),
+                page: pageInfo.currentPage
+            });
+        }
+    }
 }
 
 

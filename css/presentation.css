@@ -3378,3 +3378,20 @@ body:has(.presentation-page.is-waiting-upload) {
         transform: rotate(360deg);
     }
 }
+
+/* FINAL TOUCH — bigger toolbar icons */
+.teacher-controls__button {
+    min-width: 48px;
+    min-height: 48px;
+}
+
+.teacher-controls__icon {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+    pointer-events: none;
+}
+
+.teacher-controls__button:hover {
+    transform: translateY(-2px) scale(1.04);
+}

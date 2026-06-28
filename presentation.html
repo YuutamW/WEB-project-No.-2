@@ -363,12 +363,19 @@
                 ❓
             </button> -->
 
+            <!-- Show Q&A Tab (Mobile mainly) -->
+            <button class="teacher-controls__button teacher-controls__button--tool" type="button"
+                data-control-role="student" data-student-feature="showQuestions" data-tool="qa-drawer"
+                data-tooltip="Q&A" title="Q&A" aria-label="Open Q&A" hidden>
+                <img class="teacher-controls__icon" src="assets/icons/qna-icn.svg" alt="">
+            </button>
+
             <!-- Show / Hide Questions -->
             <button id="studentShowQuestionsButton" class="teacher-controls__button teacher-controls__button--tool"
                 type="button" data-control-role="student" data-student-feature="showQuestions"
                 data-tool="show-questions" data-tooltip="Show / Hide Questions" title="Show / Hide Questions"
                 aria-label="Show / Hide Questions" hidden>
-                👁
+                ❓
             </button>
 
             <!-- Cast + Layers Manager -->
@@ -390,7 +397,7 @@
                 type="button" data-control-role="student" data-student-feature="followLecturer"
                 data-tool="follow-lecturer" data-tooltip="Follow Lecturer" title="Follow Lecturer"
                 aria-label="Follow Lecturer" hidden>
-                👁
+                <img class="teacher-controls__icon" src="assets/icons/follow-lecturer.svg" alt="">
             </button>
 
             <!-- Leave Session -->
@@ -398,7 +405,7 @@
                 type="button" data-control-role="student" data-student-feature="exit"
                 data-session-action="leave-session" data-tooltip="Exit Session" title="Exit Session"
                 aria-label="Exit Session" hidden>
-                ⎋
+                <img class="teacher-controls__icon" src="assets/icons/leave-session-icn.svg" alt="">
             </button>
 
         </nav>
