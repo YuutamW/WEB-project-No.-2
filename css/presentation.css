@@ -3436,3 +3436,56 @@ body:has(.presentation-page.is-waiting-upload) {
         grid-template-columns: 1fr;
     }
 }
+
+/* Q&A drawer header layout */
+.qa-drawer__header {
+    position: relative;
+    min-height: 56px;
+    padding: 0 48px;
+}
+
+.qa-drawer__title {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    margin: 0;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    white-space: nowrap;
+}
+
+.qa-drawer__count {
+    position: absolute;
+    left: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.qa-drawer__close {
+    display: none;
+    position: absolute;
+    right: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 28px;
+    height: 28px;
+    border: 0;
+    background: transparent;
+    color: #ff3b6b;
+    font-size: 22px;
+    font-weight: 900;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.qa-drawer__close:hover {
+    color: #ff174f;
+}
+
+/* Fix [x] Button for mobile */
+@media (max-width: 700px) {
+    .qa-drawer__close {
+        display: grid;
+        place-items: center;
+    }
+}
