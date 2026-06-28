@@ -308,10 +308,10 @@
                     </button>
 
                     <h2 id="studentStudyOverlayTitle" class="dashboard-modal__title">
-                        השאלות וההערות שלי
+                        מיון וחיפוש בשאלות שלי
                     </h2>
 
-                    <p class="dashboard-modal__note">
+                    <!-- <p class="dashboard-modal__note">
                         תצוגת דמו. בהמשך כאן יופיעו שאלות, notes, ו־annotations לפי session.
                     </p>
 
@@ -325,184 +325,194 @@
                                     כאן יופיעו notes ו־annotations אחרי שנבנה את מערכת השכבות.
                                 </p>
                             </div>
-                        </section>
+                        </section> -->
 
-                        <section class="student-study-overlay-card">
-                            <h3>השאלות שלי</h3>
+                    <section class="student-study-overlay-card">
+                        <h3> מיון וחיפוש ב - שאלות שלי
+                        </h3>
 
-                            <div class="student-study-scroll">
-                                <p class="dashboard-empty-state">
-                                    כאן נציג שאלות מסשן פעיל / סשן אחרון.
-                                </p>
-                            </div>
-                        </section>
+                        <div class="student-study-toolbar">
+                            <input id="studentQuestionsSearchInput" type="text"
+                                placeholder="חיפוש לפי טקסט / עמוד / סטטוס">
 
-                    </div>
+                            <select id="studentQuestionsSortSelect">
+                                <option value="newest">החדש ביותר</option>
+                                <option value="oldest">הישן ביותר</option>
+                                <option value="page-asc">עמוד: מהנמוך לגבוה</option>
+                                <option value="page-desc">עמוד: מהגבוה לנמוך</option>
+                            </select>
+                        </div>
 
-                </section>
+                        <div id="studentQuestionsList" class="student-study-scroll"></div>
+
+                        <p id="studentQuestionsEmpty" class="dashboard-empty-state" hidden>
+                            אין שאלות להצגה.
+                        </p>
+                    </section>
+
             </div>
 
-            <!-- OVERLAY for SERACH SESSIONS -->
-            <div id="studentSessionsOverlay" class="dashboard-modal" hidden>
-                <div class="dashboard-modal__backdrop"></div>
+            </section>
+    </div>
 
-                <section class="dashboard-modal__panel dashboard-modal__panel--wide" role="dialog" aria-modal="true">
-                    <button type="button" class="dashboard-modal__close" data-student-action="close-overlay">
-                        ×
+    <!-- OVERLAY for SERACH SESSIONS -->
+    <div id="studentSessionsOverlay" class="dashboard-modal" hidden>
+        <div class="dashboard-modal__backdrop"></div>
+
+        <section class="dashboard-modal__panel dashboard-modal__panel--wide" role="dialog" aria-modal="true">
+            <button type="button" class="dashboard-modal__close" data-student-action="close-overlay">
+                ×
+            </button>
+
+            <h2 class="dashboard-modal__title">
+                הסשנים שלי
+            </h2>
+
+            <p class="dashboard-modal__note">
+                חיפוש מהיר בסשנים שהצטרפת אליהם. בהמשך נפתח מכאן דף סשן מלא.
+            </p>
+
+            <label class="dashboard-edit-field">
+                <span>חיפוש סשן</span>
+
+                <input id="studentSessionSearchInput" type="text" placeholder="חפש לפי שם, קוד או תאריך">
+            </label>
+
+            <div id="studentSessionsOverlayList" class="dashboard-demo-list">
+                <p class="dashboard-empty-state">
+                    טוען סשנים...
+                </p>
+            </div>
+        </section>
+    </div>
+
+    <div id="studentSettingsOverlay" class="dashboard-modal" hidden>
+        <div class="dashboard-modal__backdrop" data-student-action="request-close-student-settings">
+        </div>
+
+        <section class="dashboard-modal__panel" role="dialog" aria-modal="true">
+            <button type="button" class="dashboard-modal__close" data-student-action="request-close-student-settings">
+                ✕
+            </button>
+
+            <h2 class="dashboard-modal__title">
+                הגדרות סטודנט
+            </h2>
+
+            <p class="dashboard-modal__text">
+                עריכת פרטי משתמש, שינוי סיסמה או מחיקת המשתמש.
+            </p>
+
+            <div class="dashboard-settings-row">
+                <strong>זיהוי משתמש:</strong>
+                <span id="studentSettingsUserId">לא נטען</span>
+            </div>
+
+            <div class="dashboard-settings-row">
+                <strong>אימייל:</strong>
+                <span id="studentSettingsUserEmail">לא נטען</span>
+            </div>
+
+            <div id="studentSettingsFeedback" class="dashboard-modal__feedback" hidden></div>
+
+            <form id="studentSettingsEditForm" class="dashboard-edit-form" hidden>
+                <label class="dashboard-edit-field">
+                    <span>שם פרטי</span>
+                    <input id="studentSettingsFirstName" type="text" autocomplete="given-name">
+                </label>
+
+                <label class="dashboard-edit-field">
+                    <span>שם משפחה</span>
+                    <input id="studentSettingsLastName" type="text" autocomplete="family-name">
+                </label>
+
+                <label class="dashboard-edit-field">
+                    <span>אימייל</span>
+                    <input id="studentSettingsEmail" type="email" autocomplete="email">
+                </label>
+
+                <label class="dashboard-edit-field">
+                    <span>סיסמה חדשה</span>
+                    <input id="studentSettingsPassword" type="password" autocomplete="new-password"
+                        placeholder="השאר ריק אם לא רוצים לשנות">
+                </label>
+
+                <label class="dashboard-edit-field">
+                    <span>אימות סיסמה חדשה</span>
+                    <input id="studentSettingsConfirmPassword" type="password" autocomplete="new-password"
+                        placeholder="הקלד שוב את הסיסמה">
+                </label>
+
+                <p class="dashboard-password-hint">
+                    הסיסמה חייבת לכלול אות גדולה, אות קטנה ומספר.
+                </p>
+
+                <div class="dashboard-settings-actions">
+                    <button type="submit" class="dashboard-secondary-button">
+                        שמירת שינויים
                     </button>
 
-                    <h2 class="dashboard-modal__title">
-                        הסשנים שלי
-                    </h2>
-
-                    <p class="dashboard-modal__note">
-                        חיפוש מהיר בסשנים שהצטרפת אליהם. בהמשך נפתח מכאן דף סשן מלא.
-                    </p>
-
-                    <label class="dashboard-edit-field">
-                        <span>חיפוש סשן</span>
-
-                        <input id="studentSessionSearchInput" type="text" placeholder="חפש לפי שם, קוד או תאריך">
-                    </label>
-
-                    <div id="studentSessionsOverlayList" class="dashboard-demo-list">
-                        <p class="dashboard-empty-state">
-                            טוען סשנים...
-                        </p>
-                    </div>
-                </section>
-            </div>
-
-            <div id="studentSettingsOverlay" class="dashboard-modal" hidden>
-                <div class="dashboard-modal__backdrop" data-student-action="request-close-student-settings">
+                    <button type="button" class="dashboard-secondary-button" data-student-action="cancel-settings-edit">
+                        ביטול
+                    </button>
                 </div>
+            </form>
 
-                <section class="dashboard-modal__panel" role="dialog" aria-modal="true">
-                    <button type="button" class="dashboard-modal__close"
-                        data-student-action="request-close-student-settings">
-                        ✕
+            <div id="studentDeleteUserConfirmBox" class="dashboard-confirm-box" hidden>
+                <p>
+                    האם למחוק את המשתמש? פעולה זו כרגע בלתי הפיכה.
+                </p>
+
+                <div class="dashboard-settings-actions">
+                    <button type="button" class="danger-button" data-student-action="confirm-delete-student">
+                        כן, מחק משתמש
                     </button>
 
-                    <h2 class="dashboard-modal__title">
-                        הגדרות סטודנט
-                    </h2>
+                    <button type="button" class="dashboard-secondary-button"
+                        data-student-action="cancel-delete-student">
+                        ביטול
+                    </button>
+                </div>
+            </div>
 
-                    <p class="dashboard-modal__text">
-                        עריכת פרטי משתמש, שינוי סיסמה או מחיקת המשתמש.
+            <div id="studentAbortSettingsConfirmBox" class="dashboard-submodal" hidden>
+                <div class="dashboard-submodal__card">
+                    <h3 class="dashboard-submodal__title">
+                        פעולה פתוחה
+                    </h3>
+
+                    <p id="studentAbortSettingsMessage" class="dashboard-submodal__text">
+                        יש פעולה פתוחה. האם לבטל אותה ולסגור את ההגדרות?
                     </p>
-
-                    <div class="dashboard-settings-row">
-                        <strong>זיהוי משתמש:</strong>
-                        <span id="studentSettingsUserId">לא נטען</span>
-                    </div>
-
-                    <div class="dashboard-settings-row">
-                        <strong>אימייל:</strong>
-                        <span id="studentSettingsUserEmail">לא נטען</span>
-                    </div>
-
-                    <div id="studentSettingsFeedback" class="dashboard-modal__feedback" hidden></div>
-
-                    <form id="studentSettingsEditForm" class="dashboard-edit-form" hidden>
-                        <label class="dashboard-edit-field">
-                            <span>שם פרטי</span>
-                            <input id="studentSettingsFirstName" type="text" autocomplete="given-name">
-                        </label>
-
-                        <label class="dashboard-edit-field">
-                            <span>שם משפחה</span>
-                            <input id="studentSettingsLastName" type="text" autocomplete="family-name">
-                        </label>
-
-                        <label class="dashboard-edit-field">
-                            <span>אימייל</span>
-                            <input id="studentSettingsEmail" type="email" autocomplete="email">
-                        </label>
-
-                        <label class="dashboard-edit-field">
-                            <span>סיסמה חדשה</span>
-                            <input id="studentSettingsPassword" type="password" autocomplete="new-password"
-                                placeholder="השאר ריק אם לא רוצים לשנות">
-                        </label>
-
-                        <label class="dashboard-edit-field">
-                            <span>אימות סיסמה חדשה</span>
-                            <input id="studentSettingsConfirmPassword" type="password" autocomplete="new-password"
-                                placeholder="הקלד שוב את הסיסמה">
-                        </label>
-
-                        <p class="dashboard-password-hint">
-                            הסיסמה חייבת לכלול אות גדולה, אות קטנה ומספר.
-                        </p>
-
-                        <div class="dashboard-settings-actions">
-                            <button type="submit" class="dashboard-secondary-button">
-                                שמירת שינויים
-                            </button>
-
-                            <button type="button" class="dashboard-secondary-button"
-                                data-student-action="cancel-settings-edit">
-                                ביטול
-                            </button>
-                        </div>
-                    </form>
-
-                    <div id="studentDeleteUserConfirmBox" class="dashboard-confirm-box" hidden>
-                        <p>
-                            האם למחוק את המשתמש? פעולה זו כרגע בלתי הפיכה.
-                        </p>
-
-                        <div class="dashboard-settings-actions">
-                            <button type="button" class="danger-button" data-student-action="confirm-delete-student">
-                                כן, מחק משתמש
-                            </button>
-
-                            <button type="button" class="dashboard-secondary-button"
-                                data-student-action="cancel-delete-student">
-                                ביטול
-                            </button>
-                        </div>
-                    </div>
-
-                    <div id="studentAbortSettingsConfirmBox" class="dashboard-submodal" hidden>
-                        <div class="dashboard-submodal__card">
-                            <h3 class="dashboard-submodal__title">
-                                פעולה פתוחה
-                            </h3>
-
-                            <p id="studentAbortSettingsMessage" class="dashboard-submodal__text">
-                                יש פעולה פתוחה. האם לבטל אותה ולסגור את ההגדרות?
-                            </p>
-
-                            <div class="dashboard-settings-actions">
-                                <button type="button" class="danger-button"
-                                    data-student-action="confirm-abort-student-settings">
-                                    כן, בטל וסגור
-                                </button>
-
-                                <button type="button" class="dashboard-secondary-button"
-                                    data-student-action="cancel-abort-student-settings">
-                                    המשך פעולה
-                                </button>
-                            </div>
-                        </div>
-                    </div>
 
                     <div class="dashboard-settings-actions">
-                        <button type="button" class="dashboard-secondary-button"
-                            data-student-action="edit-student-user">
-                            עריכת משתמש
+                        <button type="button" class="danger-button"
+                            data-student-action="confirm-abort-student-settings">
+                            כן, בטל וסגור
                         </button>
 
-                        <button type="button" class="danger-button" data-student-action="delete-student-user">
-                            מחיקת משתמש
+                        <button type="button" class="dashboard-secondary-button"
+                            data-student-action="cancel-abort-student-settings">
+                            המשך פעולה
                         </button>
                     </div>
-                </section>
+                </div>
             </div>
 
-            <p id="studentDashboardError" class="dashboard-error"></p>
-        </main>
+            <div class="dashboard-settings-actions">
+                <button type="button" class="dashboard-secondary-button" data-student-action="edit-student-user">
+                    עריכת משתמש
+                </button>
+
+                <button type="button" class="danger-button" data-student-action="delete-student-user">
+                    מחיקת משתמש
+                </button>
+            </div>
+        </section>
+    </div>
+
+    <p id="studentDashboardError" class="dashboard-error"></p>
+    </main>
     </div>
 
     <!-- QR API | later download : js/vendor/html5-qrcode.min.js -->

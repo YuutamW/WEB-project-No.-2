@@ -77,6 +77,9 @@ const STUDENT_DASHBOARD_CONFIG = {
         sessionsOverlay: "#studentSessionsOverlay",
         sessionSearchInput: "#studentSessionSearchInput",
         sessionsOverlayList: "#studentSessionsOverlayList",
+
+        questionsSearchInput: "#studentQuestionsSearchInput",
+        questionsSortSelect: "#studentQuestionsSortSelect",
     }
 };
 
@@ -354,12 +357,72 @@ function formatQuestionDate(dateValue) {
     });
 }
 
+// Cache for Students Quewstion Search :
+let studentQuestionsCache = [];
 
 /* 
    Render Questions List
    Show only questions that belong to current student.
  */
 function renderStudentQuestions(questions) {
+    studentQuestionsCache = Array.isArray(questions)
+        ? questions.slice()
+        : [];
+
+    applyStudentQuestionFilters();
+}
+
+function getFilteredAndSortedStudentQuestions() {
+    const searchInput = getElement(
+        STUDENT_DASHBOARD_CONFIG.SELECTORS.questionsSearchInput
+    );
+
+    const sortSelect = getElement(
+        STUDENT_DASHBOARD_CONFIG.SELECTORS.questionsSortSelect
+    );
+
+    const searchText = String(searchInput?.value || "")
+        .trim()
+        .toLowerCase();
+
+    const sortValue = sortSelect?.value || "newest";
+
+    let filteredQuestions = studentQuestionsCache.filter(function (question) {
+        if (!searchText) {
+            return true;
+        }
+
+        const text = String(question.text || "").toLowerCase();
+        const page = String(question.page || "");
+        const status = String(question.status || "").toLowerCase();
+
+        return (
+            text.includes(searchText) ||
+            page.includes(searchText) ||
+            status.includes(searchText)
+        );
+    });
+
+    filteredQuestions.sort(function (a, b) {
+        if (sortValue === "oldest") {
+            return new Date(a.createdAt) - new Date(b.createdAt);
+        }
+
+        if (sortValue === "page-asc") {
+            return Number(a.page || 0) - Number(b.page || 0);
+        }
+
+        if (sortValue === "page-desc") {
+            return Number(b.page || 0) - Number(a.page || 0);
+        }
+
+        return new Date(b.createdAt) - new Date(a.createdAt);
+    });
+
+    return filteredQuestions;
+}
+
+function applyStudentQuestionFilters() {
     const list = getElement(
         STUDENT_DASHBOARD_CONFIG.SELECTORS.questionsList
     );
@@ -374,11 +437,12 @@ function renderStudentQuestions(questions) {
 
     list.innerHTML = "";
 
-    if (!questions || questions.length === 0) {
+    const visibleQuestions = getFilteredAndSortedStudentQuestions();
+
+    if (!visibleQuestions.length) {
         if (emptyState) {
             emptyState.hidden = false;
         }
-
         return;
     }
 
@@ -386,15 +450,27 @@ function renderStudentQuestions(questions) {
         emptyState.hidden = true;
     }
 
-    questions
-        .slice()
-        .sort(function (a, b) {
-            return new Date(b.createdAt) - new Date(a.createdAt);
-        })
-        .forEach(function (question) {
-            const card = createQuestionCard(question);
-            list.appendChild(card);
-        });
+    visibleQuestions.forEach(function (question) {
+        list.appendChild(createQuestionCard(question));
+    });
+}
+
+function setupStudentQuestionControls() {
+    const searchInput = getElement(
+        STUDENT_DASHBOARD_CONFIG.SELECTORS.questionsSearchInput
+    );
+
+    const sortSelect = getElement(
+        STUDENT_DASHBOARD_CONFIG.SELECTORS.questionsSortSelect
+    );
+
+    if (searchInput) {
+        searchInput.addEventListener("input", applyStudentQuestionFilters);
+    }
+
+    if (sortSelect) {
+        sortSelect.addEventListener("change", applyStudentQuestionFilters);
+    }
 }
 
 function getCurrentStudentSession() {
@@ -1637,7 +1713,7 @@ function renderStudentSessionCards(container, sessions) {
         // Wiring up the click event to trigger joinSessionByCode 
         card.addEventListener("click", async function (event) {
             event.preventDefault();
-            
+
             try {
                 await joinSessionByCode(sessionCode);
             } catch (error) {
@@ -1765,10 +1841,13 @@ document.addEventListener("DOMContentLoaded", function () {
     setupJoinSessionForm();
     setupStudentSettingsForm();
     setupStudentSessionSearch();
+    setupStudentQuestionControls();
+    setupStudentQrScanner();
 
     loadStudentDashboard();
     prefillJoinCodeFromUrl();
+    
     renderActiveSession();
-    setupStudentQrScanner();
     renderRecentStudentSessions();
+    
 });

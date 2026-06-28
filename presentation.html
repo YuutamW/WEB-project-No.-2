@@ -260,7 +260,7 @@
             <!-- Hide/Reveal Q Markers -->
             <button id="questionMarkersToggleButton" class="teacher-controls__button" type="button"
                 data-control-role="lecturer" aria-label="Show/Hide Questions" data-tool="show-questions">
-                ❓
+                <img class="teacher-controls__icon" src="assets\icons\questions-marker-toggle.svg" alt="">
             </button>
 
             <!-- Settings -->
@@ -356,27 +356,27 @@
                 🧽
             </button> -->
 
-            <!-- Students Add Question -->
-            <!-- <button id="studentQuestionToolButton" class="teacher-controls__button teacher-controls__button--tool"
-                type="button" data-control-role="student" data-student-feature="question" data-tool="question"
-                data-tooltip="Add Question" title="Add Question" aria-label="Add Question" hidden>
-                ❓
-            </button> -->
-
             <!-- Show Q&A Tab (Mobile mainly) -->
             <button class="teacher-controls__button teacher-controls__button--tool" type="button"
                 data-control-role="student" data-student-feature="showQuestions" data-tool="qa-drawer"
                 data-tooltip="Q&A" title="Q&A" aria-label="Open Q&A" hidden>
-                <img class="teacher-controls__icon" src="assets/icons/qna-icn.svg" alt="">
+                <img class="teacher-controls__icon" src="assets/icons/show-hide-qa.svg" alt="">
+            </button>
+
+            <!-- Students Add Question -->
+            <button id="studentQuestionToolButton" class="teacher-controls__button teacher-controls__button--tool"
+                type="button" data-control-role="student" data-student-feature="question" data-tool="question"
+                data-tooltip="Add Question" title="Add Question" aria-label="Add Question" hidden>
+                <img class="teacher-controls__icon" src="assets/icons/student-add-q.svg" alt="">
             </button>
 
             <!-- Show / Hide Questions -->
-            <button id="studentShowQuestionsButton" class="teacher-controls__button teacher-controls__button--tool"
+            <!-- <button id="studentShowQuestionsButton" class="teacher-controls__button teacher-controls__button--tool"
                 type="button" data-control-role="student" data-student-feature="showQuestions"
                 data-tool="show-questions" data-tooltip="Show / Hide Questions" title="Show / Hide Questions"
                 aria-label="Show / Hide Questions" hidden>
                 ❓
-            </button>
+            </button> -->
 
             <!-- Cast + Layers Manager -->
             <!-- <button id="studentLayersToolButton" class="teacher-controls__button teacher-controls__button--tool"

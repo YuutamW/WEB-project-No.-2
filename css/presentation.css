@@ -3379,19 +3379,60 @@ body:has(.presentation-page.is-waiting-upload) {
     }
 }
 
-/* FINAL TOUCH — bigger toolbar icons */
-.teacher-controls__button {
-    min-width: 48px;
-    min-height: 48px;
+/* FINAL TOUCH — Q&A close button only */
+.qa-drawer__close {
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    z-index: 30;
+
+    width: 34px;
+    height: 34px;
+    display: grid;
+    place-items: center;
+
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: #ff3b6b;
+
+    font-size: 24px;
+    font-weight: 900;
+    line-height: 1;
+    cursor: pointer;
+
+    transition:
+        background 0.18s ease,
+        color 0.18s ease,
+        transform 0.18s ease;
+}
+
+.qa-drawer__close:hover {
+    background: rgba(255, 59, 107, 0.16);
+    color: #ff174f;
+    transform: scale(1.08);
+}
+
+#studentExitSessionButton .teacher-controls__icon {
+    width: 28px;
+    height: 28px;
+}
+
+#studentExitSessionButton:hover {
+    background: rgba(255, 59, 107, 0.10);
+}
+
+#studentExitSessionButton.is-active {
+    background: rgba(255, 59, 107, 0.16);
 }
 
 .teacher-controls__icon {
-    width: 24px;
-    height: 24px;
-    object-fit: contain;
-    pointer-events: none;
+    width: 28px;
+    height: 28px;
 }
 
-.teacher-controls__button:hover {
-    transform: translateY(-2px) scale(1.04);
+@media (max-width: 700px) {
+    .student-study-toolbar {
+        grid-template-columns: 1fr;
+    }
 }
